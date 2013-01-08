@@ -22,7 +22,10 @@ public:
 
     Vector2D & operator+(const Vector2D & v1)
     {
-        return *( new Vector2D(v1.x+this->x, v1.y+this->y));
+	static Vector2D v;
+	v.x = v1.x + this->x;
+	v.y = v1.y + this->y;
+	return v;
     }
 
     double normita()
