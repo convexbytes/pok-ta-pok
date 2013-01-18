@@ -87,7 +87,7 @@ $(BIN_DIR)microParser.o:
 	g++ $(FLAGS) $(SOURCE_DIR)microParser.cpp -o $@
 
 $(BIN_DIR)montecarloLocalization.o:\
-	$(SOURCE_DIR)gameObject.o
+	$(SOURCE_DIR)gameObject.cpp
 	g++ $(FLAGS) $(SOURCE_DIR)montecarloLocalization.cpp -o $@
 
 $(BIN_DIR)observation.o:\
