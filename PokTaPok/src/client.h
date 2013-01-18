@@ -29,13 +29,19 @@ public:
     static Client & instance();
 	~Client();
     void main_loop();
+
     static void * process_thread_function(void *parameter);
     static void * sending_thread_function(void *parameter);
-    static void  signal_controller( int num );
+    static void   signal_controller( int num );
+
+    static pthread_mutex_t  message_stack_mutex; /* mutex para el main_loop y el process_thread */
+    static pthread_mutex_t  command_mutex; /* mutex para el process_thread y el sending_thread */
+    static pthread_mutex_t  time_mutex;
+    static pthread_t        process_thread;
+    static pthread_t        sending_thread;
 
 private:
     char buffer_in[4096]; //4096 es el tamaño usado por send y receive en udpsocket
-    char command[4096];
 
     GameData        *   game_data;
     AgentResponse   *   agent_response;
@@ -45,14 +51,13 @@ private:
     LocalizationEngine * localization_engine;
 
     deque<string>       messages;
-    //Synchronizer        synchronizer;
+    //Synchronizer        synchronizer; //Decidimos que el sincronizador no era necesario usando tres hilos
     MP_MessageType      last_msg_type;
     int sending_wait_time; //microsegundos
 
-    void initialize     ();
+    void initialize     ( );
     void pre_filter     ( char *server_msg );
-    bool server_is_alive();
-    //bool connected;
+    bool server_is_alive( );
     void set_sending_wait_time(char *message);
 
 };

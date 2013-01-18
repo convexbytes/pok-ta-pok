@@ -8,7 +8,6 @@
 MontecarloLocalization::MontecarloLocalization(GameData *game_data )
 {
     this->game_data = game_data;
-    count = 0;
 }
 
 
@@ -18,16 +17,11 @@ void MontecarloLocalization::montecarlo_prediction( Particula *particulas,
                                                     )
 {
     int i;
-    //printf("\ncase %d:\n", count );
-    //printf("stroke(0);\n");
+
     for( i=0; i<NUM_PARTICULAS; i++ )
     {
-        particulas_nuevas[i] = Sample_Motion_Model( U, particulas[i] );
-        //printf("point( %lf , %lf );\n", (particulas_nuevas[i].x + 52.5)*10.0, (particulas_nuevas[i].y + 32.0)*10.0 );
+        particulas_nuevas[i] = Sample_Motion_Model( U, particulas[i] );   
     }
-    //printf("break;");
-    count++;
-
 }
 
 void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
@@ -164,11 +158,6 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control      U,
     Vector2D velocidad;
     Vector2D movimiento;
     Particula X;
-
-
-
-
-
 
     //Árbol de expansión mínima.
     if( U.dash_power == 0.0 )

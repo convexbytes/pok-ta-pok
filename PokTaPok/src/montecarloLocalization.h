@@ -38,7 +38,6 @@ public:
                                 );
 
 private:
-    int count; //para imprimir las particulas
     GameData * game_data;
     Particula Sample_Motion_Model       ( Control   U,
                                           Particula particula
