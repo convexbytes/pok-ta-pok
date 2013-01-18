@@ -23,8 +23,13 @@ public:
     Vector2D & operator+(const Vector2D & v1)
     {
 	static Vector2D v;
+<<<<<<< HEAD
 	v.x = v1.x + this->x;
 	v.y = v1.y + this->y;
+=======
+	v.x = this->x + v1.x;
+	v.y = this->y + v1.y;
+>>>>>>> d6c9fbd1162f5a5a61ff1112b50b694d56e398d9
 	return v;
     }
 
