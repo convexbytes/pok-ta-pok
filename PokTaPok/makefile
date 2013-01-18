@@ -1,109 +1,117 @@
 FLAGS = -c
 EXECUTABLE_NAME = poktapok
-OBJS = agentResponse.o \
-	client.o \
-	gameCommand.o \
-	gameData.o \
-	gameObject.o \
-	gameParameter.o \
-	gilAgent.o \
-	localizationEngine.o \
-	localizationMethods.o \
-	main.o \
-	microParser.o \
-	observation.o \
-	obsHandler.o \
-	parser.o \
-	poktapokAgent.o \
-	serializer.o \
-	udpSocket.o \
-	montecarloLocalization.o
-poktapok : $(OBJS)
-	g++ $(OBJS) -lpthread -o $(EXECUTABLE_NAME)
+SOURCE_DIR = src/
+BIN_DIR_NAME = bin
+BIN_DIR = $(BIN_DIR_NAME)/
+VPATH = src/
+OBJS = $(BIN_DIR)agentResponse.o \
+	$(BIN_DIR)client.o \
+	$(BIN_DIR)gameCommand.o \
+	$(BIN_DIR)gameData.o \
+	$(BIN_DIR)gameObject.o \
+	$(BIN_DIR)gameParameter.o \
+	$(BIN_DIR)gilAgent.o \
+	$(BIN_DIR)localizationEngine.o \
+	$(BIN_DIR)localizationMethods.o \
+	$(BIN_DIR)main.o \
+	$(BIN_DIR)microParser.o \
+	$(BIN_DIR)observation.o \
+	$(BIN_DIR)obsHandler.o \
+	$(BIN_DIR)parser.o \
+	$(BIN_DIR)poktapokAgent.o \
+	$(BIN_DIR)serializer.o \
+	$(BIN_DIR)udpSocket.o \
+	$(BIN_DIR)montecarloLocalization.o
+
+
+$(BIN_DIR)poktapok : $(OBJS)
+	g++ $(OBJS) -lpthread -o $(BIN_DIR)$(EXECUTABLE_NAME)
 
 clean:
-	rm $(OBJS)
+	rm $(BIN_DIR)*
 
-agentResponse.o: \
-	gameCommand.cpp
-	g++ $(FLAGS) agentResponse.cpp
+$(BIN_DIR)agentResponse.o: \
+	$(SOURCE_DIR)gameCommand.cpp
+	echo "checking for bin directory..."
+	if [ -d bin ]; then echo continue; else mkdir bin; fi
+	g++ $(FLAGS) $(SOURCE_DIR)agentResponse.cpp -o $@
 
-client.o:\
-	udpSocket.cpp \
-	gameData.cpp \
-	agentResponse.cpp \
-	parser.cpp \
-	localizationEngine.cpp \
-	microParser.cpp \
-	udpSocket.cpp \
-	serializer.cpp \
-	gilAgent.cpp
-	g++ $(FLAGS) -pthread client.cpp
+$(BIN_DIR)client.o:\
+	$(SOURCE_DIR)udpSocket.cpp \
+	$(SOURCE_DIR)gameData.cpp \
+	$(SOURCE_DIR)agentResponse.cpp \
+	$(SOURCE_DIR)parser.cpp \
+	$(SOURCE_DIR)localizationEngine.cpp \
+	$(SOURCE_DIR)microParser.cpp \
+	$(SOURCE_DIR)udpSocket.cpp \
+	$(SOURCE_DIR)serializer.cpp \
+	$(SOURCE_DIR)gilAgent.cpp
+	g++ $(FLAGS) -pthread $(SOURCE_DIR)client.cpp -o $@
 
-gameCommand.o:\
-	observation.cpp
-	g++ $(FLAGS) gameCommand.cpp
+$(BIN_DIR)gameCommand.o:\
+	$(SOURCE_DIR)observation.cpp
+	g++ $(FLAGS) $(SOURCE_DIR)gameCommand.cpp -o $@
 
-gameData.o:\
-	gameParameter.cpp \
-	gameObject.cpp \
-	obsHandler.cpp \
-	observation.cpp \
-	parser.cpp
-	g++ $(FLAGS) gameData.cpp
+$(BIN_DIR)gameData.o:\
+	$(SOURCE_DIR)gameParameter.cpp \
+	$(SOURCE_DIR)gameObject.cpp \
+	$(SOURCE_DIR)obsHandler.cpp \
+	$(SOURCE_DIR)observation.cpp \
+	$(SOURCE_DIR)parser.cpp
+	g++ $(FLAGS) $(SOURCE_DIR)gameData.cpp -o $@
 
-gameObject.o:
-	g++ $(FLAGS) gameObject.cpp
+$(BIN_DIR)gameObject.o:
+	g++ $(FLAGS) $(SOURCE_DIR)gameObject.cpp -o $@
 
-gameParameter.o:
-	g++ $(FLAGS) gameParameter.cpp
+$(BIN_DIR)gameParameter.o:
+	g++ $(FLAGS) $(SOURCE_DIR)gameParameter.cpp -o $@
 	
-gilAgent.o:\
-	agentResponse.cpp \
-	gameData.cpp \
-	observation.cpp 
-	g++ $(FLAGS) gilAgent.cpp
+$(BIN_DIR)gilAgent.o:\
+	$(SOURCE_DIR)agentResponse.cpp \
+	$(SOURCE_DIR)gameData.cpp \
+	$(SOURCE_DIR)observation.cpp 
+	g++ $(FLAGS) $(SOURCE_DIR)gilAgent.cpp -o $@
 
-localizationEngine.o:\
-	gameData.cpp 
-	g++ $(FLAGS) localizationEngine.cpp
+$(BIN_DIR)localizationEngine.o:\
+	$(SOURCE_DIR)gameData.cpp 
+	g++ $(FLAGS) $(SOURCE_DIR)localizationEngine.cpp -o $@
 	
-localizationMethods.o:
-	g++ $(FLAGS) localizationMethods.cpp
+$(BIN_DIR)localizationMethods.o:
+	g++ $(FLAGS) $(SOURCE_DIR)localizationMethods.cpp -o $@
 
-main.o:\
-	client.cpp
-	g++ $(FLAGS) main.cpp
+$(BIN_DIR)main.o:\
+	$(SOURCE_DIR)client.cpp
+	g++ $(FLAGS) $(SOURCE_DIR)main.cpp -o $@
 
-microParser.o:
-	g++ $(FLAGS) microParser.cpp
+$(BIN_DIR)microParser.o:
+	g++ $(FLAGS) $(SOURCE_DIR)microParser.cpp -o $@
 
-montecarloLocalization.o:\
-	gameObject.o
-	g++ $(FLAGS) montecarloLocalization.cpp
+$(BIN_DIR)montecarloLocalization.o:\
+	$(SOURCE_DIR)gameObject.o
+	g++ $(FLAGS) $(SOURCE_DIR)montecarloLocalization.cpp -o $@
 
-observation.o:\
-	gameObject.cpp
-	g++ $(FLAGS) observation.cpp
+$(BIN_DIR)observation.o:\
+	$(SOURCE_DIR)gameObject.cpp
+	g++ $(FLAGS) $(SOURCE_DIR)observation.cpp -o $@
 	
-obsHandler.o:\
-	observation.cpp \
-	gameObject.cpp 
-	g++ $(FLAGS) obsHandler.cpp
+$(BIN_DIR)obsHandler.o:\
+	$(SOURCE_DIR)observation.cpp \
+	$(SOURCE_DIR)gameObject.cpp 
+	g++ $(FLAGS) $(SOURCE_DIR)obsHandler.cpp -o $@
 
-parser.o:\
-	gameData.cpp \
-	microParser.cpp \
-	obsHandler.cpp
-	g++ $(FLAGS) parser.cpp
+$(BIN_DIR)parser.o:\
+	$(SOURCE_DIR)gameData.cpp \
+	$(SOURCE_DIR)microParser.cpp \
+	$(SOURCE_DIR)obsHandler.cpp
+	g++ $(FLAGS) $(SOURCE_DIR)parser.cpp -o $@
 	
-poktapokAgent.o:
-	g++ $(FLAGS) poktapokAgent.cpp
+$(BIN_DIR)poktapokAgent.o:
+	g++ $(FLAGS) $(SOURCE_DIR)poktapokAgent.cpp -o $@
 
-serializer.o:\
-	observation.cpp \
-	gameCommand.cpp 
-	g++ $(FLAGS) serializer.cpp
+$(BIN_DIR)serializer.o:\
+	$(SOURCE_DIR)observation.cpp \
+	$(SOURCE_DIR)gameCommand.cpp 
+	g++ $(FLAGS) $(SOURCE_DIR)serializer.cpp -o $@
 
-udpSocket.o:
-	g++ $(FLAGS) udpSocket.cpp
+$(BIN_DIR)udpSocket.o:
+	g++ $(FLAGS) $(SOURCE_DIR)udpSocket.cpp -o $@
