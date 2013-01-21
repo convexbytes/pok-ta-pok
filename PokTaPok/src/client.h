@@ -24,6 +24,7 @@ class Client
 {
 private:
     Client();
+    static Client client;
 public:
     //initial();
     static Client & instance();
@@ -34,11 +35,11 @@ public:
     static void * sending_thread_function(void *parameter);
     static void   signal_controller( int num );
 
-    static pthread_mutex_t  message_stack_mutex; /* mutex para el main_loop y el process_thread */
-    static pthread_mutex_t  command_mutex; /* mutex para el process_thread y el sending_thread */
-    static pthread_mutex_t  time_mutex;
-    static pthread_t        process_thread;
-    static pthread_t        sending_thread;
+    pthread_mutex_t  message_stack_mutex; /* mutex para el main_loop y el process_thread */
+    pthread_mutex_t  command_mutex; /* mutex para el process_thread y el sending_thread */
+    pthread_mutex_t  time_mutex;
+    pthread_t        process_thread;
+    pthread_t        sending_thread;
 
 private:
     char buffer_in[4096]; //4096 es el tamaño usado por send y receive en udpsocket

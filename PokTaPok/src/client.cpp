@@ -32,8 +32,8 @@ Client & Client::instance() {
 }
 
 void Client::initialize() {
-    int Client::process_thread_error; // Para capturar el error a la hora de crear el hilo de proceso
-    int Client::sending_thread_error; // Para capturar el error a la hora de crear el hilo de envío
+    int process_thread_error; // Para capturar el error a la hora de crear el hilo de proceso
+    int sending_thread_error; // Para capturar el error a la hora de crear el hilo de envío
     //Iniciamos todos los objetos para cargar toda la memoria al principio
     game_data           = new GameData  ( );
     parser              = new Parser    (game_data);
@@ -42,7 +42,7 @@ void Client::initialize() {
     response_commited   = new AgentResponse     ( );
     localization_engine = new LocalizationEngine( game_data, response_commited );
     //Comprobamos que se crearon todos los objetos
-    if( !( game_data & parser & agent & agent_response & response_commited & localization_engine ) )
+    if( !( game_data && parser && agent && agent_response && response_commited && localization_engine ) )
     {
         printf( "Objects could not be created, exiting...\n" );
         if( game_data )
@@ -63,23 +63,23 @@ void Client::initialize() {
 	this->last_msg_type = MP_NONE;
 
 	//Creamos los mutex.
-    if ( (     pthread_mutex_init( & Client::message_stack_mutex, NULL )
-            || pthread_mutex_init( & Client::command_mutex, NULL)
-            || pthread_mutex_init( & Client::time_mutex, NULL)
+    if ( (     pthread_mutex_init( & Client::instance().message_stack_mutex, NULL )
+            || pthread_mutex_init( & Client::instance().command_mutex, NULL)
+            || pthread_mutex_init( & Client::instance().time_mutex, NULL)
          ) != 0 )
     {
 		printf("\nMutex could not be created, exiting...\n");
 		exit(1);
 	}
 	//Creamos los hilos.
-    process_thread_error = pthread_create( & Client::process_thread,
+    process_thread_error = pthread_create( & Client::instance().process_thread,
                                              NULL,
-                                             Client::Client::process_thread_function,
+                                             Client::process_thread_function,
                                              NULL );
 
-    sending_thread_error = pthread_create( & Client::sending_thread,
+    sending_thread_error = pthread_create( & Client::instance().sending_thread,
                                              NULL,
-                                             Client::Client::sending_thread_function,
+                                             Client::sending_thread_function,
                                              NULL );
 
     if ( process_thread_error || sending_thread_error)
@@ -92,7 +92,18 @@ void Client::initialize() {
 }
 
 Client::~Client() {
-	// no necesitamos eliminar los threads y los mutex?
+	pthread_kill            ( Client::instance().process_thread, SIGQUIT );
+    	pthread_kill            ( Client::instance().sending_thread, SIGQUIT );
+    	pthread_mutex_destroy   ( & Client::instance().message_stack_mutex );
+    	pthread_mutex_destroy   ( & Client::instance().command_mutex );
+    	pthread_mutex_destroy   ( & Client::instance().time_mutex );
+
+	delete Client::instance().parser;
+	delete Client::instance().game_data;
+	delete Client::instance().agent_response;
+	delete Client::instance().response_commited;
+	delete Client::instance().localization_engine;
+	delete Client::instance().agent;
 }
 
 void Client::main_loop() {
@@ -109,11 +120,11 @@ void Client::main_loop() {
         {
 			//printf("Sense arrived\n");
 		}
-        pthread_mutex_lock( & Client::message_stack_mutex );
+        pthread_mutex_lock( & Client::instance().message_stack_mutex );
 
             Client::instance().messages.push_back( buffer_in );
 
-        pthread_mutex_unlock( & Client::message_stack_mutex );
+        pthread_mutex_unlock( & Client::instance().message_stack_mutex );
 
 	}
 }
@@ -122,18 +133,18 @@ void * Client::Client::process_thread_function(void *parameter) {
 	char server_message_aux[4096];
 	bool stack_empty;
 	while (1) {
-        pthread_mutex_lock( & Client::message_stack_mutex );
+        pthread_mutex_lock( & Client::instance().message_stack_mutex );
 		stack_empty = Client::instance().messages.empty();
-        pthread_mutex_unlock( & Client::message_stack_mutex );
+        pthread_mutex_unlock( & Client::instance().message_stack_mutex );
 		if (stack_empty) //Si la pila tiene mensajes, leemos; si no tiene, dormimos.
 		{
 			usleep(1000); //Duerme un milisegundo mientras se llena el stack de mensajes
 		} else {
-            pthread_mutex_lock(&Client::message_stack_mutex);
-			strcpy(server_message_aux,
+            pthread_mutex_lock( & Client::instance().message_stack_mutex);
+			strcpy( server_message_aux,
 					Client::instance().messages.front().c_str());
 			Client::instance().messages.pop_front();
-            pthread_mutex_unlock(&Client::message_stack_mutex);
+            pthread_mutex_unlock(&Client::instance().message_stack_mutex);
 
 			//Pasamos al "filtro" para alimentar game_data.
 			Client::instance().pre_filter(server_message_aux);
@@ -145,11 +156,6 @@ void * Client::Client::process_thread_function(void *parameter) {
 			Client::instance().agent->do_process(Client::instance().game_data,
 					Client::instance().agent_response,
 					Client::instance().response_commited);
-
-			//Ejecutamos el serializer y guardamos el mensaje.
-            //pthread_mutex_lock( & Client::command_mutex ); //Este mutex causa un deadlock la última vez que se probó.
-			//Serializer::generate_command( Client::instance().command, Client::instance().agent_response->command );
-            //pthread_mutex_unlock( & Client::command_mutex );
 
 		}
 	}
@@ -174,7 +180,7 @@ void* Client::Client::sending_thread_function(void *parameter) {
 
 			// es esto threadsafe?
             // esto no es threadsafe, debería tener mutex aquí
-            Serializer::generate_command( commandaux, Client::instance().agent_response->command);
+            Serializer::generate_command( command_aux, Client::instance().agent_response->command);
 
             USock::instance().Send( command_aux );
 			*Client::instance().response_commited =
@@ -203,11 +209,11 @@ void Client::signal_controller(int num) {
 	//
 	//Este código se ejecutará cuando se reciba alguna señal.
 	printf("\nReleasing memory and exiting program...");
-    pthread_kill            (Client::process_thread, SIGQUIT );
-    pthread_kill            (Client::sending_thread, SIGQUIT );
-    pthread_mutex_destroy   ( & Client::message_stack_mutex );
-    pthread_mutex_destroy   ( & Client::command_mutex );
-    pthread_mutex_destroy   ( & Client::time_mutex );
+    pthread_kill            ( Client::instance().process_thread, SIGQUIT );
+    pthread_kill            ( Client::instance().sending_thread, SIGQUIT );
+    pthread_mutex_destroy   ( & Client::instance().message_stack_mutex );
+    pthread_mutex_destroy   ( & Client::instance().command_mutex );
+    pthread_mutex_destroy   ( & Client::instance().time_mutex );
 
 	delete Client::instance().parser;
 	delete Client::instance().game_data;
