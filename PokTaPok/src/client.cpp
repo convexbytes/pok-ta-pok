@@ -208,19 +208,6 @@ void Client::signal_controller(int num) {
 	// ¿por qué no pusimos este código en el main?
 	//
 	//Este código se ejecutará cuando se reciba alguna señal.
-	printf("\nReleasing memory and exiting program...");
-    pthread_kill            ( Client::instance().process_thread, SIGQUIT );
-    pthread_kill            ( Client::instance().sending_thread, SIGQUIT );
-    pthread_mutex_destroy   ( & Client::instance().message_stack_mutex );
-    pthread_mutex_destroy   ( & Client::instance().command_mutex );
-    pthread_mutex_destroy   ( & Client::instance().time_mutex );
-
-	delete Client::instance().parser;
-	delete Client::instance().game_data;
-	delete Client::instance().agent_response;
-	delete Client::instance().response_commited;
-	delete Client::instance().localization_engine;
-	delete Client::instance().agent;
 	printf("\nSignal received, exiting now...\n");
 	exit(0);
 }

@@ -1,7 +1,8 @@
 #ifndef MICRO_PARSER_H
 #define MICRO_PARSER_H
 
-enum MP_MessageType{
+enum MP_MessageType
+{
     MP_NONE = 0,
     MP_INIT,
     MP_SERVER_PARAM,
@@ -10,7 +11,9 @@ enum MP_MessageType{
     MP_HEAR,
     MP_SENSE_BODY,
     MP_SEE,
-    MP_PLAYER_TYPE
+	MP_PLAYER_TYPE,
+	MP_OK,
+	MP_SEE_GLOBAL
 };
 
 class MicroParser

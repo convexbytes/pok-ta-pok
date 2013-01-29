@@ -12,32 +12,32 @@ using namespace std;
 
 enum ViewModeQuality
 {
-    LOW,
+    LOW = 1,
     HIGH
 };
 
 enum ViewModeWidth
 {
-    NARROW,
+    NARROW = 1,
     NORMAL,
     WIDE
 };
 
 enum FoulCard
 {
-    FCARD_NONE,
+    FCARD_NONE = 1,
     FCARD_YELLOW,
     FCARD_RED
 };
 
 enum Collision
 {
-    COLLISION_NONE
+    COLLISION_NONE = 1
 };
 
 enum FocusTarget
 {
-    TARGET_NONE
+    TARGET_NONE = 1
 };
 
 enum PlayMode
@@ -109,7 +109,7 @@ enum PlayMode
 };
 enum HearSender
 {
-    SELF,
+    SELF = 1,
     OUR,
     OPP,
     REFEREE,
@@ -118,26 +118,31 @@ enum HearSender
 
 enum ObservationType
 {
-    OBS_SEE,
+    OBS_SEE = 1,
     OBS_SENSE,
     OBS_HEAR,
     OBS_MSG,
     OBS_INIT,
     OBS_ERROR,
-    OBS_OK
+    OBS_OK,
+    OBS_SEE_GLOBAL
 };
-enum CouchRequest
+enum Request
 {
-    CHANGE_MODE,
+    CHANGE_MODE = 1,
     MOVE,
     START,
     RECOVER,
     EAR,
-    CHECK_BALL
+    EYE,
+    CHECK_BALL,
+    SYNCH_SEE,
+    LOOK,
+    
 };
 enum CheckBallPosition
 {
-    B_IN_FIELD,
+    B_IN_FIELD = 1,
     B_GOAL_R,
     B_GOAL_L,
     B_OUT_OF_FIELD
@@ -145,7 +150,7 @@ enum CheckBallPosition
 
 enum ErrorType
 {
-    ILLEGAL_MODE,
+    ILLEGAL_MODE = 1,
     ILLEGAL_OBJECT_FORM,
     ILLEGAL_COMMAND_FORM
 };
@@ -264,10 +269,10 @@ public:
 class InitObs : public Observation
 {
 public:
-    int uniform_number;
-    char side; // 'l' | 'r'
-    PlayMode play_mode;
-    int playmode_num;
+    int 		uniform_number;
+    char 		side; // 'l' | 'r'
+    PlayMode 	play_mode;
+    int 		playmode_num;
 };
 
 
@@ -278,13 +283,40 @@ public:
 
 };
 
-class OkObs : public Observation
+class SeeGlobal
 {
 public:
-    CouchRequest request_type;
-    bool ear_on;
-    CheckBallPosition ball_pos;
-    int ball_time;
+	// Omito (g r) y (g l), ya que son siempre constantes: ((g r) 52.5 0) ((g l) -52.5 0)
+	vector<AbsPlayer> 	players;
+	AbsBall 			ball;
+	int					time;
 };
 
+class OkLook // Tiene lo mismo que SeeGlobal hasta la versión 15.1.0 del servidor
+{
+public:
+	// Omito (g r) y (g l), ya que son siempre constantes: ((g r) 52.5 0) ((g l) -52.5 0)
+	vector<AbsPlayer> 	players;
+	AbsBall 			ball;
+	int					time;
+};
+
+class OkEar
+{
+public:
+	bool ear_on;
+};
+
+class OkEye
+{
+public:
+	bool eye_on;
+};
+
+class OkCheckBall
+{
+public:
+	int 			  time;
+	CheckBallPosition position;	
+};
 #endif /* OBSERVATION_H */

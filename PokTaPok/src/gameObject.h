@@ -241,6 +241,40 @@ public:
     void print();
 };
 
+// Clases para el coach
 
+class AbsoluteMobileObject
+{
+public:
+	double 	x;
+	double 	y;
+	double	vx;
+	double	vy;
+};
+
+class AbsPlayer : public AbsoluteMobileObject
+{
+public:
+	AbsPlayer( );
+	AbsPlayer( string team,
+				int unum,
+				double x,
+				double y,
+				double vx,
+				double vy,
+				int body_angle,
+				int neck_angle
+				);
+	string 	team;
+	int		unum;
+	int 	body_angle;  
+	int  	neck_angle; 
+	
+};
+
+class AbsBall : public AbsoluteMobileObject
+{
+public:	
+};
 
 #endif //GAME_OBJECT_H

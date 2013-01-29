@@ -1,6 +1,6 @@
 #ifndef MONTECARLOLOCALIZATION_H
 #define MONTECARLOLOCALIZATION_H
-#define NUM_PARTICULAS 5000
+#define NUM_PARTICULAS 1000
 //#define MONT_PI 3.141592653589793
 #include "gameObject.h"
 #include "vector"

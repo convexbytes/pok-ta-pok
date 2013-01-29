@@ -28,17 +28,20 @@ public:
 private:
     GameData    * game_data;
 
+	// Parseamos cada tipo de mensaje.
     void parse_server_param  ( char * message );
     void parse_player_param  ( char * message );
     void parse_player_type   ( char * message );
     void parse_see           ( char * message );
+    void parse_see_global	 ( char * message );
     void parse_sense         ( char * message );
     void parse_hear          ( char * message );
     void parse_msg           ( char * message );
     void parse_init          ( char * message );
     void parse_ok            ( char * message );
     void parse_error         ( char * message );
-
+    
+	// Los siguientes no son tipos de mensaje, sino utilidades
     void parse_flag          ( char * sub_msg, EFlag id, const char format[] );
     void parse_line          ( char * sub_msg, ELine id, const char format[] );
     PlayMode parse_play_mode ( char * char_play_mode, int & num );

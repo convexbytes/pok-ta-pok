@@ -33,7 +33,11 @@ int MicroParser::get_message_type(char * message)
     tipo = strstr(message, "see");
 	if(tipo)
         return MP_SEE;
-
+	tipo = strstr(message, "see_global");
+	if( tipo )
+		return MP_SEE_GLOBAL;
+	tipo = strstr(message, "ok");
+		return MP_OK;
     return MP_NONE;
 }
 

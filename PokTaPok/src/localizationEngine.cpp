@@ -21,9 +21,10 @@ LocalizationEngine::LocalizationEngine( GameData * game_data, AgentResponse * ag
     //inicializamos particulas.
     for( i=0; i<NUM_PARTICULAS; i++ )
     {
-
-        particulas[i].x =  particulas_nuevas[i].x =   ( drand48()*105.0 - 52.5 ); //La cancha mide 52.5 X 32.0
-        particulas[i].y =  particulas_nuevas[i].y =     ( drand48()*70.0  - 35.0 );
+		// La cancha mide 52.5 X 32.0; añadimos un espacio extra, ya que podemos 
+		// salir un poco de la cancha
+        particulas[i].x =  particulas_nuevas[i].x =   ( drand48()*110.0 - 55.0 ); 
+        particulas[i].y =  particulas_nuevas[i].y =     ( drand48()*80.0  - 40.0 );
         particulas[i].theta = particulas_nuevas[i].theta = ( 0.0 );
 
         /*particulas[i].set_x     ( -3.0 );

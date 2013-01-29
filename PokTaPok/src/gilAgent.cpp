@@ -111,27 +111,7 @@ void GilAgent::on_before_kick_off()
 void GilAgent::on_time_over(){}
 void GilAgent::on_play_on()
 {
-    /*
-        if( my_fist_time )
-        {
-            if( agent_response_commited->command.turn_is_set() && agent_response_commited->command.turn_angle == 90  )
-            {
-                my_fist_time = false;
-                agent_response->command.append_dash( 50 );
-            }
-            else
-                agent_response->command.append_turn( 90 );
-        }
-        else
-        {
-            agent_response->command.append_dash( 50 );
-        }
-    */
-
     this->pozole_goal();
-    //agent_response->command.append_turn( 1 );
-    //agent_response->command.append_dash( 50 );
-
 }
 void GilAgent::on_kick_off_l(){}
 void GilAgent::on_kick_off_r(){}
@@ -147,8 +127,7 @@ void GilAgent::on_goal_l(){}
 void GilAgent::on_goal_r(){}
 void GilAgent::on_drop_ball()
 {
-    //agent_response->command.append_turn( 0 );
-    //agent_response->command.append_dash(50);
+
 }
 void GilAgent::on_offside_l(){}
 void GilAgent::on_offside_r(){}
@@ -203,7 +182,6 @@ void GilAgent::pozole_goal()
 
 bool GilAgent::search_ball()
 {
-    //cout << "\nBall is visible: " << game_data->obs_handler.last_see.ball_is_visible();
     if( !game_data->obs_handler.last_see.ball_is_visible() )
     {
         agent_response->command.append_turn( -35 );

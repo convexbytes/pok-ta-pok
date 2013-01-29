@@ -76,9 +76,9 @@ ParserMsgType Parser::parse(char *message )
 
 void Parser::parse_error( char *message)
 {
-        char str1[200];
-        char *subcadena2=NULL;
-        int time;
+        char 	str1[128];
+        char 	*subcadena2=NULL;
+        int 	time;
         subcadena2=strstr(message,"(error");
         if (subcadena2)
         {
@@ -101,18 +101,17 @@ void Parser::parse_error( char *message)
                 game_data->obs_handler.error( time, ILLEGAL_COMMAND_FORM );
             }
         }
-
 }
 
 void Parser::parse_hear( char *message )
 {
-    char * subcad = NULL;
-    int time;
-    int aux_num;
-    int angle;
-    char aux_str[256];
+    char  * subcad = NULL;
+    int 	time;
+    int 	aux_num;
+    int 	angle;
+    char 	aux_str[256];
     PlayMode play_mode;
-
+    
     subcad = strstr( message,"(hear" ); //Buscamos el inicio del hear
     if( subcad == NULL ) return; //Si no encuentra algún hear, salimos
     subcad = move_to_next_word( subcad );
@@ -175,7 +174,6 @@ void Parser::parse_hear( char *message )
                 aux_str[ strlen( aux_str) -1 ] = '\0';//quitamos el paréntesis
                 //obtenemos el playmode
                 play_mode = this->parse_play_mode(aux_str, aux_num );
-
                 game_data->obs_handler.hear_referee( time, play_mode );
 
             break;
@@ -206,7 +204,7 @@ void Parser::parse_init( char *message )
 
 }
 
-void Parser::parse_ok(char *message)
+void Parser::parse_ok( char *message )
 {
         char str1[256];
         int time;
@@ -215,62 +213,113 @@ void Parser::parse_ok(char *message)
         if( !subcadena2 ) return;
         subcadena2 = move_to_next_word( subcadena2 );
         sscanf( subcadena2, "%s", str1 );
-        if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1] = '\0';
-        if(strcmp(str1, "change_mode")==0)
+        if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1] = '\0'; // Quitamos el último paréntesis para que la comparación sea limpia
+        
+        if  	(strcmp(str1, "change_mode")==0)
         {
-            game_data->obs_handler.ok( CHANGE_MODE );
+            game_data->obs_handler.ok_change_mode(  );
         }
         else if (strcmp(str1, "move")==0)
         {
-            game_data->obs_handler.ok( MOVE );
+            game_data->obs_handler.ok_move(  );
         }
         else if (strcmp(str1, "start")==0)
         {
-            game_data->obs_handler.ok( START );
+            game_data->obs_handler.ok_start(  );
         }
         else if (strcmp(str1, "recover")==0)
         {
-            game_data->obs_handler.ok( RECOVER );
+            game_data->obs_handler.ok_recover(  );
         }
         else if (strcmp(str1, "ear")==0)
         {
             subcadena2 = move_to_next_word( subcadena2 );
             sscanf( subcadena2, "%s", str1 );
-            if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0';
-            if( strcmp(str1, "on")==0 )
+            if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0'; // Quitamos el último paréntesis
+            if( strcmp(str1, "on") == 0 )
             {
-                game_data->obs_handler.ok( EAR, true );
+                game_data->obs_handler.ok_ear( true );
             }
-            else if (strcmp(str1, "off")==0)
+            else if (strcmp(str1, "off") == 0)
             {
-                game_data->obs_handler.ok( EAR, false );
+                game_data->obs_handler.ok_ear( false );
             }
         }
-
+		else if ( strcmp( str1, "eye" ) == 0 )
+        {
+			subcadena2 = move_to_next_word( subcadena2 );
+			sscanf( subcadena2, "%s", str1 );
+            if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0'; // Quitamos el último paréntesis
+            if( strcmp(str1, "on") == 0 )
+            {
+                game_data->obs_handler.ok_eye( true );
+            }
+            else if (strcmp(str1, "off") == 0)
+            {
+                game_data->obs_handler.ok_eye( false );
+            }
+		}
+        
         else if (strcmp(str1, "check_ball")==0)
         {
             subcadena2 = move_to_next_word( subcadena2 );
-            sscanf(subcadena2, "%d", &time );
+            sscanf(subcadena2, "%d", &time ); // Obtenemos tiempo
             subcadena2 = move_to_next_word( subcadena2 );
-            sscanf( subcadena2, "%s", str1 );
+            sscanf( subcadena2, "%s", str1 ); // Obtenemos in_field, goal_l, etc...
             if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0';
-            if (strcmp(str1, "in_field")==0)
+            if ( strcmp( str1, "in_field" ) == 0 )
             {
-                game_data->obs_handler.ok( CHECK_BALL, time, B_IN_FIELD );
+                game_data->obs_handler.ok_check_ball( time, B_IN_FIELD );
             }
             else if ( strcmp( str1, "goal_l" ) == 0 )
             {
-                game_data->obs_handler.ok( CHECK_BALL, time, B_GOAL_L );
+                game_data->obs_handler.ok_check_ball( time, B_GOAL_L );
             }
             else if ( strcmp( str1, "goal_r" ) == 0 )
             {
-                game_data->obs_handler.ok( CHECK_BALL, time, B_GOAL_R );
+                game_data->obs_handler.ok_check_ball( time, B_GOAL_R );
             }
             else if ( strcmp( str1, "out_of_field") == 0 )
             {
-                game_data->obs_handler.ok( CHECK_BALL, time, B_OUT_OF_FIELD );
+                game_data->obs_handler.ok_check_ball( time, B_OUT_OF_FIELD );
             }
         }
+        else if ( strcmp( str1, "look" ) == 0 )
+        {
+			double 	x, y, vx, vy, body_angle, neck_angle;
+			int		unum, n_readed;
+			char	team[56];
+			
+			message += 9; // Recorremos 9 espacios: (ok look 
+			// Datos del tiempo y la portería derecha
+			sscanf( message, "%d ( ( g r ) %lf %lf ) %n", &time, &x, &y, &n_readed );
+			message += n_readed;
+			
+			game_data->obs_handler.ok_look_begin( time );
+			
+			// Datos de la portería izquierda
+			sscanf( message, "( ( g l ) %lf %lf ) %n", &x, &y, &n_readed );
+			message += n_readed;
+			
+			// Datos del balón
+			sscanf( message, "( (b) %lf %lf %lf %lf ) %n", &x, &y, &vx, &vy, &n_readed );
+			message += n_readed;
+			
+			game_data->obs_handler.ok_look_ball( x, y, vx, vy );
+			
+			// Datos de todos los jugadores
+			while( *message != ')' )
+			{
+				sscanf( message, "( (p \"%[-0-9a-zA-Z ().+*/?<>_]\" %d ) %lf %lf %lf %lf %lf %lf ) %n", team, &unum, &x, &y, &vx, &vy, &body_angle, &neck_angle, &n_readed );
+				message += n_readed;
+				
+				game_data->obs_handler.ok_look_player( team, unum, x, y, vx, vy, body_angle, neck_angle );
+			}
+			
+		}
+		else if ( strcmp( str1, "synch_see" ) == 0 )
+		{
+		}
 }
 
 void Parser::parse_player_param(char *message)
@@ -2039,7 +2088,7 @@ PlayMode Parser::parse_play_mode(char *char_play_mode, int & num )
        de juego que presentan esta característica
     */
 
-    int aux_num; //en esta variable se guarda el unum o numero de goles dependiendo del playmode
+    //int aux_num; //en esta variable se guarda el unum o numero de goles dependiendo del playmode, este módulo aún no se implementa
     num = UNDEFINED_NUMBER;
     if(strcmp(char_play_mode,"time_over")==0)
         return TIME_OVER;
@@ -2258,6 +2307,40 @@ PlayMode Parser::parse_play_mode(char *char_play_mode, int & num )
         */
     else
             return (PlayMode)1; //Regresamos cero en caso de algún error
+}
+
+void Parser::parse_see_global( char * message )
+{
+			double x, y, vx, vy, body_angle, neck_angle;
+			char team[56]; // Pendiende te verificar cuál es la longitud máxima del equipo.
+			int unum, n_readed, time;
+			
+			message += 12; // Omitimos "(see_global "
+			
+			// Datos del tiempo y la portería derecha
+			sscanf( message, "%d ( ( g r ) %lf %lf ) %n", &time, &x, &y, &n_readed );
+			message += n_readed;
+			
+			game_data->obs_handler.see_global_begin( time );
+			
+			// Datos de la portería izquierda
+			sscanf( message, "( ( g l ) %lf %lf ) %n", &x, &y, &n_readed );
+			message += n_readed;
+			
+			// Datos del balón
+			sscanf( message, "( (b) %lf %lf %lf %lf ) %n", &x, &y, &vx, &vy, &n_readed );
+			message += n_readed;
+			
+			game_data->obs_handler.see_global_ball( x, y, vx, vy );
+			
+			// Datos de todos los jugadores
+			while( *message != ')' )
+			{
+				sscanf( message, "( (p \"%[-0-9a-zA-Z ().+*/?<>_]\" %d ) %lf %lf %lf %lf %lf %lf ) %n", team, &unum, &x, &y, &vx, &vy, &body_angle, &neck_angle, &n_readed );
+				message += n_readed;
+				
+				game_data->obs_handler.see_global_player( team, unum, x, y, vx, vy, body_angle, neck_angle );
+			}
 }
 
 char * Parser::move_to_next_word(char * str)

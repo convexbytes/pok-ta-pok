@@ -107,3 +107,28 @@ void Line::print()
 void Ball::print()
 {
 }
+
+AbsPlayer::AbsPlayer( )
+{
+	x = y = vx = vy = body_angle = neck_angle = unum = 0;
+	team = "";
+}
+AbsPlayer::	AbsPlayer( string team,
+				int unum,
+				double x,
+				double y,
+				double vx,
+				double vy,
+				int body_angle,
+				int neck_angle
+				)
+{
+	this->team.assign( team );
+	this->unum = unum;
+	this->x = x;
+	this->y = y;
+	this->vx = vx;
+	this->vy = vy;
+	this->body_angle = body_angle;
+	this->neck_angle = neck_angle;
+}

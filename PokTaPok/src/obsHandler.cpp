@@ -10,10 +10,12 @@ ObsHandler::ObsHandler()
 
 void ObsHandler::begin_sense( int time )
 {
-    last_obs_type = OBS_SENSE;
-    SenseObs new_sense;
-    last_sense = new_sense;
-    last_sense.time = time;
+	SenseObs new_sense;
+    last_obs_type =	OBS_SENSE;
+    last_sense 	  =	new_sense;
+    // last_obs_time es para saber el ciclo de la última "observación", falta implementar un manejador de éste
+    // para que no se esté actualizando en los hear, sense, etc.
+    last_sense.time = last_obs_time = time; 
 }
 void ObsHandler::sense_view_mode_quality( ViewModeQuality view_mode_quality) { last_sense. view_mode_quality = view_mode_quality; }
 void ObsHandler::sense_view_mode_width  ( ViewModeWidth view_mode_width) { last_sense. view_mode_width = (ViewModeWidth)view_mode_width; }
@@ -49,9 +51,9 @@ void ObsHandler::sense_foul_card        ( FoulCard foul_card) { last_sense. foul
 void ObsHandler::begin_see( int time )
 {
     SeeObs see;
-    last_obs_type = OBS_SEE;
-    last_see = see;
-    last_see.time = time;
+    last_obs_type 	= OBS_SEE;
+    last_see 		= see;
+    last_see.time 	= last_obs_time = time;
 }
 
 void ObsHandler::see_player( string team, int unum,  float distance, int direction,
@@ -180,7 +182,7 @@ void ObsHandler::see_finish()
 void ObsHandler::hear_couch(int time, string msg)
 {
     last_obs_type = OBS_HEAR;
-    last_hear.time = last_hear_couch.time = time;
+    last_hear.time = last_hear_couch.time = last_obs_time = time;
     last_hear.sender = COUCH;
     last_hear_couch.message = msg;
 
@@ -189,7 +191,7 @@ void ObsHandler::hear_couch(int time, string msg)
 void ObsHandler::hear_our(int time, int direction, int unum, string msg)
 {
     last_obs_type = OBS_HEAR;
-    last_hear.time = last_hear_our.time = time;
+    last_hear.time = last_hear_our.time = last_obs_time = time;
     last_hear.sender = OUR;
     last_hear_our.direction = direction;
     last_hear_our.uniform_number = unum;
@@ -199,7 +201,7 @@ void ObsHandler::hear_our(int time, int direction, int unum, string msg)
 void ObsHandler::hear_opp(int time, int direction, int unum, string msg)
 {
     last_obs_type = OBS_HEAR;
-    last_hear.time = last_hear_our.time = time;
+    last_hear.time = last_hear_our.time = last_obs_time = time;
     last_hear.sender = OPP;
     last_hear_opp.direction = direction;
     last_hear_opp.uniform_number = unum;
@@ -209,7 +211,7 @@ void ObsHandler::hear_opp(int time, int direction, int unum, string msg)
 void ObsHandler::hear_referee(int time, PlayMode play_mode, int num )
 {
     last_obs_type = OBS_HEAR;
-    last_hear_referee.time = last_hear.time = time;
+    last_hear_referee.time = last_hear.time = last_obs_time = time;
     last_hear.sender = REFEREE;
     last_hear_referee.play_mode = play_mode;
     last_hear_referee.num = num;
@@ -223,7 +225,7 @@ void ObsHandler::hear_referee(int time, PlayMode play_mode)
 void ObsHandler::hear_self(int time, string msg)
 {
     last_obs_type = OBS_HEAR;
-    last_hear_self.time = last_hear.time = time;
+    last_hear_self.time = last_hear.time = last_obs_time = time;
     last_hear.sender = SELF;
     last_hear_self.message = msg;
 }
@@ -242,30 +244,136 @@ void ObsHandler::init(char side, int unum, PlayMode play_mode, int playmode_num)
 void ObsHandler::error(int time, ErrorType error)
 {
     last_obs_type = OBS_ERROR;
-    last_error.time = time;
+    last_error.time = last_obs_time = time;
     last_error.error = error;
 }
+
 //Funciones referentes a ok.
-void ObsHandler::ok(CouchRequest r_type)
+
+void ObsHandler::ok_start		( )
 {
-    if( r_type == CHECK_BALL || r_type == EAR) return;
-    last_obs_type = OBS_OK;
-    last_ok.request_type = r_type;
+	last_obs_type = OBS_OK;
+	last_ok = START;
+}
+void ObsHandler::ok_check_ball	( int time,
+								  CheckBallPosition ball_pos )
+{
+	last_obs_type = OBS_OK;
+	last_ok = CHECK_BALL;
+	last_ok_check_ball.time = last_obs_time = time;
+	last_ok_check_ball.position;
+}
+void ObsHandler::ok_ear			( bool ear_on )
+{
+	last_obs_type = OBS_OK;
+	last_ok = EAR;
+	last_ok_ear.ear_on = ear_on;
+}
+void ObsHandler::ok_eye			( bool eye_on )
+{
+	last_obs_type = OBS_OK;
+	last_ok = EYE;
+	last_ok_eye.eye_on = eye_on;
+}
+void ObsHandler::ok_move		( )
+{
+	last_obs_type = OBS_OK;
+	last_ok	 = MOVE;
+}
+void ObsHandler::ok_recover		( )
+{
+	last_obs_type = OBS_OK;
+	last_ok = RECOVER;
 }
 
-void ObsHandler::ok(CouchRequest r_type, bool ear_on)
+void ObsHandler::ok_change_mode ( )
 {
-    if( r_type != EAR ) return;
-    last_obs_type = OBS_OK;
-    last_ok.request_type = r_type;
-    last_ok.ear_on = ear_on;
+	last_obs_type = OBS_OK;
+	last_ok = CHANGE_MODE;
 }
 
-void ObsHandler::ok(CouchRequest r_type, int time, CheckBallPosition bal_pos)
+void ObsHandler::ok_look_begin	( int time )
 {
-    if( r_type != CHECK_BALL ) return;
-    last_obs_type = OBS_OK;
-    last_ok.request_type = r_type;
-    last_ok.ball_time = time;
-    last_ok.ball_pos = bal_pos;
+	last_obs_type = OBS_OK;
+	last_ok = LOOK;
+	last_ok_look.time = last_obs_time = time;
 }
+
+void ObsHandler::ok_look_ball	( double x,
+								  double y,
+								  double vx,
+								  double vy )
+{
+	last_ok_look.ball.x = x;
+	last_ok_look.ball.y = y;
+	last_ok_look.ball.vx = vx;
+	last_ok_look.ball.vy = vy;
+}
+
+void ObsHandler::ok_look_player ( const char * team,
+								  int unum,
+								  double x,
+								  double y,
+								  double vx,
+								  double vy,
+								  int bodyAngle,
+								  int neckAngle )
+{
+	static AbsPlayer new_player;
+	new_player.team.assign( team );
+	new_player.unum = unum;
+	new_player.x = x;
+	new_player.y = y;
+	new_player.vx = vx;
+	new_player.vy = vy;
+	new_player.body_angle = bodyAngle;
+	new_player.neck_angle = neckAngle;
+	
+	last_ok_look.players.push_back( new_player );
+}
+
+void ObsHandler::ok_synch_see	( )
+{
+	last_obs_type = OBS_OK;
+	last_ok = SYNCH_SEE;
+}
+	
+void ObsHandler::see_global_begin	( int time )
+{
+	last_obs_type = OBS_SEE_GLOBAL;
+	last_see_global.time = time;
+}
+void ObsHandler::see_global_ball  	( double x,
+							  double y,
+							  double vx,
+							  double vy )
+{
+	last_see_global.ball.x = x;
+	last_see_global.ball.y = y;
+	last_see_global.ball.vx = vx;
+	last_see_global.ball.vy = vy;
+}
+								  
+							  
+void ObsHandler::see_global_player	( const char * team,
+							  int	unum,
+							  double x,
+							  double y,
+						      double vx,
+						      double vy,
+						      int bodyAngle,
+						      int neckAngle )
+{
+	static AbsPlayer new_player;
+	new_player.team.assign( team );
+	new_player.unum = unum;
+	new_player.x = x;
+	new_player.y = y;
+	new_player.vx = vx;
+	new_player.vy = vy;
+	new_player.body_angle = bodyAngle;
+	new_player.neck_angle = neckAngle;
+	
+	last_see_global.players.push_back( new_player );
+}
+

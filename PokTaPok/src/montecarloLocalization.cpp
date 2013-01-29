@@ -88,52 +88,19 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
                    }
               }
        }
-    /*
-   printf("PARTICULAS viejas: \n");
-   for( i=0; i<NUM_PARTICULAS; i++ )
-    {
 
-        printf( "x:%lf y:%lf theta:%lf peso[%d]:%lf prob:%lf rango[%d]:[%lf,%lf]\n",
-                particulas[i].x,
-                particulas[i].y,
-                particulas[i].theta,
-                i,
-                peso[i],
-                prob_particulas[i],
-                i,
-                rango[i],
-                rango[i+1]
-                );
-     }
-
-
-
-   printf("PARTICULAS nuevas: \n");
-   for( i=0; i<NUM_PARTICULAS; i++ )
-    {
-        printf( "x:%lf y:%lf theta:%lf peso[%d]:%lf prob:%lf rango[%d]:[%lf,%lf]\n",
-                particulas_nuevas[i].x,
-                particulas_nuevas[i].y,
-                particulas_nuevas[i].theta,
-                i,
-                peso[i],
-                prob_particulas[i],
-                i,
-                rango[i],
-                rango[i+1]
-                );
-    }
-
-    */
-    printf("Particula mayor peso:\t");
-    printf( "x:%lf, y:%lf, theta:%lf , peso: %lf , lugar: %d\n",
+    /* Imprimimos la partícula de mayor peso
+     */ 
+    int time = game_data->obs_handler.last_obs_time;
+    printf( "time: %d x: %lf y: %lf bodyAngle: %lf weight: %lf place: %d\n",
+			time,
             particulas_nuevas[posicion_peso_max].x,
             particulas_nuevas[posicion_peso_max].y,
             particulas_nuevas[posicion_peso_max].theta,
             peso[posicion_peso_max],
             posicion_peso_max
             );
-
+	
 }
 
 
@@ -443,14 +410,14 @@ Vector2D MontecarloLocalization::modelo_aceleracion_gomez( double dash_power,
                                                            double body_angle)
 {
     ServerParam & param     = game_data->game_parameter.server_param;
-    double dashAngleStep    = param.dash_angle_step;
+    /*double dashAngleStep    = param.dash_angle_step;
     double minDashPower     = param.min_dash_power;
     double maxDashPower     = param.max_dash_power;
     double minDashAngle     = param.min_dash_angle;
     double maxDashAngle     = param.max_dash_angle;
     double extraStamina     = param.extra_stamina;
     double sideDashRate     = param.side_dash_rate;
-    double backDashRate     = param.back_dash_rate;
+    double backDashRate     = param.back_dash_rate;*/
     double dashPowerRate    = param.dash_power_rate;
 
     double act_power;

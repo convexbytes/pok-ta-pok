@@ -18,25 +18,32 @@ public:
     HearCouchObs     last_hear_couch;
     HearSelfObs      last_hear_self;
     InitObs          last_init;
-    //MsgObs           last_msg;
+    //MsgObs           last_msg; Lo pospongo porque el único caso en que se recibe es al terminar el partido.
     ErrorObs         last_error;
-    OkObs            last_ok;
+    OkEar			 last_ok_ear;
+    OkEye			 last_ok_eye;
+    OkLook			 last_ok_look;
+    OkCheckBall		 last_ok_check_ball;
+    SeeGlobal		 last_see_global;
+    Request          last_ok;
     ObservationType  last_obs_type;
+    int				 last_obs_time;
 
-    void init(char side, int unum, PlayMode play_mode, int playmode_num );
+    void init		(char side, int unum, PlayMode play_mode, int playmode_num );
 
-    void begin_see(int time);
-    void see_player(string team, int unum ,  float distance , int direction , float dis_change ,
+    void begin_see	( int time);
+    void see_player	( string team, int unum ,  float distance , int direction , float dis_change ,
                        float dir_change , float speed_x , float speed_y ,
                        int body_dir , int neck_dir );
-    void see_player(string team , int unum ,  float distance , int direction , float dis_change ,
+    void see_player	( string team , int unum ,  float distance , int direction , float dis_change ,
                        float dir_change , float speed_x , float speed_y );
-    void see_player(string team , int unum ,  float distance , int direction , float dis_change ,
+    void see_player	( string team , int unum ,  float distance , int direction , float dis_change ,
                        float dir_change );
-    void see_player(string team , int unum ,  float distance , int direction );
-    void see_player(string team ,  float distance , int direction );
-    void see_player( float distance , int direction );
+    void see_player	( string team , int unum ,  float distance , int direction );
+    void see_player	( string team ,  float distance , int direction );
+    void see_player	( float distance , int direction );
 
+	
     void see_flag( EFlag id , float distance, int direction , float dir_chg , float dis_chg );
     void see_flag( EFlag id , float distance, int direction );
     void see_flag( float distance, int direction );
@@ -45,7 +52,8 @@ public:
     void see_ball(float distance, int direction, float dis_change, float dir_change, float speed_x, float speed_y);
     void see_ball(float distance, int direction, float dis_change, float dir_change);
     void see_ball(float distance, int direction);
-    void see_finish();
+    void see_finish(); // Le decimos que ya terminó para que haga algunas tareas como ordenar, pendiente a remover esta función.
+    
     void begin_sense(int time);
     void sense_view_mode_quality( ViewModeQuality );
     void sense_view_mode_width( ViewModeWidth );
@@ -87,11 +95,43 @@ public:
 
     //void msg( int time, string msg );
 
-    void ok( CouchRequest r_type );
-    void ok( CouchRequest r_type, int time, CheckBallPosition bal_pos ); //only for check_ball
-    void ok( CouchRequest r_type, bool ear_on ); //only for ear
-
-
+    void ok_start 		( );
+    void ok_check_ball 	( int time, 
+						  CheckBallPosition bal_pos ); // Only for check_ball
+    void ok_ear			( bool ear_on );
+	void ok_eye			( bool eye_on );
+    void ok_move		( );
+	void ok_recover		( );
+	void ok_change_mode ( ); 
+	void ok_look_begin  ( int time ); 
+	void ok_look_ball   ( double x,
+						  double y,
+						  double vx,
+						  double vy );
+	void ok_look_player ( const char * team,
+						  int	unum,
+						  double x,
+						  double y,
+						  double vx,
+						  double vy,
+						  int bodyAngle,
+						  int neckAngle );
+	void ok_synch_see	( );
+	
+	void see_global_begin	( int time );
+	void see_global_ball  	( double x,
+							  double y,
+							  double vx,
+							  double vy );
+	void see_global_player	( const char * team,
+							  int	unum,
+							  double x,
+							  double y,
+						      double vx,
+						      double vy,
+						      int bodyAngle,
+						      int neckAngle );
+	
 };
 
 #endif /* OBS_HANDLER_H */
