@@ -50,7 +50,7 @@ void LocalizationEngine::update_world()
 
     banderas = & game_data->obs_handler.last_see.flags;
     obs_type = game_data->obs_handler.last_obs_type;
-    controles = & agent_response->command;
+    controles = & agent_response->command_commited; // El último comando que ejecutó el servidor
     if( obs_type == OBS_SENSE )
     {
         // obtenemos los controles
