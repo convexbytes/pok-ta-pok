@@ -29,7 +29,7 @@ public:
     ObservationType  last_obs_type;
     int				 last_obs_time;
 
-    void init		(char side, int unum, PlayMode play_mode, int playmode_num );
+    void init		(char side, int unum, PlayModeHearable play_mode, int playmode_num );
 
     void begin_see	( int time);
     void see_player	( string team, int unum ,  float distance , int direction , float dis_change ,
@@ -84,8 +84,8 @@ public:
     void sense_foul_charged( int );
     void sense_foul_card( FoulCard );
 
-    void hear_referee   ( int time, PlayMode play_mode, int num );
-    void hear_referee   ( int time, PlayMode play_mode );
+    void hear_referee   ( int time, PlayModeHearable play_mode, int num );
+    void hear_referee   ( int time, PlayModeHearable play_mode );
     void hear_self      ( int time, string msg );
     void hear_couch     ( int time, string msg );
     void hear_our       ( int time, int direction, int unum, string msg );

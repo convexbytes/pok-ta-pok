@@ -1,19 +1,20 @@
 #ifndef GILAGENT_H
 #define GILAGENT_H
 #include "agent.h"
+#include "gameCommand.h"
 
 class GilAgent : public Agent
 {
 private:
     GameData        * game_data;
-    AgentResponse   * agent_response;
-    AgentResponse   * agent_response_commited;
+    AgentCommand   * agent_response;
+    AgentCommand const   * agent_response_commited;
     bool              my_fist_time;
 public:
     GilAgent();
     virtual void do_process(GameData * game_data,
-                            AgentResponse * agent_response,
-                            AgentResponse * agent_response_commited);
+                            AgentCommand * agent_response,
+                            AgentCommand const * agent_response_commited);
 
     //play_mode functions
     void on_goalie_catch_ball_l();

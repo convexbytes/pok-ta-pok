@@ -12,6 +12,7 @@ enum ParserMsgType
     P_PLAYER_PARAM,
     P_PLAYER_TYPE,
     P_SEE,
+    P_SEE_GLOBAL,
     P_SENSE,
     P_HEAR,
     P_MSG,
@@ -44,7 +45,7 @@ private:
 	// Los siguientes no son tipos de mensaje, sino utilidades
     void parse_flag          ( char * sub_msg, EFlag id, const char format[] );
     void parse_line          ( char * sub_msg, ELine id, const char format[] );
-    PlayMode parse_play_mode ( char * char_play_mode, int & num );
+    PlayModeHearable parse_play_mode ( char * char_play_mode, int & num );
 
     void flpar              (char *subcadena2, EFlag c);
     void lipar              ( char *subcadena2, ELine c);

@@ -38,8 +38,8 @@ void Client::initialize() {
     game_data           = new GameData  ( );
     parser              = new Parser    (game_data);
     agent               = new GilAgent  ( );
-    agent_response      = new AgentResponse     ( );
-    response_commited   = new AgentResponse     ( );
+    agent_response      = new AgentCommand     ( );
+    response_commited   = new AgentCommand     ( );
     localization_engine = new LocalizationEngine( game_data, response_commited );
     //Comprobamos que se crearon todos los objetos
     if( !( game_data && parser && agent && agent_response && response_commited && localization_engine ) )
@@ -150,7 +150,7 @@ void * Client::Client::process_thread_function(void *parameter) {
 			Client::instance().pre_filter(server_message_aux);
 
 			//Vaciamos el response.
-			Client::instance().agent_response->flush();
+            Client::instance().agent_response->reset();
 
 			//Recibimos la respuesta del agente.
 			Client::instance().agent->do_process(Client::instance().game_data,
@@ -180,9 +180,11 @@ void* Client::Client::sending_thread_function(void *parameter) {
 
 			// es esto threadsafe?
             // esto no es threadsafe, debería tener mutex aquí
-            Serializer::generate_command( command_aux, Client::instance().agent_response->command);
+            Serializer::generate_command( command_aux, *Client::instance().agent_response );
 
-            USock::instance().Send( command_aux );
+            if( strlen( command_aux ) != 0 )
+                USock::instance().Send( command_aux );
+
 			*Client::instance().response_commited =
 					*Client::instance().agent_response;
 

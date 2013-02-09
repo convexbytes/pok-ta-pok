@@ -19,10 +19,10 @@ enum MP_MessageType
 class MicroParser
 {
 	public:
-        static bool parenthesis_are_matched(char *message);
-        static bool message_is_correct(char *message);
-        static int get_message_type(char * message);
-        static int get_message_time(char *message);
+        static bool parenthesis_are_matched     (char *message);
+        static bool message_is_correct          (char *message);
+        static MP_MessageType get_message_type  (char * message);
+        static int get_message_time             (char *message);
 };
 
 

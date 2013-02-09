@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-LocalizationEngine::LocalizationEngine( GameData * game_data, AgentResponse * agent_response )
+LocalizationEngine::LocalizationEngine( GameData * game_data, AgentCommand *agent_response )
 {
     int angulo_inicial;
     int i;
@@ -43,14 +43,14 @@ void LocalizationEngine::update_world()
 {
     ObservationType   obs_type;
     vector<Flag>    * banderas;
-    GameCommand     * controles;
+    AgentCommand     * controles;
     Control           U;
     Particula       * p_aux;
     int i;
 
     banderas = & game_data->obs_handler.last_see.flags;
     obs_type = game_data->obs_handler.last_obs_type;
-    controles = & agent_response->command_commited; // El último comando que ejecutó el servidor
+    controles = agent_response; // El último comando que se envió al servidor
     if( obs_type == OBS_SENSE )
     {
         // obtenemos los controles

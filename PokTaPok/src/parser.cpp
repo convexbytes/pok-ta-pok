@@ -32,6 +32,11 @@ ParserMsgType Parser::parse(char *message )
         parse_player_type( message );
         return P_PLAYER_TYPE;
     }
+    else if( strstr( message, "see_global") )
+    {
+        parse_see_global( message );
+        return P_SEE_GLOBAL;
+    }
     else if( strstr(message, "see") )
     {
         parse_see( message );
@@ -82,6 +87,7 @@ void Parser::parse_error( char *message)
         subcadena2=strstr(message,"(error");
         if (subcadena2)
         {
+            /* el error lleva el ciclo en el que ocurrió??
             sscanf(subcadena2, "(error %d", &time );
             while( !isspace( *subcadena2 ) )
                 ++subcadena2;
@@ -100,6 +106,7 @@ void Parser::parse_error( char *message)
             {
                 game_data->obs_handler.error( time, ILLEGAL_COMMAND_FORM );
             }
+            */
         }
 }
 
@@ -110,7 +117,7 @@ void Parser::parse_hear( char *message )
     int 	aux_num;
     int 	angle;
     char 	aux_str[256];
-    PlayMode play_mode;
+    PlayModeHearable play_mode; // "playmode" que podemos escuchar del referee
     
     subcad = strstr( message,"(hear" ); //Buscamos el inicio del hear
     if( subcad == NULL ) return; //Si no encuentra algún hear, salimos
@@ -192,15 +199,25 @@ void Parser::parse_init( char *message )
     char side;
     char str[256];
     int aux_num;
-    PlayMode play_mode;
+    PlayModeHearable play_mode;
     subcad = strstr(message, "(init" );
     if( subcad == NULL ) return;
-    sscanf(subcad, "(init %c %d %s", &side, &unum, str );
-    str[ strlen(str) -1 ] = '\0'; //quitamos el paréntesis que cierra
-    play_mode = parse_play_mode( str, aux_num );
-    if( play_mode == 0 ) //Cuando play_mode es igual a cero, hubo un error en el parseo
-        return;
-    game_data->obs_handler.init(side, unum, play_mode, aux_num );
+
+
+    if( strncmp( "(init ok)", message, 9 ) == 0 )
+    {
+        game_data->obs_handler.init( 'c', 0, (PlayModeHearable)0, 0 );
+    }
+    else
+    {
+        sscanf(subcad, "(init %c %d %s", &side, &unum, str );
+        str[ strlen(str) -1 ] = '\0'; //quitamos el paréntesis que cierra
+        play_mode = parse_play_mode( str, aux_num );
+        if( play_mode == 0 ) //Cuando play_mode es igual a cero, hubo un error en el parseo
+            return;
+        game_data->obs_handler.init(side, unum, play_mode, aux_num );
+    }
+
 
 }
 
@@ -319,6 +336,7 @@ void Parser::parse_ok( char *message )
 		}
 		else if ( strcmp( str1, "synch_see" ) == 0 )
 		{
+            game_data->obs_handler.ok_synch_see();
 		}
 }
 
@@ -854,6 +872,16 @@ void Parser::parse_see(char *message)
             }
         }
 
+        subcadena2 = strstr( message,"(B" );
+        if ( subcadena2 != NULL )
+        {
+            float dis;
+            int dir;
+            subcadena2 += 4; // Avanzamos "(B) "
+            sscanf( subcadena2, "%f %d )", &dis, &dir );
+            game_data->obs_handler.see_ball(dis, dir);
+
+        }
         //Jugadores
         count = 0;
         subcadena = strstr( message, "(p" );
@@ -2078,7 +2106,7 @@ void Parser::lipar(char *subcadena2, ELine c)
 
 }
 
-PlayMode Parser::parse_play_mode(char *char_play_mode, int & num )
+PlayModeHearable Parser::parse_play_mode(char *char_play_mode, int & num )
 {
     /* Entrada: Una cadena de caracteres cuya primer palabra es algún modo de juego y una variable entera
        Salida: El tipo de modo de juego, un enum PLayMode; devuelve -1 en caso de no corresponder a ninguno
@@ -2306,7 +2334,7 @@ PlayMode Parser::parse_play_mode(char *char_play_mode, int & num )
         }
         */
     else
-            return (PlayMode)1; //Regresamos cero en caso de algún error
+            return (PlayModeHearable)0; //Regresamos cero en caso de algún error
 }
 
 void Parser::parse_see_global( char * message )

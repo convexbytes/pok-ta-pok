@@ -3,6 +3,8 @@
 
 ObsHandler::ObsHandler()
 {
+    last_obs_type = OBS_NONE;
+    last_obs_time = 0;
 
 }
 
@@ -208,7 +210,7 @@ void ObsHandler::hear_opp(int time, int direction, int unum, string msg)
     last_hear_opp.message = msg;
 }
 
-void ObsHandler::hear_referee(int time, PlayMode play_mode, int num )
+void ObsHandler::hear_referee(int time, PlayModeHearable play_mode, int num )
 {
     last_obs_type = OBS_HEAR;
     last_hear_referee.time = last_hear.time = last_obs_time = time;
@@ -217,7 +219,7 @@ void ObsHandler::hear_referee(int time, PlayMode play_mode, int num )
     last_hear_referee.num = num;
 }
 
-void ObsHandler::hear_referee(int time, PlayMode play_mode)
+void ObsHandler::hear_referee(int time, PlayModeHearable play_mode)
 {
     hear_referee(time, play_mode, UNDEFINED_NUMBER );
 }
@@ -230,7 +232,7 @@ void ObsHandler::hear_self(int time, string msg)
     last_hear_self.message = msg;
 }
 //Funciones referentes a init.
-void ObsHandler::init(char side, int unum, PlayMode play_mode, int playmode_num)
+void ObsHandler::init(char side, int unum, PlayModeHearable play_mode, int playmode_num)
 {
     //playmode_num es el número incrustado en los modos de juego, por ejemplo, 2 en goal_r_2.
     last_obs_type = OBS_INIT;
@@ -341,7 +343,9 @@ void ObsHandler::ok_synch_see	( )
 void ObsHandler::see_global_begin	( int time )
 {
 	last_obs_type = OBS_SEE_GLOBAL;
-	last_see_global.time = time;
+    last_see_global.time =
+           last_obs_time = time;
+    last_see_global.players.clear();
 }
 void ObsHandler::see_global_ball  	( double x,
 							  double y,
@@ -364,7 +368,7 @@ void ObsHandler::see_global_player	( const char * team,
 						      int bodyAngle,
 						      int neckAngle )
 {
-	static AbsPlayer new_player;
+    AbsPlayer new_player;
 	new_player.team.assign( team );
 	new_player.unum = unum;
 	new_player.x = x;

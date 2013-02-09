@@ -1,16 +1,14 @@
-FLAGS = -c
+FLAGS = -c 
 EXECUTABLE_NAME = poktapok
 SOURCE_DIR = src/
 BIN_DIR_NAME = bin
 BIN_DIR = $(BIN_DIR_NAME)/
 VPATH = src/
 OBJS = $(BIN_DIR)agentResponse.o \
-	$(BIN_DIR)client.o \
 	$(BIN_DIR)gameCommand.o \
 	$(BIN_DIR)gameData.o \
 	$(BIN_DIR)gameObject.o \
 	$(BIN_DIR)gameParameter.o \
-	$(BIN_DIR)gilAgent.o \
 	$(BIN_DIR)localizationEngine.o \
 	$(BIN_DIR)localizationMethods.o \
 	$(BIN_DIR)main.o \
@@ -18,14 +16,13 @@ OBJS = $(BIN_DIR)agentResponse.o \
 	$(BIN_DIR)observation.o \
 	$(BIN_DIR)obsHandler.o \
 	$(BIN_DIR)parser.o \
-	$(BIN_DIR)poktapokAgent.o \
 	$(BIN_DIR)serializer.o \
 	$(BIN_DIR)udpSocket.o \
 	$(BIN_DIR)montecarloLocalization.o
 
 
-$(BIN_DIR)poktapok : $(OBJS)
-	g++ $(OBJS) -lpthread -o $(BIN_DIR)$(EXECUTABLE_NAME)
+$(BIN_DIR)poktapok : $(OBJS) $(BIN_DIR)gilAgent.o $(BIN_DIR)client.o 
+	g++ $(OBJS) $(BIN_DIR)gilAgent.o $(BIN_DIR)client.o  -lpthread -o $(BIN_DIR)$(EXECUTABLE_NAME)
 
 clean:
 	rm $(BIN_DIR)*
@@ -105,8 +102,6 @@ $(BIN_DIR)parser.o:\
 	$(SOURCE_DIR)obsHandler.cpp
 	g++ $(FLAGS) $(SOURCE_DIR)parser.cpp -o $@
 	
-$(BIN_DIR)poktapokAgent.o:
-	g++ $(FLAGS) $(SOURCE_DIR)poktapokAgent.cpp -o $@
 
 $(BIN_DIR)serializer.o:\
 	$(SOURCE_DIR)observation.cpp \
@@ -115,3 +110,32 @@ $(BIN_DIR)serializer.o:\
 
 $(BIN_DIR)udpSocket.o:
 	g++ $(FLAGS) $(SOURCE_DIR)udpSocket.cpp -o $@
+
+########### Para compilar el entrenamiento ################
+
+TRAINING_SRC_DIR = training_src/
+
+$(BIN_DIR)primeraTrainer :\
+	$(OBJS) \
+	$(BIN_DIR)trainerClient.o  \
+	$(BIN_DIR)primeraTrainer.o
+	g++ $(OBJS) $(BIN_DIR)trainerClient.o $(BIN_DIR)primeraTrainer.o -lpthread -o $@
+
+$(BIN_DIR)primeraApprentice : $(OBJS) $(BIN_DIR)primeraApprentice.o  $(BIN_DIR)primeraAppClient.o 	$(BIN_DIR)primeraTrainer.o
+	g++ $(OBJS)  $(BIN_DIR)primeraApprentice.o  $(BIN_DIR)primeraAppClient.o $(BIN_DIR)primeraTrainer.o -lpthread -o $@
+
+$(BIN_DIR)primeraAppClient.o : 
+	g++ $(TRAINING_SRC_DIR)primeraAppClient.cpp -c -o $@
+
+$(BIN_DIR)primeraTrainer.o :
+	g++ $(TRAINING_SRC_DIR)primeraTrainer.cpp -c -o $@
+
+$(BIN_DIR)primeraApprentice.o :	\
+	$(BIN_DIR)gameCommand.o \
+	$(BIN_DIR)primeraTrainer.o
+	g++ $(TRAINING_SRC_DIR)primeraApprentice.cpp -c -o $@
+
+	
+$(BIN_DIR)trainerClient.o : $(OBJS)
+	g++ $(TRAINING_SRC_DIR)trainerClient.cpp -c -o $@
+

@@ -1,5 +1,5 @@
 #include "gilAgent.h"
-#include "agentResponse.h"
+#include "gameCommand.h"
 #include "gameData.h"
 #include "observation.h"
 #include <iostream>
@@ -9,14 +9,21 @@ GilAgent::GilAgent()
     my_fist_time = true;
 }
 
-void GilAgent::do_process( GameData * game_data, AgentResponse * agent_response, AgentResponse *agent_response_commited )
+void GilAgent::do_process( GameData * game_data, AgentCommand * agent_response, const AgentCommand *agent_response_commited )
+
 {
 
-    PlayMode play_mode;
+    PlayModeHearable play_mode;
     this->game_data = game_data;
     this->agent_response = agent_response;
     this->agent_response_commited = agent_response_commited;
     play_mode = game_data->obs_handler.last_hear_referee.play_mode;
+
+    if( game_data->obs_handler.last_obs_type == OBS_SEE )
+    {
+        printf( "%f\n", game_data->obs_handler.last_sense.speed_amount );
+    }
+
     switch(play_mode)
     {
     case GOALIE_CATCH_BALL_L: on_goalie_catch_ball_l(); break;
@@ -81,13 +88,10 @@ void GilAgent::do_process( GameData * game_data, AgentResponse * agent_response,
     case PENALTY_DRAW: on_penalty_draw(); break;
     default:
 
-        agent_response->command.append_turn( 0 );
+        //agent_response->append_turn( 0 );
         break;
     }
 
-
-
-    //command->append_dash(50);
 
 
 }
@@ -106,7 +110,7 @@ void GilAgent::on_before_kick_off()
         }
         */
     //}
-    agent_response->command.append_turn( 0 );
+    agent_response->append_turn( 0 );
 }
 void GilAgent::on_time_over(){}
 void GilAgent::on_play_on()
@@ -184,7 +188,7 @@ bool GilAgent::search_ball()
 {
     if( !game_data->obs_handler.last_see.ball_is_visible() )
     {
-        agent_response->command.append_turn( -35 );
+        agent_response->append_turn( -35 );
         return false;
     }
     else
@@ -218,7 +222,7 @@ bool GilAgent::go_to_bal_kick_position()
             return true;
         }
         else
-            agent_response->command.append_dash( 50 );
+            agent_response->append_dash( 90 );
             return false;
     }
     else return false;
@@ -249,11 +253,11 @@ void GilAgent::kick_to_goal()
     }
     if( found )
     {
-        agent_response->command.append_kick(50, (goal_flag->direction - game_data->obs_handler.last_sense.head_angle) );
+        agent_response->append_kick( 100, (goal_flag->direction - game_data->obs_handler.last_sense.head_angle) );
     }
     else
     {
-        agent_response->command.append_kick(10, 0);
+        agent_response->append_kick( 10, 0 );
     }
 
 }
@@ -285,6 +289,6 @@ void GilAgent::align_body_to_ball()
     ball = & game_data->obs_handler.last_see.ball;
     me = & game_data->world_state.me ;
 
-    agent_response->command.append_turn(  ball->direction );
+    agent_response->append_turn(  ball->direction );
 
 }

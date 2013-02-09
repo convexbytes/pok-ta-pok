@@ -15,7 +15,7 @@ public:
     GameParameter 	game_parameter;
     ObsHandler 		obs_handler;
     PlayMode 		play_mode;
-    AgentResponse 	agent_response;
+    //AgentCommand agent_response;
 };
 
 #endif // GAMEDATA_H
