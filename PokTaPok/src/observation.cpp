@@ -105,7 +105,7 @@ void SeeObs::add_ball(Ball ball)
 }
 
 
-bool SeeObs::ball_is_visible()
+bool SeeObs::ball_is_visible() const
 {
     return ball_visible;
 }

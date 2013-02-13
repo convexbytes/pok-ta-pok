@@ -268,7 +268,7 @@ class Observation
 {
 public:
     int time;
-    ObservationType type;
+    ObservationType type; // This seems useless to me now..., pendiente de borrar
 };
 
 class SenseObs : public Observation
@@ -313,7 +313,7 @@ class SeeObs : public Observation
 {
 public:
     SeeObs();
-    bool    ball_is_visible     ();
+    bool    ball_is_visible     () const;
     int     num_recognized_players  ();
     int     num_recognized_flags    ();
     int     num_recognized_lines    ();
@@ -375,7 +375,7 @@ public:
     string message;
 };
 
-class InitObs : public Observation
+class InitObs
 {
 public:
     int 		uniform_number;

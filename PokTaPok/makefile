@@ -21,8 +21,8 @@ OBJS = $(BIN_DIR)agentResponse.o \
 	$(BIN_DIR)montecarloLocalization.o
 
 
-$(BIN_DIR)poktapok : $(OBJS) $(BIN_DIR)gilAgent.o $(BIN_DIR)client.o 
-	g++ $(OBJS) $(BIN_DIR)gilAgent.o $(BIN_DIR)client.o  -lpthread -o $(BIN_DIR)$(EXECUTABLE_NAME)
+$(BIN_DIR)poktapok : $(OBJS) $(BIN_DIR)poktapokAgent.o $(BIN_DIR)client.o 
+	g++ $(OBJS) $(BIN_DIR)poktapokAgent.o $(BIN_DIR)client.o  -lpthread -o $(BIN_DIR)$(EXECUTABLE_NAME)
 
 clean:
 	rm $(BIN_DIR)*
@@ -42,7 +42,7 @@ $(BIN_DIR)client.o:\
 	$(SOURCE_DIR)microParser.cpp \
 	$(SOURCE_DIR)udpSocket.cpp \
 	$(SOURCE_DIR)serializer.cpp \
-	$(SOURCE_DIR)gilAgent.cpp
+	$(SOURCE_DIR)poktapokAgent.cpp
 	g++ $(FLAGS) -pthread $(SOURCE_DIR)client.cpp -o $@
 
 $(BIN_DIR)gameCommand.o:\
@@ -63,11 +63,11 @@ $(BIN_DIR)gameObject.o:
 $(BIN_DIR)gameParameter.o:
 	g++ $(FLAGS) $(SOURCE_DIR)gameParameter.cpp -o $@
 	
-$(BIN_DIR)gilAgent.o:\
+$(BIN_DIR)poktapokAgent.o:\
 	$(SOURCE_DIR)agentResponse.cpp \
 	$(SOURCE_DIR)gameData.cpp \
 	$(SOURCE_DIR)observation.cpp 
-	g++ $(FLAGS) $(SOURCE_DIR)gilAgent.cpp -o $@
+	g++ $(FLAGS) $(SOURCE_DIR)poktapokAgent.cpp -o $@
 
 $(BIN_DIR)localizationEngine.o:\
 	$(SOURCE_DIR)gameData.cpp 

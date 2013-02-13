@@ -35,7 +35,7 @@ void AgentCommand::reset()
 }
 
 
-void AgentCommand::append_dash(int power)
+void AgentCommand::append_dash(double power)
 {
     turn_set = false; /* exclusion de comandos en el mismo ciclo */
     catch_set = false;
@@ -94,7 +94,7 @@ void AgentCommand::append_catch( int direction )
     catch_direction = direction;
 }
 
-void AgentCommand::append_kick(int power, int direction)
+void AgentCommand::append_kick(double power, double direction)
 {
     dash_set = false;
     turn_set = false;
@@ -106,7 +106,7 @@ void AgentCommand::append_kick(int power, int direction)
     kick_power = power;
 }
 
-void AgentCommand:: append_move ( int x, int y )
+void AgentCommand:: append_move ( double x, double y )
 {
     dash_set = false;
     turn_set = false;

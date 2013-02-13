@@ -17,7 +17,7 @@ void Serializer::generate_command( char * output, AgentCommand &game_command )
     // Genera el commando listo para enviarlo al servidor //
     if( game_command.dash_is_set() )
     {
-        sprintf(command_aux2, "(dash %d)", game_command.dash_power );
+        sprintf(command_aux2, "(dash %lf)", game_command.dash_power );
         strcat(command_aux, command_aux2);
     }
 
@@ -33,12 +33,12 @@ void Serializer::generate_command( char * output, AgentCommand &game_command )
     }
     else if ( game_command.move_is_set() )
     {
-        sprintf(command_aux2, "(move %d %d)", game_command.move_x, game_command.move_y );
+        sprintf(command_aux2, "(move %lf %lf)", game_command.move_x, game_command.move_y );
         strcat(command_aux, command_aux2);
     }
     else if ( game_command.kick_is_set() )
     {
-        sprintf(command_aux2, "(kick %d %d)", game_command.kick_power, game_command.kick_direction );
+        sprintf(command_aux2, "(kick %lf %lf)", game_command.kick_power, game_command.kick_direction );
         strcat(command_aux, command_aux2);
     }
     if( game_command.turn_neck_is_set() )
@@ -111,7 +111,7 @@ void Serializer::serializeAgentCommands(const AgentCommand &command, vector<stri
     /* Genera el commando listo para enviarlo al servidor */
     if( command.dash_is_set() )
     {
-        sprintf(command_aux2, "(dash %d)", command.dash_power );
+        sprintf(command_aux2, "(dash %lf)", command.dash_power );
         new_command.assign( command_aux2 );
         container->push_back( new_command );
 
@@ -131,13 +131,13 @@ void Serializer::serializeAgentCommands(const AgentCommand &command, vector<stri
     }
     else if ( command.move_is_set() )
     {
-        sprintf(command_aux2, "(move %d %d)", command.move_x, command.move_y );
+        sprintf(command_aux2, "(move %lf %lf)", command.move_x, command.move_y );
         new_command.assign( command_aux2 );
         container->push_back( new_command );
     }
     else if ( command.kick_is_set() )
     {
-        sprintf(command_aux2, "(kick %d %d)", command.kick_power, command.kick_direction );
+        sprintf(command_aux2, "(kick %lf %lf)", command.kick_power, command.kick_direction );
         new_command.assign( command_aux2 );
         container->push_back( new_command );
     }
@@ -213,7 +213,7 @@ void Serializer::serializeTrainerCommands( const TrainerCommand & command,
 {
     char aux_command[256];
     string new_command;
-    int i;
+    unsigned int i;
     if( command.earIsSet() )
     {
         if( command.earOn() )

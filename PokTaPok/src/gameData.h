@@ -11,11 +11,8 @@
 class GameData
 {
 public:
-    WorldState 		world_state;
     GameParameter 	game_parameter;
     ObsHandler 		obs_handler;
-    PlayMode 		play_mode;
-    //AgentCommand agent_response;
 };
 
 #endif // GAMEDATA_H

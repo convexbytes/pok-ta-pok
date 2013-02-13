@@ -12,6 +12,7 @@ class Serializer
 public:
     static void generate_command ( char *output,  AgentCommand & game_command);
 
+    // Segunda versión del serializador
     static void serializeAgentCommands( const AgentCommand & command, vector<std::string> *container );
     
     // Añadido para el entrenador

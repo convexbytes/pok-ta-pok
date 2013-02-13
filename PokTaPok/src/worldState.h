@@ -1,32 +1,33 @@
-#ifndef WORLDSTATE_H
-#define WORLDSTATE_H
-#include "gameObject.h"
-#include "observation.h"
-#include "geometry.h"
-#include "localizationMethods.h"
 
-class WorldPlayer
+#ifndef WORLD_STATE_H
+#define WORLD_STATE_H
+#include "obsHandler.h"
+
+class AgentStateV1
 {
 public:
-    Vector2D global_position;
-    short body_angle;
-    char side;
-    short unum;
-};
+    AgentStateV1();
+    bool synchSeeOn() const { return synch_see_on; }
 
-class BallState // : public Ball
-{
-public:
-    Vector2D global_position;
+private:
+    bool synch_see_on;
 };
 
 class WorldState
 {
 public:
-    WorldPlayer players[21];
-    WorldPlayer me;
-    BallState ball;
-    //PlayMode play_mode;
+    virtual void updateWorld( ObsHandler const & obs_h ) = 0;
 };
 
-#endif // WORLDSTATE_H
+class WorldStateV1 : public WorldState
+{
+public:
+
+    virtual void updateWorld( ObsHandler const & obs_h);
+
+    AgentStateV1 me;
+};
+
+
+
+#endif // WORLD_STATE_H

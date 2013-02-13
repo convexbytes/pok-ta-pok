@@ -7,7 +7,7 @@
 #include "microParser.h"
 #include "udpSocket.h"
 #include "serializer.h"
-#include "gilAgent.h"
+
 #include <pthread.h>
 #include <signal.h>
 #include <deque>
@@ -37,12 +37,15 @@ void Client::initialize() {
     //Iniciamos todos los objetos para cargar toda la memoria al principio
     game_data           = new GameData  ( );
     parser              = new Parser    (game_data);
-    agent               = new GilAgent  ( );
+    agent               = new PokTaPokAgentV1  ( );
     agent_response      = new AgentCommand     ( );
     response_commited   = new AgentCommand     ( );
+    response_to_commit  = new AgentCommand     ( );
     localization_engine = new LocalizationEngine( game_data, response_commited );
     //Comprobamos que se crearon todos los objetos
-    if( !( game_data && parser && agent && agent_response && response_commited && localization_engine ) )
+    if( !( game_data && parser && agent && agent_response
+           && response_commited && localization_engine
+           && response_to_commit) )
     {
         printf( "Objects could not be created, exiting...\n" );
         if( game_data )
@@ -53,10 +56,13 @@ void Client::initialize() {
             free( agent );
         if( agent_response )
             free( agent_response );
+        if( response_to_commit )
+            free( response_to_commit );
         if( response_commited )
             free( response_commited );
         if( localization_engine )
             free( localization_engine );
+
         exit (-1);
     }
 
@@ -102,24 +108,25 @@ Client::~Client() {
 	delete Client::instance().game_data;
 	delete Client::instance().agent_response;
 	delete Client::instance().response_commited;
+    delete Client::instance().response_to_commit;
 	delete Client::instance().localization_engine;
 	delete Client::instance().agent;
 }
 
 void Client::main_loop() {
-	Client::instance().initialize();
-	USock::instance().Initial("localhost", 6000);
-	USock::instance().Send("(init poktapok (version 15.1))");
-	MP_MessageType mp_type; //Tipo de mensaje del microparser
+    Client::instance().initialize();
+    USock::instance().Initial("localhost", 6000);
+    USock::instance().Send("(init poktapok (version 15.1))");
+    MP_MessageType mp_type; //Tipo de mensaje del microparser
     while( server_is_alive() )
     {
+
         USock::instance().Receive( buffer_in );
-		mp_type = Client::instance().last_msg_type =
+
+        mp_type = Client::instance().last_msg_type =
             (MP_MessageType) MicroParser::get_message_type(buffer_in); //Le decimos al hilo de envio el tipo de mensaje que nos lleg̣a.
-        if (mp_type == MP_SENSE_BODY)
-        {
-			//printf("Sense arrived\n");
-		}
+        //Client::instance().last_msg_cycle = MicroParser::get_message_time( buffer_in );
+
         pthread_mutex_lock( & Client::instance().message_stack_mutex );
 
             Client::instance().messages.push_back( buffer_in );
@@ -132,6 +139,7 @@ void Client::main_loop() {
 void * Client::Client::process_thread_function(void *parameter) {
 	char server_message_aux[4096];
 	bool stack_empty;
+    AgentCommand * comm_aux;
 	while (1) {
         pthread_mutex_lock( & Client::instance().message_stack_mutex );
 		stack_empty = Client::instance().messages.empty();
@@ -139,24 +147,32 @@ void * Client::Client::process_thread_function(void *parameter) {
 		if (stack_empty) //Si la pila tiene mensajes, leemos; si no tiene, dormimos.
 		{
 			usleep(1000); //Duerme un milisegundo mientras se llena el stack de mensajes
-		} else {
+        }
+        else
+        {
             pthread_mutex_lock( & Client::instance().message_stack_mutex);
+
 			strcpy( server_message_aux,
 					Client::instance().messages.front().c_str());
+
 			Client::instance().messages.pop_front();
+
             pthread_mutex_unlock(&Client::instance().message_stack_mutex);
 
 			//Pasamos al "filtro" para alimentar game_data.
 			Client::instance().pre_filter(server_message_aux);
 
 			//Vaciamos el response.
-            Client::instance().agent_response->reset();
+            //Client::instance().agent_response->reset();
 
 			//Recibimos la respuesta del agente.
 			Client::instance().agent->do_process(Client::instance().game_data,
 					Client::instance().agent_response,
 					Client::instance().response_commited);
 
+            comm_aux = Client::instance().agent_response;
+            Client::instance().agent_response = Client::instance().response_to_commit;
+            Client::instance().response_to_commit = comm_aux;
 		}
 	}
 	return NULL;
@@ -164,31 +180,45 @@ void * Client::Client::process_thread_function(void *parameter) {
 
 void* Client::Client::sending_thread_function(void *parameter) {
 	int time;
+    int i;
 	MP_MessageType msg_type;
-	char command_aux[4096];
+
+    std::vector<string> commands;
 	while (1) {
         //pthread_mutex_lock( & Client::time_mutex );
 		msg_type = Client::instance().last_msg_type;
         //pthread_mutex_unlock( & Client::time_mutex );
-		if (msg_type == MP_SENSE_BODY) {
+        if ( msg_type == MP_SENSE_BODY )
+        {
 			//Destinado para cuando trabaje el módulo synchronizer
 			//Client::instance().synchronizer.msg_arrived(msg_type);
 			//time = Client::instance().synchronizer.get_current_cycle_wait_time();
-			time = 90000;
-			msg_type = MP_NONE;
-			usleep(time);
+            time = 90000;
+            msg_type = Client::instance().last_msg_type = MP_NONE;
+            usleep(time);
 
 			// es esto threadsafe?
             // esto no es threadsafe, debería tener mutex aquí
-            Serializer::generate_command( command_aux, *Client::instance().agent_response );
 
-            if( strlen( command_aux ) != 0 )
-                USock::instance().Send( command_aux );
+            commands.clear();
+
+            //Serializer::generate_command( command_aux, *Client::instance().agent_response );
+
+            Serializer::serializeAgentCommands( *Client::instance().response_to_commit,
+                                                & commands );
+
+            for( i=0; i<commands.size(); i++ )
+            {
+                USock::instance().Send( commands[i].c_str() );
+            }
 
 			*Client::instance().response_commited =
 					*Client::instance().agent_response;
 
-		} else {
+
+        }
+        else
+        {
 			usleep(1000);
 		}
 
@@ -196,18 +226,25 @@ void* Client::Client::sending_thread_function(void *parameter) {
 	return NULL;
 }
 
-bool Client::server_is_alive() {
+bool Client::server_is_alive()
+{
+    // Reservado para un análisis de detección de conexión con el servidor.
 	return true;
 }
 
-void Client::pre_filter(char * server_msg) {
-	parser->parse(server_msg);
-	localization_engine->update_world();
+void Client::pre_filter(char * server_msg)
+{
+    double x, y, ang;
 
+    parser->parse(server_msg); // Parseo, llena el objeto obs_handler
+
+    localization_engine->getNewPos( x, y, ang ); // Usa obs_handler para actualizar la pose del agente
 }
 
+
+
 void Client::signal_controller(int num) {
-	// ¿por qué no pusimos este código en el main?
+    // Pendiente de poner este código, junto con lo referente a las señales, en el main.
 	//
 	//Este código se ejecutará cuando se reciba alguna señal.
 	printf("\nSignal received, exiting now...\n");

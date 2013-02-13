@@ -12,16 +12,16 @@ class AgentCommand
 public:
     AgentCommand();
     void reset();
-    void append_dash        ( int power );
+    void append_dash        ( double power );
     void append_turn        ( int angle );
     void append_turn_neck   ( int angle );
     void append_say         ( std::string message );
     void append_say         ( const char *message );
-    void append_kick        ( int power, int direction );
+    void append_kick        ( double power, double direction );
     void append_catch       ( int direction );
     void append_change_view ( ViewModeQuality quality, ViewModeWidth width );
     void append_attentionto ( AttentionTeam attention_team, int uniform_number );
-    void append_move        ( int x, int y );
+    void append_move        ( double x, double y );
     void append_score       ();
     void append_synch_see   ();
 
@@ -42,10 +42,10 @@ public:
     int get_catch_direction () const { return catch_direction; }
     int get_kick_power      () const { return kick_power; }
     int get_dash_power      () const { return dash_power; }
-    int move_x, move_y;
+    double move_x, move_y;
     int catch_direction;
-    int kick_power, kick_direction;
-    int dash_power;
+    double kick_power, kick_direction;
+    double dash_power;
     int turn_angle;
     int turn_neck_angle;
     int attention_uniform_number;

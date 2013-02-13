@@ -1,6 +1,6 @@
 #ifndef MONTECARLOLOCALIZATION_H
 #define MONTECARLOLOCALIZATION_H
-#define NUM_PARTICULAS 1000
+#define NUM_PARTICULAS 300
 //#define MONT_PI 3.141592653589793
 #include "gameObject.h"
 #include "vector"
@@ -26,6 +26,9 @@ class MontecarloLocalization
 public:
     MontecarloLocalization( GameData * game_data );
 
+
+    //Particula heaviest_particle;
+
     void montecarlo_prediction( Particula   * particulas,
                                 Control       U,
                                 Particula   * particulas_nuevas
@@ -39,8 +42,8 @@ public:
 
 private:
     GameData * game_data;
-    Particula Sample_Motion_Model       ( Control   U,
-                                          Particula particula
+    Particula Sample_Motion_Model       ( Control const &   U,
+                                          Particula const & particula
                                           );
 
     double  Landmark_Model_Known_Corresponce( Flag      bandera,

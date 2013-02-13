@@ -31,6 +31,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 {
     int     i, j, banderas_vistas;
     int     posicion_peso_max = 0;
+    int     time;
     double  draw;
     double  peso[NUM_PARTICULAS];
     double  rango[NUM_PARTICULAS+1];
@@ -90,8 +91,8 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
        }
 
     /* Imprimimos la partícula de mayor peso
-     */ 
-    int time = game_data->obs_handler.last_obs_time;
+*/
+    time = game_data->obs_handler.last_obs_time;
     printf( "time: %d x: %lf y: %lf bodyAngle: %lf weight: %lf place: %d\n",
 			time,
             particulas_nuevas[posicion_peso_max].x,
@@ -100,12 +101,13 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
             peso[posicion_peso_max],
             posicion_peso_max
             );
+
 	
 }
 
 
-Particula MontecarloLocalization::Sample_Motion_Model( Control      U,
-                                                       Particula    particula
+Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
+                                                       Particula const  &  particula
                                                        )
 {
 
@@ -124,7 +126,7 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control      U,
     Vector2D aceleracion;
     Vector2D velocidad;
     Vector2D movimiento;
-    Particula X;
+    static Particula X;
 
     //Árbol de expansión mínima.
     if( U.dash_power == 0.0 )
@@ -172,7 +174,11 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control      U,
         {
             if( body_dis_vel == 0.0 )  // dash_power distinto a cero,  turn y body_dis_vel igual a cero.
             {
-                aceleracion = modelo_aceleracion( U.dash_power, 0.0, stamina, effort, particula.theta );
+                aceleracion = modelo_aceleracion( U.dash_power,
+                                                  0.0,
+                                                  stamina,
+                                                  effort,
+                                                  Deg2Rad( particula.theta ) );
                 //aceleracion = modelo_aceleracion_gomez( U.dash_power, stamina, effort, particula.theta );
                 rmax = player_rand * aceleracion.normita();
                 r1 = drand48()*2.0*rmax - rmax;
@@ -183,7 +189,11 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control      U,
             }
             else  // dash_power y body_dis_vel distinto a cero,  turn igual a cero.
             {
-                aceleracion = modelo_aceleracion( U.dash_power, 0.0, stamina, effort, particula.theta );
+                aceleracion = modelo_aceleracion( U.dash_power,
+                                                  0.0,
+                                                  stamina,
+                                                  effort,
+                                                  Deg2Rad( particula.theta ) );
                 //aceleracion = modelo_aceleracion_gomez( U.dash_power, stamina, effort, particula.theta );
                 velocidad = Vector2D::fromPolar(body_dis_vel, grad2rad( body_dir_vel + particula.theta + neck_dir ) );
                 //printf( "Aceleración: %lf %lf \t Velocidad: %lf %lf theta:: %lf \n", aceleracion.x, aceleracion.y, velocidad.x, velocidad.y, body_dir_vel + particula.theta + neck_dir  );

@@ -3,84 +3,76 @@
 #include "utilities.h"
 #include "geometry.h"
 
-#include <cmath>
+#include <math.h>
 #include <iostream>
 
 Vector2D dePrimera( double vel_r_t1,
                       double vel_angle_t1,
                       double vel_r_t0,
                       double vel_angle_t0,
-                      double ball_direction, // La dirección a la que vemos el balón
-                      double ball_distance,
+                      double ball_distance, // La dirección a la que vemos el balón
+                      double ball_direction,
                       double neck_angle,
                       double kickable_margin,
                       double kick_power_rate,
                       double decay)
 
 {
-    static Vector2D angle_power;
-    double & k1 = kickable_margin;
-    double & k2 = kick_power_rate;
-    double & k3 = decay;
+    Vector2D kick_vector;
 
     double dir_diff = fabs( ball_direction - neck_angle );
 
-    double tan_upper = vel_r_t1 * sin( vel_angle_t1 ) - k3 * vel_r_t0 * sin( vel_angle_t0 );
-    double tan_lower = vel_r_t1 * cos( vel_angle_t1 ) - k3 * vel_r_t0 * cos( vel_angle_t0 );
+    double f = (1 - 0.25*(dir_diff/180.0) -0.25*(ball_distance/kickable_margin) );
 
+    Vector2D vt1( vel_r_t1* cos( Deg2Rad( vel_angle_t1 ) ),
+                  vel_r_t1* sin( Deg2Rad( vel_angle_t1 ) )  );
 
-    double power;
-    double kick_angle;
+    Vector2D vt0( vel_r_t0* cos( Deg2Rad( vel_angle_t0 ) ),
+                  vel_r_t0* sin( Deg2Rad( vel_angle_t0 ) )  );
 
-    kick_angle = atan2( tan_upper, tan_lower );
+    double pow_needed;
+    double angle_needed;
 
-
-
-    if( kick_angle != 0 )
+    if( vt1.x == 0.0 && vt1.y == 0.0 && vt0.x == 0.0 && vt0.y == 0.0)
     {
-        angle_power.x = kick_angle;
-
-        power = tan_upper /
-                ( ( 1 - 0.25 * ( dir_diff/180.0 + ball_distance/k1 ) ) * sin( kick_angle) * k2 * k3 );
+        pow_needed = 0.0;
+        angle_needed = 0.0;
     }
     else
     {
-        power = kick_angle = 1000000; // Temporalmente manejamos este número como indicador de error
+         pow_needed = (vt1/decay - vt0).normita() / ( kick_power_rate * f ) ;
+         angle_needed = atan2( vt1.y/decay - vt0.y, vt1.x/decay - vt0.x );
     }
 
-    angle_power.x = power;
-    angle_power.y = kick_angle;
+    kick_vector.x = pow_needed;
+    kick_vector.y = Rad2Deg( angle_needed );
 
-    return angle_power;
+    return kick_vector;
 
 }
 
-Vector2D ballRelativeInterceptionModel( double ball_distance,
-                                        double ball_direction,
-                                        double neck_angle,
-                                        double ball_dis_vel,
-                                        double ball_dir_vel,
-                                        double decay,
-                                        int t)
+Vector2D freezeBall( double vel_r_t0,
+                     double vel_angle_t0,
+                     double ball_distance,
+                     double ball_direction,
+                     double neck_angle,
+                     double kickable_margin,
+                     double kick_power_rate,
+                     double decay)
 {
-    // Regresa el la magnitud y la dirección de la velocidad necesarias para interceptar
-    // el balón al tiempo t
+    Vector2D kick_vector; // kick_vector.x = power, kick_vector.y = angle
 
-    Vector2D vel_needed;
-
-    vel_needed = ballAbsoluteInterceptionModel( ball_distance * cos( ball_direction - neck_angle),
-                                                ball_distance * sin( ball_direction - neck_angle),
-                                                0.0,
-                                                0.0,
-                                                ball_dis_vel * cos( ball_dir_vel ),
-                                                ball_dis_vel * sin( ball_dir_vel ),
-                                                decay,
-                                                t);
-
-    return Vector2D::toPolar( vel_needed.x, vel_needed.y );
-
-
+    kick_vector = dePrimera( 0.0,
+                             0.0,
+                              ball_distance,
+                              ball_direction,
+                              neck_angle,
+                              kickable_margin,
+                              kick_power_rate,
+                              decay);
+    return kick_vector;
 }
+
 
 Vector2D ballAbsoluteInterceptionModel( double x0_ball, // posición x del balón en el tiempo 0
                                           double y0_ball, // posición y del balón en el tiempo 0
@@ -122,11 +114,39 @@ Vector2D ballAbsoluteInterceptionModel( double x0_ball, // posición x del baló
 
         //vel_needed.x = vx_needed;
         //vel_needed.y = vy_needed;
-        std::cout << t << std::endl;
+        //std::cout << t << std::endl;
 
     return vel_needed;
 }
 
+Vector2D ballRelativeInterceptionModel( double ball_distance,
+                                        double ball_direction,
+                                        double neck_angle,
+                                        double ball_dis_vel,
+                                        double ball_dir_vel,
+                                        double decay,
+                                        int t)
+{
+    // Regresa el la magnitud y la dirección de la velocidad necesarias para interceptar
+    // el balón al tiempo t
+
+    Vector2D vel_needed;
+
+    vel_needed = ballAbsoluteInterceptionModel( ball_distance * cos( ball_direction - neck_angle),
+                                                ball_distance * sin( ball_direction - neck_angle),
+                                                0.0,
+                                                0.0,
+                                                ball_dis_vel * cos( ball_dir_vel ),
+                                                ball_dis_vel * sin( ball_dir_vel ),
+                                                decay,
+                                                t);
+
+    return Vector2D::toPolar( vel_needed.x, vel_needed.y );
+
+
+}
+
+
 
 #endif //ANALYTICAL_ABILITY_H
-    // Ajuste de aceleración, el modelo original supone una velocidad constante
+    

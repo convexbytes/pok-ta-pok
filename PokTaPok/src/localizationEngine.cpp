@@ -39,21 +39,21 @@ LocalizationEngine::LocalizationEngine( GameData * game_data, AgentCommand *agen
     this->p_nuevas  = particulas_nuevas;
 }
 
-void LocalizationEngine::update_world()
+void LocalizationEngine::getNewPos( double &x, double &y, double &body_angle )
 {
     ObservationType   obs_type;
     vector<Flag>    * banderas;
     AgentCommand     * controles;
     Control           U;
     Particula       * p_aux;
-    int i;
 
     banderas = & game_data->obs_handler.last_see.flags;
     obs_type = game_data->obs_handler.last_obs_type;
     controles = agent_response; // El último comando que se envió al servidor
     if( obs_type == OBS_SENSE )
     {
-        // obtenemos los controles
+        // Obtenemos los controles
+        // Consideramos el caso en que la dirección del comando dash es cero
         if( controles->dash_is_set() )
         {
             U.dash_power = controles->dash_power;

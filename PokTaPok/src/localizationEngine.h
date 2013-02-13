@@ -10,7 +10,7 @@ class LocalizationEngine
 {
 public:
     LocalizationEngine( GameData * game_data, AgentCommand * agent_response );
-    void update_world(); //Método que usa el algoritmo de localización para actualizar los datos de game_data
+    void getNewPos( double & x, double & y, double & body_angle ); //Método que usa el algoritmo de localización para actualizar los datos de game_data
 private:
     GameData                * game_data;
     AgentCommand            * agent_response;

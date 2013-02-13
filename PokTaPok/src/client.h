@@ -8,7 +8,10 @@
 #include "microParser.h"
 #include "udpSocket.h"
 #include "serializer.h"
-#include "gilAgent.h"
+#include "poktapokAgent.h"
+
+
+
 #include <pthread.h>
 #include <signal.h>
 #include <deque>
@@ -45,15 +48,16 @@ private:
     char buffer_in[4096]; //4096 es el tamaño usado por send y receive en udpsocket
 
     GameData        *   game_data;
-    AgentCommand   *   agent_response;
-    AgentCommand   *   response_commited;
+    AgentCommand    *   agent_response;
+    AgentCommand    *   response_to_commit;
+    AgentCommand    *   response_commited;
     Parser          *   parser;
-    GilAgent        *   agent;
+    Agent           *   agent;
     LocalizationEngine * localization_engine;
-
     deque<string>       messages;
     //Synchronizer        synchronizer; //Decidimos que el sincronizador no era necesario usando tres hilos
     MP_MessageType      last_msg_type;
+    //int                 last_msg_cycle;
     int sending_wait_time; //microsegundos
 
     void initialize     ( );

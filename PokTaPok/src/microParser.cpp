@@ -102,41 +102,6 @@ bool MicroParser::message_is_correct(char *message)
     return parenthesis_are_matched(message);
 }
 
-int MicroParser::get_message_time(char *message)
-{
-    int type, time;
-    type = MicroParser::get_message_type(message);
-    switch(type)
-    {
-    case MP_INIT:
-        scanf("(init %d", &time);
-    break;
-    case MP_SERVER_PARAM:
-        scanf("(server_param %d", &time);
-    break;
-    case MP_PLAYER_PARAM:
-        scanf("(player_param %d", &time);
-    break;
-    case MP_PLAYER_TYPE:
-        scanf("(player_type %d", &time);
-    break;
-    case MP_MSG:
-        scanf("(msg %d", &time);
-    break;
-    case MP_HEAR:
-        scanf("(hear %d", &time);
-    break;
-    case MP_SENSE_BODY:
-        scanf("(sense_body %d", &time);
-    break;
-    case MP_SEE:
-        scanf("(see %d", &time);
-    break;
-    default:
-        time = -1;
-        break;
-    }
-    return time;
-}
+
 
 

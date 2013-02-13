@@ -162,7 +162,6 @@ void Parser::parse_hear( char *message )
                 subcad = move_to_next_word( subcad );
                 sscanf( subcad, "%s", aux_str );	//extraemos el mensaje antes del paréntesis que cierra, incluyendo las comillas
                 aux_str[ strlen( aux_str) -1 ] = '\0'; //quitamos el paréntesis
-                //printf( "%s", aux_str );
                 game_data->obs_handler.hear_self(time, aux_str );
 
 
@@ -171,7 +170,6 @@ void Parser::parse_hear( char *message )
                 subcad = move_to_next_word( subcad );
                 sscanf( subcad, "%s", aux_str );	//extraemos el mensaje antes del paréntesis que cierra, incluyendo las comillas
                 aux_str[ strlen( aux_str) -1 ] = '\0';//quitamos el paréntesis
-                //printf("%s", aux_str );
                 game_data->obs_handler.hear_couch(time, aux_str );
 
             break;
@@ -580,7 +578,6 @@ void Parser::parse_player_type(char *message)
             new_type.catchable_area_l_stretch=init_value3;
         }
         game_data->game_parameter.player_types.push_back( new_type );
-        //game_data->game_parameter.player_types.back().print();
 
 }
 
@@ -601,7 +598,6 @@ void Parser::parse_see(char *message)
 
     sscanf(message,"(see %d",&int_value4);
     game_data->obs_handler.begin_see(int_value4);
-    //printf( "Time: %d\n", game_data->obs_handler.last_see.time );
 
             subcadena2=strstr(message,"f t l 50");
         if (subcadena2 != NULL){
@@ -905,8 +901,7 @@ void Parser::parse_see(char *message)
                     subcadena++;
                     while( subcadena[0] != '\"' )
                         subcadena++;
-                    //printf( "\nsubcadena: %s", subcadena );
-                    //printf( "\nteam: %s", str1 );
+
                     subcadena++;
                     if( (*subcadena) == ' ' )
                     {
@@ -957,11 +952,6 @@ void Parser::parse_see(char *message)
                 break;
             }
 
-            //printf( "\nsubcadena2: %s",subcadena2);
-            //printf( "\nsubcadena: %s",subcadena);
-            //printf("\nhas_team: %d", has_team );
-            //printf("\nhas_number: %d", has_number );
-            //printf("\ncount: %d", count );
             count = 0;
             has_team = false; has_number = false;
             subcadena = strstr( subcadena, "(p" );
@@ -983,7 +973,7 @@ void Parser::parse_sense(char * message )
     sscanf(message,"(sense_body %d", &int_value);
 
     game_data->obs_handler.begin_sense( int_value ); //enviamos el tiempo
-    //printf( "Time: %d\n", game_data->obs_handler.last_sense.time );
+
     subcadena = strstr(message, "view_mode");
     sscanf(subcadena,"view_mode %s %s", char_s_value, char_s_value2);
 
@@ -1752,7 +1742,7 @@ void Parser::parse_server_param(char *message)
         if (subcadena){
             sscanf(subcadena,"quantize_step_l %lf )", &init_value);
             game_data->game_parameter.server_param.quantize_step_l = init_value;
-            //printf( "q_step_l: %lf\n", init_value );
+
         }
         subcadena=strstr(message,"quantize_step");
         if (subcadena){
@@ -2037,8 +2027,10 @@ void Parser::flpar( char *subcadena2, EFlag c){
                         if(count==3){
                             subcadena=strstr(subcadena2,")");
                             sscanf(subcadena+1," %lf %d %lf",&flo_value,&int_value4,&flo_value1);
+
+                            // No sabemos aún cuáles son los tres valores que recibimos
                             //game_data->obs_handler.see_flag(c,flo_value,int_value5,flo_value1);
-                            printf("id: %d  ", c);
+                            // printf("id: %d  ", c); //#gil_mark
                         }
 
                         if(count==2){
@@ -2049,8 +2041,10 @@ void Parser::flpar( char *subcadena2, EFlag c){
                         if(count==1){
                             subcadena=strstr(subcadena2,")");
                             sscanf(subcadena+1," %lf",&flo_value);
+
+                            // No sabemos aún en qué caso recibimos un solo valor y cuál es.
                             //game_data->obs_handler.see_flag(c,flo_value);
-                            printf("id: %d  ", c);
+                            //printf("id: %d  ", c); //#gil_mark
                         }
 
                     }

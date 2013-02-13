@@ -1,22 +1,53 @@
-#ifndef GILAGENT_H
-#define GILAGENT_H
+#ifndef POKTAPOK_AGENT_H
+#define POKTAPOK_AGENT_H
 #include "agent.h"
-#include "gameCommand.h"
+#include "obsHandler.h"
 
-class GilAgent : public Agent
+class PokStateV1
 {
-private:
-    GameData        * game_data;
-    AgentCommand   * agent_response;
-    AgentCommand const   * agent_response_commited;
-    bool              my_fist_time;
 public:
-    GilAgent();
-    virtual void do_process(GameData * game_data,
-                            AgentCommand * agent_response,
-                            AgentCommand const * agent_response_commited);
+    PokStateV1();
 
-    //play_mode functions
+    void update( ObsHandler const & obs,
+                 AgentCommand const & command_commited );
+
+    PlayModeHearable playMode() const { return play_mode; }
+
+    bool ballIsVisible()    const { return ball_is_visible; }
+    int  time()             const { return last_upd_time; }
+    char side()             const { return field_side; }
+    int  unum()             const { return uniform_number; }
+
+private:
+    void updateOnSense  ( SenseObs const & sense );
+    void updateOnInit   ( InitObs  const & init );
+    void updateOnSee    ( SeeObs   const & see );
+
+    void updateOnCommandCommit( AgentCommand const & command_commited );
+
+    int uniform_number;
+    char field_side;
+
+
+    PlayModeHearable play_mode;
+    int last_upd_time;
+
+    bool ball_is_visible;
+
+
+};
+
+class PokTaPokAgentV1 : public Agent
+{
+public:
+    virtual void do_process( GameData *game_data,
+                             AgentCommand *agent_response,
+                             const AgentCommand *agent_response_commited );
+private:
+    PokStateV1 state;
+
+    AgentCommand * command;
+
     void on_goalie_catch_ball_l();
     void on_goalie_catch_ball_r();
     void on_before_kick_off();
@@ -77,14 +108,6 @@ public:
     void on_penalty_winner_l();
     void on_penalty_winner_r();
     void on_penalty_draw();
-
-    void pozole_goal();
-
-    bool search_ball(); //returns true if agent sees the ball and is aligned to it. It looks for the ball and aligns otherwise
-    bool go_to_bal_kick_position(); //returns true if agent is able to kick the ball. Go into position and returns false otherwise
-    void kick_to_goal();
-    bool im_aligned_to_ball();
-    void align_body_to_ball();
 };
 
-#endif // GILAGENT_H
+#endif // POKTAPOK_AGENT_H
