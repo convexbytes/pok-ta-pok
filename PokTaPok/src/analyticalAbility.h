@@ -64,12 +64,27 @@ Vector2D freezeBall( double vel_r_t0,
 
     kick_vector = dePrimera( 0.0,
                              0.0,
+                             vel_r_t0,
+                             vel_angle_t0,
                               ball_distance,
                               ball_direction,
                               neck_angle,
                               kickable_margin,
                               kick_power_rate,
                               decay);
+    /*
+( double vel_r_t1,
+                      double vel_angle_t1,
+                      double vel_r_t0,
+                      double vel_angle_t0,
+                      double ball_distance, // La dirección a la que vemos el balón
+                      double ball_direction,
+                      double neck_angle,
+                      double kickable_margin,
+                      double kick_power_rate,
+                      double decay)
+
+      */
     return kick_vector;
 }
 

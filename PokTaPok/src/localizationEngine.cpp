@@ -7,12 +7,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-LocalizationEngine::LocalizationEngine( GameData * game_data, AgentCommand *agent_response )
+LocalizationEngine::LocalizationEngine( GameData * game_data, AgentCommand *command_commited )
 {
     int angulo_inicial;
     int i;
     this->game_data      = game_data;
-    this->agent_response = agent_response;
+    this->command_commited = command_commited;
     this->montecarlo_loc = new MontecarloLocalization( game_data );
 
     angulo_inicial = 0;
@@ -49,13 +49,14 @@ void LocalizationEngine::getNewPos( double &x, double &y, double &body_angle )
 
     banderas = & game_data->obs_handler.last_see.flags;
     obs_type = game_data->obs_handler.last_obs_type;
-    controles = agent_response; // El último comando que se envió al servidor
+    controles = command_commited; // El último comando que se envió al servidor
     if( obs_type == OBS_SENSE )
     {
         // Obtenemos los controles
         // Consideramos el caso en que la dirección del comando dash es cero
         if( controles->dash_is_set() )
         {
+            std::cout << "hijo de perra" << std::endl;
             U.dash_power = controles->dash_power;
             U.turn_angle = 0.0;
         }
@@ -76,7 +77,7 @@ void LocalizationEngine::getNewPos( double &x, double &y, double &body_angle )
         p_nuevas = p_aux;
         montecarlo_loc->montecarlo_prediction( p, U, p_nuevas);
     }
-    else if( obs_type == OBS_SEE )
+    else if( obs_type == OBS_SEE && banderas->size() > 0 ) // No tiene caso hacer correción con 0 banderas
     {
         //Las particulas nuevas se convierten ahora en las viejas.
         p_aux = p;
@@ -84,6 +85,19 @@ void LocalizationEngine::getNewPos( double &x, double &y, double &body_angle )
         p_nuevas = p_aux;
         montecarlo_loc->montecarlo_correction( p, banderas, p_nuevas );
     }
+
+    if( command_commited->move_is_set() )
+    {
+        for( int i=0; i<NUM_PARTICULAS; i++ )
+        {
+            p_nuevas[i].x = p[i].x = command_commited->move_x;
+            p_nuevas[i].y = p[i].y = command_commited->move_y;
+        }
+    }
+
+    x = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].x;
+    y = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].y;
+    body_angle  = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].theta;
 
 }
 

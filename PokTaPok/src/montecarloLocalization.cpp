@@ -8,6 +8,7 @@
 MontecarloLocalization::MontecarloLocalization(GameData *game_data )
 {
     this->game_data = game_data;
+    indice_part_mayor_peso = 0;
 }
 
 
@@ -102,6 +103,8 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
             posicion_peso_max
             );
 
+    this->indice_part_mayor_peso = posicion_peso_max;
+
 	
 }
 
@@ -123,12 +126,11 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
     double act_ang = 0.0;
     double r1, r2, rmax, r_angle;
 
-    Vector2D aceleracion;
-    Vector2D velocidad;
-    Vector2D movimiento;
+    Vector2D aceleracion( 0.0, 0.0);
+    Vector2D velocidad( 0.0, 0.0);
+    Vector2D movimiento( 0.0, 0.0 );
     static Particula X;
 
-    //Árbol de expansión mínima.
     if( U.dash_power == 0.0 )
     {
         if( U.turn_angle == 0.0)
@@ -150,6 +152,7 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
         }
         else
         {
+
             if( body_dis_vel == 0.0 ) // dash_power y body_dis_vel igual a cero,  turn distinto a cero.
             {
                 r_angle = drand48()*2.0*player_rand - player_rand;
@@ -158,7 +161,8 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
             }
             else // dash_power igual a cero,  turn y body_dis_vel distinto a cero.
             {
-                movimiento = Vector2D::fromPolar( body_dis_vel, grad2rad( body_dir_vel  + particula.theta + neck_dir ) );
+
+                movimiento = Vector2D::fromPolar( body_dis_vel, Deg2Rad( body_dir_vel  + particula.theta + neck_dir ) );
                 rmax = player_rand * body_dis_vel; //player_rand multiplicado por la norma de la velocidad
                 r1 = drand48()*2.0*rmax - rmax;
                 r2 = drand48()*2.0*rmax - rmax;
@@ -170,6 +174,7 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
         }
     }
     else
+    {
         if( U.turn_angle == 0.0 )
         {
             if( body_dis_vel == 0.0 )  // dash_power distinto a cero,  turn y body_dis_vel igual a cero.
@@ -195,7 +200,7 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
                                                   effort,
                                                   Deg2Rad( particula.theta ) );
                 //aceleracion = modelo_aceleracion_gomez( U.dash_power, stamina, effort, particula.theta );
-                velocidad = Vector2D::fromPolar(body_dis_vel, grad2rad( body_dir_vel + particula.theta + neck_dir ) );
+                velocidad = Vector2D::fromPolar(body_dis_vel, Deg2Rad( body_dir_vel + particula.theta + neck_dir ) );
                 //printf( "Aceleración: %lf %lf \t Velocidad: %lf %lf theta:: %lf \n", aceleracion.x, aceleracion.y, velocidad.x, velocidad.y, body_dir_vel + particula.theta + neck_dir  );
                 rmax = player_rand * ( aceleracion + velocidad ).normita() ;
                 r1 = drand48()*2.0*rmax - rmax;
@@ -216,6 +221,8 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
                 //no es posible realizar dash y turn en el mismo ciclo
             }
         }
+    }
+
     X.x = particula.x + movimiento.x;
     X.y = particula.y + movimiento.y;
     X.theta = entre180( (double)(particula.theta + act_ang) );
@@ -232,7 +239,7 @@ double MontecarloLocalization::Landmark_Model_Known_Corresponce(    Flag        
     double  denominador;
     double  numerador;
     double  r_aprox;
-    double  phi_aprox;
+    double  phi_aprox_rad;
     double  probabilidad;
     double  distancia_x;
     double  distancia_y;
@@ -252,19 +259,21 @@ double MontecarloLocalization::Landmark_Model_Known_Corresponce(    Flag        
     numerador   = bandera.get_global_coord().y - pose.y;
     denominador = bandera.get_global_coord().x - pose.x;
 
-    if ( denominador > 0.0 )
-        phi_aprox = atan( numerador/denominador );
+    /*if ( denominador > 0.0 )
+        phi_aprox_rad = atan( numerador/denominador );
 
     else if ( denominador < 0.0 )
-        phi_aprox = signo( numerador ) * ( M_PI - atan( abs( numerador/denominador ) ) );
+        phi_aprox_rad = signo( numerador ) * ( M_PI - atan( abs( numerador/denominador ) ) );
 
     else if ( denominador == 0.0 && numerador != 0.0 )
-        phi_aprox = signo( numerador ) * ( M_PI / 2.0 );
+        phi_aprox_rad = signo( numerador ) * ( M_PI / 2.0 );
 
     else
-        phi_aprox = 0.0;
+        phi_aprox_rad = 0.0;
+    */
+    phi_aprox_rad = atan2( numerador, denominador );
 
-    phi_aprox = phi_aprox - grad2rad( pose.theta );
+    phi_aprox_rad = phi_aprox_rad - Deg2Rad( pose.theta );
 
     //r_min = exp( (rint ( log(  (rint( bandera.distance/ 0.1 ) - 0.5 ) * 0.1 ) / q_step_l ) - 0.5 ) * q_step_l );
     //r_max = exp( (rint ( log(  (rint( bandera.distance/ 0.1 ) + 0.5 ) * 0.1 ) / q_step_l ) + 0.5 ) * q_step_l );
@@ -279,13 +288,16 @@ double MontecarloLocalization::Landmark_Model_Known_Corresponce(    Flag        
 
     desviacion_phi = phi_max - phi_min;
 
-//***//probabilidad = prob_normal_distribution( bandera.distance - r_aprox, desviacion_r ) * prob_normal_distribution( grad2rad( bandera.direction ) - phi_aprox, desviacion_phi );
+    // La desviación obtenida es demasiado pequeña, y arroja probabilidades casi iguales cero.
 
+    //variable_momentanea1 = prob_normal_distribution( bandera.distance - r_aprox,
+      //                                               desviacion_r );
 
-    //variable_momentanea1 = prob_normal_distribution( bandera.distance - r_aprox, desviacion_r );
+    // Fijamos la desviación a 3.0 para aumentar las prob.
     variable_momentanea1 = prob_normal_distribution( bandera.distance - r_aprox, 3.0 );
 
-    valiable_momentanea2 = prob_normal_distribution( grad2rad( bandera.direction ) - phi_aprox, desviacion_phi );
+    valiable_momentanea2 = prob_normal_distribution(  bandera.direction  - Rad2Deg( phi_aprox_rad ),
+                                                      desviacion_phi );
 
 
     probabilidad = variable_momentanea1 * valiable_momentanea2;
@@ -305,9 +317,6 @@ double MontecarloLocalization::prob_normal_distribution( double x,
     r2 = exp( (-0.5)*x*x/(stdev*stdev) );
 
     r=(exp( (-0.5)*x*x/(stdev*stdev) ))*(1.0/ ( sqrt( 2.0*M_PI ) * stdev ));
-
-
-    //cout << "r:" << r <<", x:" << x << ", var:" << var << endl;
 
     return r;
 }

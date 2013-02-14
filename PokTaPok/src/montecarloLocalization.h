@@ -4,14 +4,14 @@
 //#define MONT_PI 3.141592653589793
 #include "gameObject.h"
 #include "vector"
-#include "gameData.h" //arreglar esto...
+#include "gameData.h" //arreglar esto, el scope no debería ir tan lejos
 
 class Particula
 {
 public:
     double x;
     double y;
-    double theta;
+    double theta; // En grados
 };
 
 class Control
@@ -27,7 +27,7 @@ public:
     MontecarloLocalization( GameData * game_data );
 
 
-    //Particula heaviest_particle;
+    int indiceMayorPeso() const { return indice_part_mayor_peso; }
 
     void montecarlo_prediction( Particula   * particulas,
                                 Control       U,
@@ -42,6 +42,10 @@ public:
 
 private:
     GameData * game_data;
+
+
+    int indice_part_mayor_peso;
+
     Particula Sample_Motion_Model       ( Control const &   U,
                                           Particula const & particula
                                           );

@@ -1,5 +1,6 @@
 #include "poktapokAgent.h"
 #include "formation.h"
+#include "analyticalAbility.h"
 
 PokStateV1::PokStateV1()
 {
@@ -86,7 +87,16 @@ void PokStateV1::updateOnSee(const SeeObs &see)
 {
     last_upd_time = see.time;
     this->ball_is_visible = see.ball_is_visible();
+    if( see.ball_is_visible() )
+    {
+        if( see.ball.distance <= 0.7 + 0.3 + 0.085 ) // Reemplazar con los parámetros del servidor
+            this->ball_is_kickable = true;
+        else
+            this->ball_is_kickable = false;
+    }
 }
+
+
 
 void PokStateV1::updateOnSense(const SenseObs &sense)
 {
@@ -97,10 +107,16 @@ void PokTaPokAgentV1::do_process( GameData *game_data,
                                   AgentCommand *agent_response,
                                   const AgentCommand *agent_response_commited)
 {
-    this->command = agent_response;
+    // Guardamos las referencias a los datos del juego
+    this->command   = agent_response;
+    this->command_c = agent_response_commited;
+    this->obs_h     = &game_data->obs_handler;
+    this->param     = &game_data->game_parameter;
+
     command->reset();
-    state.update( game_data->obs_handler,
-                  *agent_response_commited );
+
+    state.update( *obs_h,
+                  *command_c );
 
     switch( state.playMode() )
     {
@@ -170,199 +186,129 @@ void PokTaPokAgentV1::do_process( GameData *game_data,
 
 }
 
+bool PokTaPokAgentV1::ballIsKickable()
+{
+    double kickableArea =
+            param->server_param.kickable_margin +
+            param->server_param.player_size +
+            param->server_param.ball_size;
+
+     return ( state.ballIsVisible() &&  obs_h->last_see.ball.distance < kickableArea );
+}
+
+
+bool PokTaPokAgentV1::iHaveTheBall()
+{
+    // Por ahora el único criterio que tenemos para determinar si tengo el balón
+    // es saber si está dentro del área pateable
+    return ballIsKickable();
+}
+
 void PokTaPokAgentV1::on_before_kick_off()
 {
     Vector2D const * position;
-    if( state.side() == 'l' )
-    {
-        switch( state.unum() )
-        {
-        case 1:
-            position = &Formation::BeforeKickOff::L1;
-            break;
-        case 2:
-            position = &Formation::BeforeKickOff::L2;
-            break;
-        case 3:
-            position = &Formation::BeforeKickOff::L3;
-            break;
-        case 4:
-            position = &Formation::BeforeKickOff::L4;
-            break;
-        case 5:
-            position = &Formation::BeforeKickOff::L5;
-            break;
-        case 6:
-            position = &Formation::BeforeKickOff::L6;
-            break;
-        case 7:
-            position = &Formation::BeforeKickOff::L7;
-            break;
-        case 8:
-            position = &Formation::BeforeKickOff::L8;
-            break;
-        case 9:
-            position = &Formation::BeforeKickOff::L9;
-            break;
-        case 10:
-            position = &Formation::BeforeKickOff::L10;
-            break;
-        case 11:
-            position = &Formation::BeforeKickOff::L11;
-            break;
-        }
-    }
-    else
-    {
-        switch( state.unum() )
-        {
-        case 1:
-            position = &Formation::BeforeKickOff::R1;
-            break;
-        case 2:
-            position = &Formation::BeforeKickOff::R2;
-            break;
-        case 3:
-            position = &Formation::BeforeKickOff::R3;
-            break;
-        case 4:
-            position = &Formation::BeforeKickOff::R4;
-            break;
-        case 5:
-            position = &Formation::BeforeKickOff::R5;
-            break;
-        case 6:
-            position = &Formation::BeforeKickOff::R6;
-            break;
-        case 7:
-            position = &Formation::BeforeKickOff::R7;
-            break;
-        case 8:
-            position = &Formation::BeforeKickOff::R8;
-            break;
-        case 9:
-            position = &Formation::BeforeKickOff::R9;
-            break;
-        case 10:
-            position = &Formation::BeforeKickOff::R10;
-            break;
-        case 11:
-            position = &Formation::BeforeKickOff::R11;
-            break;
-        }
-    }
 
-    command->append_move( position->x,
-                          position->y );
+        switch( state.unum() )
+        {
+        case 1:
+            position = &Formation::BeforeKickOff::P1;
+            break;
+        case 2:
+            position = &Formation::BeforeKickOff::P2;
+            break;
+        case 3:
+            position = &Formation::BeforeKickOff::P3;
+            break;
+        case 4:
+            position = &Formation::BeforeKickOff::P4;
+            break;
+        case 5:
+            position = &Formation::BeforeKickOff::P5;
+            break;
+        case 6:
+            position = &Formation::BeforeKickOff::P6;
+            break;
+        case 7:
+            position = &Formation::BeforeKickOff::P7;
+            break;
+        case 8:
+            position = &Formation::BeforeKickOff::P8;
+            break;
+        case 9:
+            position = &Formation::BeforeKickOff::P9;
+            break;
+        case 10:
+            position = &Formation::BeforeKickOff::P10;
+            break;
+        case 11:
+            position = &Formation::BeforeKickOff::P11;
+            break;
+        }
+
+    if( state.side() == 'l' )
+        command->append_move( position->x,
+                              position->y );
+    else
+        command->append_move( - position->x,
+                              position->y );
 
 }
 
 void PokTaPokAgentV1::on_play_on()
 {
-
+    if( iHaveTheBall() )
+    {
+        attackBallStrategy();
+    }
+    else if( myTeamHasTheBall() )
+    {
+        attackNoBallStrategy();
+    }
+    else
+        defendStrategy();
 }
 
 void PokTaPokAgentV1::on_time_over(){}
 
-void PokTaPokAgentV1::on_back_pass_l()
-{
+void PokTaPokAgentV1::on_back_pass_l(){}
 
-}
+void PokTaPokAgentV1::on_back_pass_r(){}
 
-void PokTaPokAgentV1::on_back_pass_r()
-{
+void PokTaPokAgentV1::on_catch_fault_l(){}
 
-}
+void PokTaPokAgentV1::on_catch_fault_r(){}
 
-void PokTaPokAgentV1::on_catch_fault_l()
-{
+void PokTaPokAgentV1::on_corner_kick_l(){}
 
-}
+void PokTaPokAgentV1::on_corner_kick_r(){}
 
-void PokTaPokAgentV1::on_catch_fault_r()
-{
+void PokTaPokAgentV1::on_drop_ball(){}
 
-}
+void PokTaPokAgentV1::on_first_half_over(){}
 
-void PokTaPokAgentV1::on_corner_kick_l()
-{
+void PokTaPokAgentV1::on_foul_ballout_l(){}
 
-}
+void PokTaPokAgentV1::on_foul_ballout_r(){}
 
-void PokTaPokAgentV1::on_corner_kick_r()
-{
+void PokTaPokAgentV1::on_foul_charge_l(){}
 
-}
+void PokTaPokAgentV1::on_foul_charge_r(){}
 
-void PokTaPokAgentV1::on_drop_ball()
-{
+void PokTaPokAgentV1::on_foul_l(){}
 
-}
+void PokTaPokAgentV1::on_foul_r(){}
 
-void PokTaPokAgentV1::on_first_half_over()
-{
+void PokTaPokAgentV1::on_foul_multiple_attack_l(){}
 
-}
+void PokTaPokAgentV1::on_foul_multiple_attack_r(){}
 
-void PokTaPokAgentV1::on_foul_ballout_l()
-{
+void PokTaPokAgentV1::on_foul_push_l(){}
 
-}
+void PokTaPokAgentV1::on_foul_push_r(){}
 
-void PokTaPokAgentV1::on_foul_ballout_r()
-{
+void PokTaPokAgentV1::on_free_kick_fault_l(){}
 
-}
-
-void PokTaPokAgentV1::on_foul_charge_l()
-{
-
-}
-
-void PokTaPokAgentV1::on_foul_charge_r()
-{
-
-}
-
-void PokTaPokAgentV1::on_foul_l()
-{
-
-}
-
-void PokTaPokAgentV1::on_foul_r()
-{
-
-}
-
-void PokTaPokAgentV1::on_foul_multiple_attack_l()
-{
-
-}
-
-void PokTaPokAgentV1::on_foul_multiple_attack_r()
-{
-
-}
-
-void PokTaPokAgentV1::on_foul_push_l()
-{
-
-}
-
-void PokTaPokAgentV1::on_foul_push_r()
-{
-
-}
-
-void PokTaPokAgentV1::on_free_kick_fault_l()
-{
-
-}
-
-void PokTaPokAgentV1::on_free_kick_fault_r()
-{
-
-}
+void PokTaPokAgentV1::on_free_kick_fault_r(){}
 
 void PokTaPokAgentV1::on_free_kick_l()
 {
@@ -424,35 +370,17 @@ void PokTaPokAgentV1::on_kick_in_l()
 
 }
 
-void PokTaPokAgentV1::on_kick_in_r()
-{
+void PokTaPokAgentV1::on_kick_in_r(){}
 
-}
+void PokTaPokAgentV1::on_kick_off_l(){}
 
-void PokTaPokAgentV1::on_kick_off_l()
-{
+void PokTaPokAgentV1::on_kick_off_r(){}
 
-}
+void PokTaPokAgentV1::on_offside_l(){}
 
-void PokTaPokAgentV1::on_kick_off_r()
-{
+void PokTaPokAgentV1::on_offside_r(){}
 
-}
-
-void PokTaPokAgentV1::on_offside_l()
-{
-
-}
-
-void PokTaPokAgentV1::on_offside_r()
-{
-
-}
-
-void PokTaPokAgentV1::on_pause()
-{
-
-}
+void PokTaPokAgentV1::on_pause(){}
 
 void PokTaPokAgentV1::on_penalty_setup_l(){}
 void PokTaPokAgentV1::on_penalty_setup_r(){}
@@ -473,3 +401,24 @@ void PokTaPokAgentV1::on_penalty_winner_r(){}
 void PokTaPokAgentV1::on_penalty_draw(){}
 void PokTaPokAgentV1::on_penalty_kick_l(){}
 void PokTaPokAgentV1::on_penalty_kick_r(){}
+
+
+void PokTaPokAgentV1::attackBallStrategy()
+{
+
+}
+
+bool PokTaPokAgentV1::myTeamHasTheBall()
+{
+    return false; //Temporal, sólo para compilar
+}
+
+void PokTaPokAgentV1::attackNoBallStrategy()
+{
+
+}
+
+void PokTaPokAgentV1::defendStrategy()
+{
+    command->append_turn( 10 );
+}

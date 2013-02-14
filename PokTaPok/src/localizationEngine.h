@@ -9,11 +9,11 @@
 class LocalizationEngine
 {
 public:
-    LocalizationEngine( GameData * game_data, AgentCommand * agent_response );
+    LocalizationEngine( GameData * game_data, AgentCommand * command_commited );
     void getNewPos( double & x, double & y, double & body_angle ); //Método que usa el algoritmo de localización para actualizar los datos de game_data
 private:
     GameData                * game_data;
-    AgentCommand            * agent_response;
+    AgentCommand            * command_commited; // Command_commited
     //LocalizationAlgorithm   * loc_algorithm;
     MontecarloLocalization  * montecarlo_loc;
     Particula                 particulas[NUM_PARTICULAS];

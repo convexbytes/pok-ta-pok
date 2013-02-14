@@ -33,6 +33,7 @@ private:
     int last_upd_time;
 
     bool ball_is_visible;
+    bool ball_is_kickable;
 
 
 };
@@ -46,8 +47,23 @@ public:
 private:
     PokStateV1 state;
 
-    AgentCommand * command;
+    AgentCommand    * command;
+    AgentCommand const * command_c;
+    GameParameter   * param;
+    ObsHandler      * obs_h;
 
+    bool iHaveTheBall();
+    bool myTeamHasTheBall();
+    bool ballIsKickable();
+
+    // Estrategias
+
+    void attackBallStrategy();
+    void attackNoBallStrategy();
+    void defendStrategy();
+
+
+    // Modos de juego
     void on_goalie_catch_ball_l();
     void on_goalie_catch_ball_r();
     void on_before_kick_off();
