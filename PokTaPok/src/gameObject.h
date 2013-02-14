@@ -232,6 +232,14 @@ public:
 class Player : public MobileObject
 {
 public:
+
+    bool isMyMate( string team_name )
+    {
+        if( team.empty() )
+            return false;
+        team.compare( team_name ) == 0;
+    }
+
     string team;
     //char side;
     int uniform_number;
@@ -239,6 +247,7 @@ public:
     //int face_direction;  //Venia en el manual, pero no estoy seguro qué es.
     int neck_direction;
     void print();
+
 };
 
 // Clases para el coach

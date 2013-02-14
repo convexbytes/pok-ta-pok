@@ -50,8 +50,8 @@ private:
                                           Particula const & particula
                                           );
 
-    double  Landmark_Model_Known_Corresponce( Flag      bandera,
-                                              Particula pose
+    double  Landmark_Model_Known_Corresponce( Flag & bandera,
+                                              Particula &pose
                                               );
 
     double  prob_normal_distribution     ( double x,

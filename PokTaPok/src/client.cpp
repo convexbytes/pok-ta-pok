@@ -116,7 +116,7 @@ Client::~Client() {
 void Client::main_loop() {
     Client::instance().initialize();
     USock::instance().Initial("localhost", 6000);
-    USock::instance().Send("(init poktapok (version 15.1))");
+    USock::instance().Send("(init PokTaPok (version 15.1))");
     MP_MessageType mp_type; //Tipo de mensaje del microparser
     while( server_is_alive() )
     {
@@ -213,7 +213,7 @@ void* Client::Client::sending_thread_function(void *parameter) {
             }
 
 			*Client::instance().response_commited =
-					*Client::instance().agent_response;
+                    *Client::instance().response_to_commit;
 
 
         }

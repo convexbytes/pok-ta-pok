@@ -3,6 +3,8 @@
 #include "agent.h"
 #include "obsHandler.h"
 
+#define TEAM_NAME "PokTaPok"
+
 class PokStateV1
 {
 public:

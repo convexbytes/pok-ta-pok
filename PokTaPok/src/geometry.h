@@ -20,12 +20,29 @@ public:
     double x;
     double y;
 
+    void operator=( Vector2D const & v)
+    {
+        x = v.x;
+        y = v.y;
+    }
+
+    void operator=( double const a )
+    {
+        x = y = a;
+    }
+
     Vector2D & operator+(const Vector2D & v1)
     {
         static Vector2D v;
         v.x = v1.x + this->x;
         v.y = v1.y + this->y;
 	return v;
+    }
+
+    void operator+=(const Vector2D & v1)
+    {
+        this->x += v1.x;
+        this->y += v1.y;
     }
 
     Vector2D & operator-( const Vector2D & v )
@@ -46,6 +63,13 @@ public:
         return v;
     }
 
+    void operator/=( double r )
+    {
+        if( r == 0 )
+            return;
+        this->x /= r;
+        this->y /= r;
+    }
 
 
     double normita()

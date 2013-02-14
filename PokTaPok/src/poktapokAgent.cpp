@@ -410,7 +410,28 @@ void PokTaPokAgentV1::attackBallStrategy()
 
 bool PokTaPokAgentV1::myTeamHasTheBall()
 {
-    return false; //Temporal, sólo para compilar
+    int i;
+    bool loTenemos = false;
+    Vector2D pos_player;
+    Vector2D pos_ball;
+    Player * player;
+    double margin = 1.0;
+    if( obs_h->last_see.ball_is_visible() )
+    {
+        Ball & ball = obs_h->last_see.ball;
+        pos_ball = Vector2D::fromPolar( ball.distance, Deg2Rad( ball.direction) );
+        for ( i=0; i < obs_h->last_see.players.size() && loTenemos == false; i++)
+        {
+            player = & obs_h->last_see.players.at(i);
+            if( player->isMyMate( TEAM_NAME ) )
+            {
+                pos_player = Vector2D::fromPolar( player->distance, Deg2Rad(player->direction) );
+                if( pos_player.distance( pos_ball ) < margin )
+                    loTenemos = true;
+            }
+        }
+    }
+    return loTenemos;
 }
 
 void PokTaPokAgentV1::attackNoBallStrategy()
@@ -420,5 +441,5 @@ void PokTaPokAgentV1::attackNoBallStrategy()
 
 void PokTaPokAgentV1::defendStrategy()
 {
-    command->append_turn( 10 );
+
 }

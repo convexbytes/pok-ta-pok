@@ -34,15 +34,14 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
     int     posicion_peso_max = 0;
     int     time;
     double  draw;
-    double  peso[NUM_PARTICULAS];
-    double  rango[NUM_PARTICULAS+1];
+    static double  peso[NUM_PARTICULAS];
+    static double  rango[NUM_PARTICULAS+1];
 
     double  total_peso=0.0;
     double  peso_maximo=0.0;
 
     rango[0]=0.0;
 
-    Flag    bandera;
 
     draw            = 0.0;
     banderas_vistas = banderas->size();
@@ -56,8 +55,8 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
     {
         for( j=0; j<banderas_vistas; j++)
         {
-            bandera = banderas->at(j);
-            peso[i] = peso[i] + Landmark_Model_Known_Corresponce( bandera, particulas[i] );
+
+            peso[i] = peso[i] + Landmark_Model_Known_Corresponce( banderas->at(j), particulas[i] );
         }
 
         total_peso = total_peso + peso[i];
@@ -103,6 +102,24 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
             posicion_peso_max
             );
 
+
+    if( peso[posicion_peso_max] < 0.01 )
+    {
+        // Si el peso es demasiado pequeño, estamos perdidos y necesitamos esparcir
+        // las partículas otra vez
+        for( i=0; i<NUM_PARTICULAS; i++ )
+        {
+            // La cancha mide 52.5 X 32.0; añadimos un espacio extra, ya que podemos
+            // salir un poco de la cancha
+            particulas[i].x =  particulas_nuevas[i].x =   ( drand48()*110.0 - 55.0 );
+            particulas[i].y =  particulas_nuevas[i].y =     ( drand48()*80.0  - 40.0 );
+            particulas[i].theta = particulas_nuevas[i].theta = ( drand48()*360.0 - 180.0 );
+
+        }
+        montecarlo_correction( particulas,
+                               banderas,
+                               particulas_nuevas);
+    }
     this->indice_part_mayor_peso = posicion_peso_max;
 
 	
@@ -129,6 +146,9 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
     Vector2D aceleracion( 0.0, 0.0);
     Vector2D velocidad( 0.0, 0.0);
     Vector2D movimiento( 0.0, 0.0 );
+
+    double magnitud_velocidad;
+
     static Particula X;
 
     if( U.dash_power == 0.0 )
@@ -205,8 +225,17 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
                 rmax = player_rand * ( aceleracion + velocidad ).normita() ;
                 r1 = drand48()*2.0*rmax - rmax;
                 r2 = drand48()*2.0*rmax - rmax;
-                movimiento.x = aceleracion.x + velocidad.x + r1;
-                movimiento.y = aceleracion.y + velocidad.y + r2;
+                velocidad += aceleracion;
+                magnitud_velocidad = velocidad.normita();
+
+                // Normalizamos la velocidad, la max velocidad es 1
+                if( magnitud_velocidad > 0.0 )
+                    velocidad /= magnitud_velocidad;
+
+
+                movimiento.x = velocidad.x + r1;
+                movimiento.y = velocidad.y + r2;
+
                 act_ang = 0.0;
             }
         }
@@ -232,8 +261,8 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
 
 
 
-double MontecarloLocalization::Landmark_Model_Known_Corresponce(    Flag        bandera,
-                                                                    Particula   pose
+double MontecarloLocalization::Landmark_Model_Known_Corresponce(    Flag      & bandera,
+                                                                    Particula & pose
                                                                     )
 {
     double  denominador;
@@ -349,7 +378,8 @@ Vector2D MontecarloLocalization::modelo_aceleracion( double power,
 
     ServerParam & param     = game_data->game_parameter.server_param;
     Vector2D    aceleracion;
-    /* parámetros servidor... */
+    double magnitud;
+    // parámetros servidor... //
     double dashAngleStep    = param.dash_angle_step;
     double minDashPower     = param.min_dash_power;
     double maxDashPower     = param.max_dash_power;
@@ -418,6 +448,14 @@ Vector2D MontecarloLocalization::modelo_aceleracion( double power,
 
     aceleracion = Vector2D::fromPolar( effective_dash_power,
                               normalize_angle( body_angle + Deg2Rad( dir ) ) );
+
+
+    // Normalizamos, la aceleración max es un parámetro del servidor, igual a 1.
+
+    magnitud = aceleracion.normita();
+    if( magnitud > 1 )
+        aceleracion /= magnitud;
+
 
     return aceleracion;
 

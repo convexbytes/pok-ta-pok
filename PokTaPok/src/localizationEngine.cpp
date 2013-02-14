@@ -27,13 +27,6 @@ LocalizationEngine::LocalizationEngine( GameData * game_data, AgentCommand *comm
         particulas[i].y =  particulas_nuevas[i].y =     ( drand48()*80.0  - 40.0 );
         particulas[i].theta = particulas_nuevas[i].theta = ( 0.0 );
 
-        /*particulas[i].set_x     ( -3.0 );
-        particulas[i].set_y     ( -39.0 );
-        particulas[i].set_theta ( 0.0 );
-
-        particulas_nuevas[i].set_x     ( -3.0 );
-        particulas_nuevas[i].set_y     ( -39.0 );
-        particulas_nuevas[i].set_theta ( 0.0 );*/
     }
     this->p         = particulas;
     this->p_nuevas  = particulas_nuevas;
@@ -56,7 +49,6 @@ void LocalizationEngine::getNewPos( double &x, double &y, double &body_angle )
         // Consideramos el caso en que la dirección del comando dash es cero
         if( controles->dash_is_set() )
         {
-            std::cout << "hijo de perra" << std::endl;
             U.dash_power = controles->dash_power;
             U.turn_angle = 0.0;
         }
