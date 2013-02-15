@@ -127,7 +127,9 @@ void Parser::parse_hear( char *message )
     subcad = move_to_next_word( subcad );
     if( isdigit( *subcad ) || *subcad == '-' )
     {
+        // Aquí hay un problema de parseo, segmentation fault
         //Si nos metemos aquí, quiere decir que recibimos un ángulo y el sender es: our | opp
+        /*
         sscanf( subcad, "%d", &angle );
         subcad = move_to_next_word( subcad );
         strncpy(aux_str, subcad, 3);
@@ -142,16 +144,18 @@ void Parser::parse_hear( char *message )
 
         }
         else if( strcmp( aux_str, "opp" ) )
-        {
+        {*/
+            /*
             subcad = move_to_next_word( subcad );
             sscanf( subcad, "%d", &aux_num ); //obtenemos el unum
             subcad = move_to_next_word( subcad );
             sscanf( subcad, "%s", aux_str );	//extraemos el mensaje antes del paréntesis que cierra, incluyendo las comillas
             aux_str[ strlen( aux_str) -1 ] = '\0'; //quitamos el paréntesis
             game_data->obs_handler.hear_opp(time, angle, aux_num, aux_str);
-        }
-        else
-            return;
+            */
+        //}
+        //else
+//            return;
     }
     else
     {
