@@ -87,9 +87,9 @@ void LocalizationEngine::getNewPos( double &x, double &y, double &body_angle )
         }
     }
 
-    x = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].x;
-    y = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].y;
-    body_angle  = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].theta;
+    this->x = x = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].x;
+    this->y = y = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].y;
+    this->angle = body_angle  = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].theta;
 
 }
 

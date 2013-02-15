@@ -32,7 +32,7 @@ public:
     //initial();
     static Client & instance();
 	~Client();
-    void main_loop();
+    void main_loop(bool goalie);
 
     static void * process_thread_function(void *parameter);
     static void * sending_thread_function(void *parameter);

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -e pids ]
+then
+	kill -2 `cat pids`
+	rm pids
+fi
+

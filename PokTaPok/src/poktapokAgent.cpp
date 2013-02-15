@@ -1,17 +1,23 @@
 #include "poktapokAgent.h"
 #include "formation.h"
 #include "analyticalAbility.h"
+#include "localizationMethods.h"
 
 PokStateV1::PokStateV1()
 {
     play_mode = BEFORE_KICK_OFF;
     ball_is_visible = false;
+    M_angle = 0.0;
+    M_pos = 0.0;
+    M_ball_pos = 0.0;
+    M_ball_last_seen_time = 0.0;
 }
 
 void PokStateV1::update( const ObsHandler &obs,
                          const AgentCommand &command_commited)
 {
     ObservationType obs_type = obs.last_obs_type;
+
 
     switch( obs_type )
     {
@@ -85,6 +91,15 @@ void PokStateV1::updateOnInit(const InitObs &init)
 
 void PokStateV1::updateOnSee(const SeeObs &see)
 {
+    int i = 0;
+    int j = 0;
+    int n = 0;
+    double theta = 0.0;
+    Vector2D pos( 0.0, 0.0 );
+    Vector2D pos_tmp( 0.0, 0.0 );
+    Flag const * flag1 = NULL;
+    Flag const * flag2 = NULL;
+
     last_upd_time = see.time;
     this->ball_is_visible = see.ball_is_visible();
     if( see.ball_is_visible() )
@@ -94,20 +109,70 @@ void PokStateV1::updateOnSee(const SeeObs &see)
         else
             this->ball_is_kickable = false;
     }
+
+    for( i=0; i<see.flags.size()-1; i++ )
+    {
+        for( j=i+1; j<see.flags.size(); j++ )
+        {
+            flag1 = &see.flags.at(i);
+            flag2 = &see.flags.at(j);
+            pos_tmp = ubicacionBanderaBandera( flag1->distance,
+                                           flag1->direction - neckDirGrad(),
+                                           flag1->get_global_coord(),
+                                           flag2->distance,
+                                           flag2->direction - neckDirGrad(),
+                                           flag2->get_global_coord() );
+
+            // el método bandera-bandera puede devolver nan
+            if( !std::isnan(pos_tmp.x) && !std::isnan(pos_tmp.y) )
+            {
+                pos += pos_tmp;
+                n++;
+            }
+        }
+    }
+
+    if( n )
+    {
+        pos /= (double)n;
+        for( i=0; i<see.flags.size(); i++ )
+        {
+            flag1 = &see.flags.at(i);
+            theta += orientacion_global( flag1->get_global_coord(),
+                                        pos,
+                                        flag1->direction - neckDirGrad() );
+        }
+        theta /= (double)see.flags.size();
+    }
+
+    this->M_pos = pos;
+    this->M_angle = theta;
+
+    if( ballIsVisible() )
+    {
+        M_ball_last_seen_time = see.time;
+        M_ball_pos = pos + Vector2D::fromPolar( see.ball.distance,
+                                                Deg2Rad( see.ball.direction - neckDirGrad() - bodyAngle() )
+                                                );
+    }
+    //std::cout << pos.x << " " << pos.y << " " << theta << endl;
 }
 
 
 
 void PokStateV1::updateOnSense(const SenseObs &sense)
 {
-    last_upd_time = sense.time;
+    last_upd_time   = sense.time;
+    M_neck_dir_grad = sense.head_angle;
 }
 
 void PokTaPokAgentV1::do_process( GameData *game_data,
                                   AgentCommand *agent_response,
                                   const AgentCommand *agent_response_commited)
 {
+
     // Guardamos las referencias a los datos del juego
+
     this->command   = agent_response;
     this->command_c = agent_response_commited;
     this->obs_h     = &game_data->obs_handler;
@@ -194,6 +259,7 @@ bool PokTaPokAgentV1::ballIsKickable()
             param->server_param.ball_size;
 
      return ( state.ballIsVisible() &&  obs_h->last_see.ball.distance < kickableArea );
+
 }
 
 
@@ -266,6 +332,8 @@ void PokTaPokAgentV1::on_play_on()
     }
     else
         defendStrategy();
+
+    executeActions();
 }
 
 void PokTaPokAgentV1::on_time_over(){}
@@ -441,5 +509,140 @@ void PokTaPokAgentV1::attackNoBallStrategy()
 
 void PokTaPokAgentV1::defendStrategy()
 {
+    //double turn;
+
+    // Determinamos si debemos buscar el balón
+    // Por ahora solo nos basamos en la visibilidad del balón
+    // En el caso de que alguna jugada esté en curso, puede ser no necesario buscarlo
+    M_Search_Ball.M_on = !state.ballIsVisible();
+
+
+
+    //if( M_go_to_point.M_on == false )
+    // Determinamos si debemos ir tras el balón
+    /*
+    Player *player;
+    bool imTheClosestMateToBall = true;
+    double distance = obs_h->last_see.ball.distance;
+    int i;
+    //...
+    Vector2D ball_pos = Vector2D::fromPolar( obs_h->last_see.ball.distance,
+                                             Deg2Rad( obs_h->last_see.ball.direction
+                                                      - state.neckDirGrad()
+                                                      - state.bodyAngle()
+                                                    )
+                                           );
+    Vector2D ball_pos_rel = Vector2D::fromPolar( obs_h->last_see.ball.distance,
+                                             Deg2Rad( obs_h->last_see.ball.direction
+                                                    )
+                                           );
+
+    for( i=0; i < obs_h->last_see.players.size() && imTheClosestMateToBall; i++ )
+    {
+        player = &obs_h->last_see.players.at(i);
+        //cout << player->team << " " << TEAM_NAME;
+        if( player->isMyMate( TEAM_NAME ) )
+        {
+            if( ball_pos_rel.distance(Vector2D::fromPolar(player->distance, Deg2Rad( player->direction ) ) ) < distance )
+                imTheClosestMateToBall = false;
+        }
+
+    }
+
+
+    if( imTheClosestMateToBall )
+    {
+        //printf( "going to ppoint!");
+        if( !M_go_to_point.M_on )
+        {
+            //M_go_to_point.M_on = true;
+            //M_go_to_point.M_point = ball_pos - state.pos();
+            //M_go_to_point.M_start_time = obs_h->last_obs_time;
+            //M_go_to_point.M_expire_time = state.pos().distance(ball_pos)/0.80;
+            M_go_to_ball.M_on = true;
+        }
+
+    }
+    else
+    {
+        // Find foe and mark it!
+    }
+
+    //Vector2D defenseField( 0.0, 0.0 );
+    */
+}
+
+void PokTaPokAgentV1::searchBall()
+{
+    int last_see_time = obs_h->last_see.time;
+    if( state.time() == last_see_time )
+        command->append_turn( 90 );
+}
+
+void PokTaPokAgentV1::goToPoint()
+{
+    /*
+
+    Falta definir los campos de atracción y repulsión
+
+    double angle_between;
+    if ( M_go_to_point.M_on == false)
+        return;
+
+    if( state.pos().distance( M_go_to_point.M_point ) < 1.2 )
+        M_go_to_point.M_on = false;
+
+    angle_between = state.pos().angleBetween( M_go_to_point.M_point );
+    if( fabs(angle_between) < Deg2Rad(10) )
+        command->append_dash( 80 );
+    else
+        command->append_turn( Rad2Deg( angle_between ) );
+        */
+}
+
+void PokTaPokAgentV1::goToBall()
+{
+    Ball & ball = obs_h->last_see.ball;
+
+    if( ball.distance < 1 )
+        return;
+
+    if( abs( ball.direction < 10) )
+    {
+        if( ball.distance > 2 )
+            command->append_dash( 90 );
+    }
+    else
+        command->append_turn( ball.direction );
+}
+
+void PokTaPokAgentV1::followBall()
+{
+    if( state.ballIsVisible() )
+    {
+        command->append_turn_neck( obs_h->last_see.ball.direction );
+    }
+}
+
+void PokTaPokAgentV1::executeActions()
+{
+    /*if( M_go_to_point.M_on )
+    {
+        goToPoint();
+
+    }
+
+    else if( M_go_to_ball.M_on )
+    {
+        goToBall();
+    }
+    */
+    if( M_Search_Ball.M_on )
+    {
+        searchBall();
+    }
+
+
+    followBall();
 
 }

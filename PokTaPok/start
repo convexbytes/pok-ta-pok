@@ -1,0 +1,28 @@
+#!/bin/bash
+
+bin/poktapok p &
+PID1=$!
+sleep 2
+bin/poktapok &
+PID2=$!
+bin/poktapok &
+PID3=$!
+bin/poktapok &
+PID4=$!
+bin/poktapok &
+PID5=$!
+bin/poktapok &
+PID6=$!
+bin/poktapok &
+PID7=$!
+bin/poktapok &
+PID8=$!
+bin/poktapok &
+PID9=$!
+bin/poktapok &
+PID10=$!
+bin/poktapok &
+PID11=$!
+
+echo $PID1 $PID2 $PID3 $PID4 $PID5 $PID6 $PID7 $PID8 $PID9 $PID10 $PID11 > pids
+

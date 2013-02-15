@@ -113,10 +113,19 @@ Client::~Client() {
 	delete Client::instance().agent;
 }
 
-void Client::main_loop() {
+void Client::main_loop( bool goalie )
+{
     Client::instance().initialize();
     USock::instance().Initial("localhost", 6000);
-    USock::instance().Send("(init PokTaPok (version 15.1))");
+
+    if( goalie )
+    {
+        USock::instance().Send("(init PokTaPok (version 15.1) (goalie))");
+    }
+    {
+        USock::instance().Send("(init PokTaPok (version 15.1))");
+    }
+
     MP_MessageType mp_type; //Tipo de mensaje del microparser
     while( server_is_alive() )
     {
@@ -193,7 +202,7 @@ void* Client::Client::sending_thread_function(void *parameter) {
 			//Destinado para cuando trabaje el módulo synchronizer
 			//Client::instance().synchronizer.msg_arrived(msg_type);
 			//time = Client::instance().synchronizer.get_current_cycle_wait_time();
-            time = 90000;
+            time = 80000;
             msg_type = Client::instance().last_msg_type = MP_NONE;
             usleep(time);
 
@@ -234,11 +243,11 @@ bool Client::server_is_alive()
 
 void Client::pre_filter(char * server_msg)
 {
-    double x, y, ang;
+    //double x, y, ang;
 
     parser->parse(server_msg); // Parseo, llena el objeto obs_handler
 
-    localization_engine->getNewPos( x, y, ang ); // Usa obs_handler para actualizar la pose del agente
+    //localization_engine->getNewPos( x, y, ang ); // Usa obs_handler para actualizar la pose del agente
 }
 
 

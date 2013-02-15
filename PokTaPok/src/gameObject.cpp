@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-Vector2D Flag::get_global_coord()
+Vector2D Flag::get_global_coord() const
 {
     Vector2D coord;
     switch (this->id)

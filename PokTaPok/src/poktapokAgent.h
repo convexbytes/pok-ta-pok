@@ -1,9 +1,48 @@
 #ifndef POKTAPOK_AGENT_H
 #define POKTAPOK_AGENT_H
 #include "agent.h"
+#include "attractorField.h"
 #include "obsHandler.h"
 
+
 #define TEAM_NAME "PokTaPok"
+
+
+class Jugada
+{
+public:
+    //virtual void execute() = 0;
+
+    bool   M_on;
+    int    M_start_time;
+    int    M_expire_time;
+
+};
+
+class GoToPoint : public Jugada
+{
+public:
+    //virtual void execute();
+    Vector2D M_point;
+};
+
+class SearchBall : public Jugada
+{
+public:
+    //virtual void execute();
+    double M_turn_body_angle;
+    double M_turn_neck_angle;
+};
+
+class GoToBall : public Jugada
+{
+
+};
+
+class SearchMarkFoe : public Jugada
+{
+
+};
 
 class PokStateV1
 {
@@ -15,10 +54,20 @@ public:
 
     PlayModeHearable playMode() const { return play_mode; }
 
-    bool ballIsVisible()    const { return ball_is_visible; }
+    // Referentes al agente
     int  time()             const { return last_upd_time; }
     char side()             const { return field_side; }
     int  unum()             const { return uniform_number; }
+    Vector2D const & pos()  const { return M_pos; }
+    double bodyAngle(  )    const { return M_angle; }
+    double neckDirGrad()    const { return M_neck_dir_grad; }
+
+
+    // Referentes al balón
+    Vector2D const & ballPos() const { return M_ball_pos; }
+    bool ballIsVisible()    const { return ball_is_visible; }
+    int ballLastSeenTime()     const { return M_ball_last_seen_time; }
+
 
 private:
     void updateOnSense  ( SenseObs const & sense );
@@ -30,15 +79,29 @@ private:
     int uniform_number;
     char field_side;
 
+    Vector2D M_pos;
+    double M_angle;
+
 
     PlayModeHearable play_mode;
     int last_upd_time;
 
+    // Datos del balón
+
+    Ball M_last_ball;
+    Ball M_llast_ball;
+    Vector2D M_ball_pos;
+    bool M_ball_last_seen_time;
     bool ball_is_visible;
     bool ball_is_kickable;
 
 
+
+    // Datos del sense
+    double M_neck_dir_grad;
+
 };
+
 
 class PokTaPokAgentV1 : public Agent
 {
@@ -46,6 +109,18 @@ public:
     virtual void do_process( GameData *game_data,
                              AgentCommand *agent_response,
                              const AgentCommand *agent_response_commited );
+
+
+
+    // Por ahora las haré públicas porque no tengo tiempo de ponerle sus
+    // geters y seters
+public:
+
+        // Datos de acciones
+        GoToPoint  M_go_to_point;
+        GoToBall  M_go_to_ball;
+        SearchBall M_Search_Ball;
+
 private:
     PokStateV1 state;
 
@@ -63,6 +138,16 @@ private:
     void attackBallStrategy();
     void attackNoBallStrategy();
     void defendStrategy();
+
+
+    // Algunas "acciones"
+    void searchBall();
+    void goToPoint();
+    void goToBall();
+    void followBall(); // Generalizar a "follow object"
+
+    // Ejecutor de acciones
+    void executeActions();
 
 
     // Modos de juego

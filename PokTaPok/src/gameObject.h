@@ -217,7 +217,7 @@ class Flag : public GameObject
 {
 public:
     EFlag id;
-    Vector2D get_global_coord();
+    Vector2D get_global_coord() const;
     double direction_change;
     double distance_change;
     void print();
@@ -237,7 +237,7 @@ public:
     {
         if( team.empty() )
             return false;
-        team.compare( team_name ) == 0;
+        return team.compare( team_name ) == 0;
     }
 
     string team;

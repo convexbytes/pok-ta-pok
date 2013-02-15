@@ -103,7 +103,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
             );
 
 
-    if( peso[posicion_peso_max] < 0.01 )
+    /*if( peso[posicion_peso_max] < 0.01 )
     {
         // Si el peso es demasiado pequeño, estamos perdidos y necesitamos esparcir
         // las partículas otra vez
@@ -119,7 +119,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
         montecarlo_correction( particulas,
                                banderas,
                                particulas_nuevas);
-    }
+    }*/
     this->indice_part_mayor_peso = posicion_peso_max;
 
 	

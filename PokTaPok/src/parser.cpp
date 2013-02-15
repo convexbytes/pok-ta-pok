@@ -586,6 +586,7 @@ void Parser::parse_see(char *message)
     //en la version 15.0 se reciben en orden las banderas, el balon, jugadores y al final lineas
     //primero parseamos flags
 
+    //std::cout << "parse see begin " << endl;
     int int_value4, int_value5, int_value6;
     double flo_value, flo_value1, flo_value2, flo_value3, flo_value4, flo_value5, flo_value6;
     int unum, count, j, k, l, g;
@@ -883,48 +884,60 @@ void Parser::parse_see(char *message)
         subcadena = strstr( message, "(p" );
         while( subcadena )
         {
+            //std::cout << " while 1" << endl;
             subcadena = subcadena + 2;
             if( (*subcadena) == ')' )
             {
                 subcadena++;
-                scanf("%lf %d", &flo_value, &int_value4 ); //distancia y direccion
+                //std::cout << " scan 1" << endl;
+                //std::cout << subcadena << endl;
+                sscanf( subcadena, "%lf %d )", &flo_value, &int_value4 ); //distancia y direccion
                 game_data->obs_handler.see_player( flo_value, int_value4 );
+                //std::cout << " scan 1 finished" << endl;
             }
             else if( (*subcadena) == ' ' )
             {
                 subcadena++;
                 if( (*subcadena) == '\"')
                 {
-                    sscanf( subcadena+1, "%s", str1 );
-                    has_team = true;
-                    str1[ strlen(str1) - 1 ] = '\0';
-                    subcadena++;
-                    while( subcadena[0] != '\"' )
-                        subcadena++;
+                    int n_readed;
+                    //std::cout << " scan 2" << endl;
+                    sscanf( subcadena, "\"%[-0-9a-zA-Z ().+*/?<>_]\" %n", str1, &n_readed );
 
-                    subcadena++;
+                    has_team = true;
+
+                    subcadena += n_readed;
+
                     if( (*subcadena) == ' ' )
                     {
-                        sscanf( subcadena+1, " %d)", &unum );
+                        //std::cout << " scan 3" << endl;
+                        sscanf( subcadena+1, " %d )", &unum );
                         has_number = true;
                     }
-                    /*else if( (*subcadena) == ')' )
-                    {
 
-                    }*/
                 }
             }
-            while( (*subcadena) != ')' ) subcadena++;
-            subcadena++;
+
+            while( (*subcadena) != ')' )
+
+            {
+                subcadena++;
+                //std::cout << " while 2" << endl;
+            }
+                subcadena++;
+
             subcadena2 = subcadena + 1; //la subcadena dos ahora esta en la posicion del primer parametro
             while( (*subcadena) != ')' ) //contamos los parametros
             {
-                if( isspace(*subcadena) ) count++;
+                //std::cout << " while 3" << endl;
+                if( isspace(*subcadena) )
+                    count++;
                 subcadena++;
             }
             switch( count )
             {
             case 2:
+                //std::cout << " scan 4" << endl;
                 sscanf( subcadena2, "%lf %d)", &flo_value, &int_value4 ); //distancia y direccion
                 if( has_number )
                     game_data->obs_handler.see_player(str1, unum, flo_value, int_value4 );
@@ -937,16 +950,19 @@ void Parser::parse_see(char *message)
 
                 break;
             case 4:
+                //std::cout << " scan 5" << endl;
                 sscanf( subcadena2, "%lf %d %lf %lf)", &flo_value, &int_value4, &flo_value1, &flo_value2 ); //dist, dir, dis_chg, dir_chg
                 if( has_number ) //aun no sabemos si podemos recibir jugadores con cuatro parametros y sin unum
                     game_data->obs_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2 );
                 break;
             case 6:
+                //std::cout << " scan 6" << endl;
                 sscanf( subcadena2, "%lf %d %lf %lf %lf %lf)", &flo_value, &int_value4, &flo_value1, &flo_value2, &flo_value3, &flo_value4 ); //dist, dir, dis_chg, dir_chg, speed1, speed2
                 game_data->obs_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2, flo_value3, flo_value4 );
                 break;
             case 8:
                 //dist, dir, dis_chg, dir_chg, speed1, speed2, body_dir, neck_dir
+                //std::cout << " scan 7" << endl;
                 sscanf( subcadena2, "%lf %d %lf %lf %lf %lf %lf %lf)", &flo_value, &int_value4, &flo_value1, &flo_value2, &flo_value3, &flo_value4, &flo_value5, &flo_value6 );
                 game_data->obs_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2, flo_value3, flo_value4, flo_value5, flo_value6 );
                 break;
@@ -956,8 +972,10 @@ void Parser::parse_see(char *message)
             has_team = false; has_number = false;
             subcadena = strstr( subcadena, "(p" );
         }
+        //std::cout << "finished " << endl;
         game_data->obs_handler.see_finish();
 
+    //std::cout << "parse see finished " << endl;
 }
 
 void Parser::parse_sense(char * message )
@@ -2020,7 +2038,11 @@ void Parser::flpar( char *subcadena2, EFlag c){
                         if(count==4){
                             subcadena=strstr(subcadena2,")");
                             sscanf(subcadena+1," %lf %d %lf %lf",&flo_value,&int_value4,&flo_value1,&flo_value2);
-                            game_data->obs_handler.see_flag(c,flo_value,int_value4,flo_value1,flo_value2);
+                            game_data->obs_handler.see_flag( c,
+                                                             flo_value,
+                                                             int_value4,
+                                                             flo_value1,
+                                                             flo_value2);
 
 
                         }

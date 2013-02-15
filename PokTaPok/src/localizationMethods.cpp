@@ -1,10 +1,10 @@
 #include "localizationMethods.h"
 #include "utilities.h"
 #include "geometry.h"
-/*
+
 Vector2D ubicacionBanderaBandera(float distanciaFlag1, float direccionFlag1, Vector2D coordGlobalFlag1, float distanciaFlag2, float direccionFlag2, Vector2D coordGlobalFlag2)
 {
-    // Devuelve un apuntador a un arreglo, con la coordenada global X en la posición 0 del arreglo
+    // devuelve un vector con la coordenada global en x
     // y la coordenada global Y en la posición 1 del arreglo
     //
     float distancia, p1[2], a, dx, dy, h;
@@ -30,8 +30,8 @@ Vector2D ubicacionBanderaBandera(float distanciaFlag1, float direccionFlag1, Vec
 }
 Vector2D ubicacionLineaBandera(float direccionLinea, char lineaId, float distanciaFlag, float direccionFlag, Vector2D coordGlobalFlag)
 {
-    // Devuelve un apuntador a un arreglo, con la coordenada global X en la posición 0 del arreglo
-    // y la coordenada global Y en la posición 1 del arreglo
+    // Devuelve un vector, con la coordenada global X
+    // y la coordenada global Y
     // Linea puede tomar los valores r,l,t,b (right, left, top, bottom)
     //
     float B,O,angulox,anguloy;
@@ -40,8 +40,8 @@ Vector2D ubicacionLineaBandera(float direccionLinea, char lineaId, float distanc
     B = (-1)*( signo(direccionLinea) )*( 90 - absoluto(direccionLinea) ); // Ángulo de la bisectriz a la
                                                                                // perpendicular de la linea
     O = orientation(lineaId) - B;            // Obtenemos el ángulo Global
-    angulox = gradosARadianes(direccionFlag + O);      // Conversion de grados a radianes
-    anguloy = gradosARadianes(direccionFlag + O);
+    angulox = Deg2Rad( direccionFlag + O);      // Conversion de grados a radianes
+    anguloy = Deg2Rad(direccionFlag + O);
     coor[0] = coordGlobalFlag.x - ( distanciaFlag * cos( angulox ) );    // Conversion de polares a cartesianas
     coor[1] = coordGlobalFlag.y - ( distanciaFlag * sin( anguloy ) );
 
@@ -71,9 +71,25 @@ double orientacion_global(Vector2D coordGlobalFlag, Vector2D coordGlobalAgente, 
     else
         theta = 0.0;
 
-    theta = entre180( radianesAGrados( theta ) - angulo_relativo );
+    theta = entre180( Rad2Deg( theta ) - angulo_relativo );
 
     return theta;
 }
 
-*/
+int orientation(char a)
+{
+    /*
+    *
+    */
+    int r;
+ switch(a)
+    {
+      case 'r': case 'R':  r=0;   break;  //right
+      case 'b': case 'B':  r=90;  break;  //bottom
+      case 'l': case 'L':  r=180; break;  //left
+      case 't': case 'T':  r=-90; break;  //top
+      default:  printf("Error en id de linea.\n"); r=0; break;
+    }
+   return r;
+}
+

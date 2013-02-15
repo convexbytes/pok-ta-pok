@@ -45,7 +45,7 @@ public:
         this->y += v1.y;
     }
 
-    Vector2D & operator-( const Vector2D & v )
+    Vector2D & operator-( const Vector2D & v ) const
     {
         static Vector2D v1;
         v1.x = x - v.x;
@@ -71,22 +71,40 @@ public:
         this->y /= r;
     }
 
+    void operator*=( double r )
+    {
+        this->x *= r;
+        this->y *= r;
+    }
 
     double normita()
     {
         return sqrt( x*x + y*y );
     }
 
-    double prodPunto( Vector2D const & v )
+    double prodPunto( Vector2D const & v ) const
     {
         return x * v.x + y * v.y;
     }
 
-    double distance( Vector2D const & v )
+    double distance( Vector2D const & v ) const
     {
         return sqrt( prodPunto( v ) );
     }
 
+    double angleBetween( Vector2D const & v ) const
+    {
+        Vector2D v1 = *this-v;
+        return v1.angle();
+    }
+
+    double angle() const
+    {
+        if( x != 0.0 || y != 0.0 )
+            return atan2(y,x);
+        else
+            return 0.0;
+    }
 
     static
     Vector2D fromPolar( const double & r,

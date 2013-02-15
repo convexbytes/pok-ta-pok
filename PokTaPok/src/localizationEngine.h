@@ -11,6 +11,10 @@ class LocalizationEngine
 public:
     LocalizationEngine( GameData * game_data, AgentCommand * command_commited );
     void getNewPos( double & x, double & y, double & body_angle ); //Método que usa el algoritmo de localización para actualizar los datos de game_data
+
+
+    double x,y,angle;
+
 private:
     GameData                * game_data;
     AgentCommand            * command_commited; // Command_commited
