@@ -91,7 +91,7 @@ public:
     void hear_our       ( int time, int direction, int unum, string msg );
     void hear_opp       ( int time, int direction, int unum, string msg );
 
-    void error          ( int time, ErrorType error );
+    void error          (  ErrorType error );
 
     //void msg( int time, string msg );
 

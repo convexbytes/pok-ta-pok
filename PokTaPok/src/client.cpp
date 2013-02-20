@@ -18,23 +18,36 @@
 #include <stdlib.h>
 using namespace std;
 
-void signal_controller(int num); //se ejecutará esta función cuando presionen ctrl-c en terminal
+
+Client * Client::_instance = 0;
 
 Client::Client() {
 
 }
 
-Client & Client::instance() {
-	// para mejor claridad, utilizar una variable de clase
-	//
-	static Client client;
-	return client;
+Client & Client::instance()
+{
+    if( _instance == 0)
+    {
+        _instance = new Client;
+    }
+    return *_instance;
 }
 
 void Client::initialize() {
     int process_thread_error; // Para capturar el error a la hora de crear el hilo de proceso
     int sending_thread_error; // Para capturar el error a la hora de crear el hilo de envío
     //Iniciamos todos los objetos para cargar toda la memoria al principio
+
+    game_data   = 0;
+    parser      = 0;
+    agent       = 0;
+    agent_response      = 0;
+    response_commited   = 0;
+    response_to_commit  = 0;
+    localization_engine = 0;
+
+
     game_data           = new GameData  ( );
     parser              = new Parser    (game_data);
     agent               = new PokTaPokAgentV1  ( );
@@ -42,6 +55,7 @@ void Client::initialize() {
     response_commited   = new AgentCommand     ( );
     response_to_commit  = new AgentCommand     ( );
     localization_engine = new LocalizationEngine( game_data, response_commited );
+
     //Comprobamos que se crearon todos los objetos
     if( !( game_data && parser && agent && agent_response
            && response_commited && localization_engine
@@ -74,8 +88,9 @@ void Client::initialize() {
             || pthread_mutex_init( & Client::instance().time_mutex, NULL)
          ) != 0 )
     {
-		printf("\nMutex could not be created, exiting...\n");
-		exit(1);
+        std::cout << "Mutex could not be created, exiting..."
+                  << std::endl;
+        exit(1);
 	}
 	//Creamos los hilos.
     process_thread_error = pthread_create( & Client::instance().process_thread,
@@ -90,27 +105,52 @@ void Client::initialize() {
 
     if ( process_thread_error || sending_thread_error)
     {
-		printf("\nThreads could not be created, exiting...\n");
+        std::cout << "Threads could not be created, exiting..."
+                  << std::endl;
 		exit(1);
 	}
-	//Asociamos nuestra función para manejar señales.
-	signal(SIGINT, signal_controller);
+
 }
 
-Client::~Client() {
-	pthread_kill            ( Client::instance().process_thread, SIGQUIT );
-    	pthread_kill            ( Client::instance().sending_thread, SIGQUIT );
-    	pthread_mutex_destroy   ( & Client::instance().message_stack_mutex );
-    	pthread_mutex_destroy   ( & Client::instance().command_mutex );
-    	pthread_mutex_destroy   ( & Client::instance().time_mutex );
+Client::~Client()
+{
+    Client & instance = Client::instance();
 
-	delete Client::instance().parser;
-	delete Client::instance().game_data;
-	delete Client::instance().agent_response;
-	delete Client::instance().response_commited;
-    delete Client::instance().response_to_commit;
-	delete Client::instance().localization_engine;
-	delete Client::instance().agent;
+	pthread_kill            ( Client::instance().process_thread, SIGQUIT );
+    pthread_kill            ( Client::instance().sending_thread, SIGQUIT );
+    pthread_mutex_destroy   ( & Client::instance().message_stack_mutex );
+    pthread_mutex_destroy   ( & Client::instance().command_mutex );
+    pthread_mutex_destroy   ( & Client::instance().time_mutex );
+
+    if( instance.parser )
+        delete instance.parser;
+
+    if( instance.game_data )
+        delete instance.game_data;
+
+    if( instance.agent_response )
+        delete instance.agent_response;
+
+    if( instance.response_commited )
+        delete instance.response_commited;
+
+    if( instance.response_to_commit)
+        delete instance.response_to_commit;
+
+    if( instance.localization_engine )
+        delete instance.localization_engine;
+
+    if( instance.agent )
+        delete instance.agent;
+
+    instance.game_data   = 0;
+    instance.parser      = 0;
+    instance.agent       = 0;
+    instance.agent_response      = 0;
+    instance.response_commited   = 0;
+    instance.response_to_commit  = 0;
+    instance.localization_engine = 0;
+
 }
 
 void Client::main_loop( bool goalie )
@@ -171,8 +211,6 @@ void * Client::Client::process_thread_function(void *parameter) {
 			//Pasamos al "filtro" para alimentar game_data.
 			Client::instance().pre_filter(server_message_aux);
 
-			//Vaciamos el response.
-            //Client::instance().agent_response->reset();
 
 			//Recibimos la respuesta del agente.
 			Client::instance().agent->do_process(Client::instance().game_data,
@@ -206,12 +244,17 @@ void* Client::Client::sending_thread_function(void *parameter) {
             msg_type = Client::instance().last_msg_type = MP_NONE;
             usleep(time);
 
-			// es esto threadsafe?
-            // esto no es threadsafe, debería tener mutex aquí
+            // Esto no es threadsafe, debería tener mutex aquí
+            // Se implementará junto con boost
+
 
             commands.clear();
 
-            //Serializer::generate_command( command_aux, *Client::instance().agent_response );
+            // Old version of serializer
+            // Serializer::generate_command( command_aux, *Client::instance().agent_response );
+
+            // Esto no es threadsafe, debería tener mutex aquí
+            // Se implementará junto con boost
 
             Serializer::serializeAgentCommands( *Client::instance().response_to_commit,
                                                 & commands );
@@ -243,7 +286,6 @@ bool Client::server_is_alive()
 
 void Client::pre_filter(char * server_msg)
 {
-    //double x, y, ang;
 
     parser->parse(server_msg); // Parseo, llena el objeto obs_handler
 
@@ -251,11 +293,3 @@ void Client::pre_filter(char * server_msg)
 }
 
 
-
-void Client::signal_controller(int num) {
-    // Pendiente de poner este código, junto con lo referente a las señales, en el main.
-	//
-	//Este código se ejecutará cuando se reciba alguna señal.
-	printf("\nSignal received, exiting now...\n");
-	exit(0);
-}

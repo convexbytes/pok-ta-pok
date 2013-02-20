@@ -27,7 +27,7 @@ class Client
 {
 private:
     Client();
-    static Client client;
+    static Client * _instance;
 public:
     //initial();
     static Client & instance();
@@ -36,7 +36,7 @@ public:
 
     static void * process_thread_function(void *parameter);
     static void * sending_thread_function(void *parameter);
-    static void   signal_controller( int num );
+
 
     pthread_mutex_t  message_stack_mutex; /* mutex para el main_loop y el process_thread */
     pthread_mutex_t  command_mutex; /* mutex para el process_thread y el sending_thread */

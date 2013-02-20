@@ -268,7 +268,7 @@ class Observation
 {
 public:
     int time;
-    ObservationType type; // This seems useless to me now..., pendiente de borrar
+    //ObservationType type; // This seems useless to me now..., pendiente de borrar
 };
 
 class SenseObs : public Observation
@@ -385,7 +385,7 @@ public:
 };
 
 
-class ErrorObs : public Observation
+class ErrorObs
 {
 public:
     ErrorType error;

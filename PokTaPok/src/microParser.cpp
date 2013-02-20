@@ -49,6 +49,8 @@ MP_MessageType MicroParser::get_message_type(char * message)
     if( tipo )
 		return MP_OK;
 
+    std::cout << message << std::endl;
+
     return MP_NONE;
 }
 
@@ -92,14 +94,6 @@ bool MicroParser::parenthesis_are_matched(char* message){
         {
             return false;
         }	
-}
-
-bool MicroParser::message_is_correct(char *message)
-{
-    /* Regresa verdadero si el mensaje es correcto según los criterios establecidos */
-
-    /* por ahora usaremos solamente el criterio de los paréntesis */
-    return parenthesis_are_matched(message);
 }
 
 

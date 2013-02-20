@@ -18,7 +18,6 @@ void PokStateV1::update( const ObsHandler &obs,
 {
     ObservationType obs_type = obs.last_obs_type;
 
-
     switch( obs_type )
     {
     case OBS_NONE:
@@ -94,12 +93,12 @@ void PokStateV1::updateOnSee(const SeeObs &see)
     int i = 0;
     int j = 0;
     int n = 0;
+    int n_flags = see.flags.size();
     double theta = 0.0;
     Vector2D pos( 0.0, 0.0 );
     Vector2D pos_tmp( 0.0, 0.0 );
     Flag const * flag1 = NULL;
     Flag const * flag2 = NULL;
-
     last_upd_time = see.time;
     this->ball_is_visible = see.ball_is_visible();
     if( see.ball_is_visible() )
@@ -110,10 +109,13 @@ void PokStateV1::updateOnSee(const SeeObs &see)
             this->ball_is_kickable = false;
     }
 
-    for( i=0; i<see.flags.size()-1; i++ )
+
+    if( n_flags )
+    for( i=0; i<n_flags-1; i++ )
     {
-        for( j=i+1; j<see.flags.size(); j++ )
+        for( j=i+1; j<n_flags; j++ )
         {
+
             flag1 = &see.flags.at(i);
             flag2 = &see.flags.at(j);
             pos_tmp = ubicacionBanderaBandera( flag1->distance,
@@ -180,8 +182,13 @@ void PokTaPokAgentV1::do_process( GameData *game_data,
 
     command->reset();
 
+    //std::cout << "update... " << std::endl;
+
     state.update( *obs_h,
                   *command_c );
+
+    // ya no llega a este switch
+    //std::cout << "switch" << std::endl;
 
     switch( state.playMode() )
     {
@@ -478,6 +485,7 @@ void PokTaPokAgentV1::attackBallStrategy()
 
 bool PokTaPokAgentV1::myTeamHasTheBall()
 {
+    /*
     int i;
     bool loTenemos = false;
     Vector2D pos_player;
@@ -499,7 +507,8 @@ bool PokTaPokAgentV1::myTeamHasTheBall()
             }
         }
     }
-    return loTenemos;
+    return loTenemos;*/
+    return false;
 }
 
 void PokTaPokAgentV1::attackNoBallStrategy()

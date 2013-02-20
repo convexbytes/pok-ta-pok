@@ -82,31 +82,32 @@ ParserMsgType Parser::parse(char *message )
 void Parser::parse_error( char *message)
 {
         char 	str1[128];
-        char 	*subcadena2=NULL;
-        int 	time;
-        subcadena2=strstr(message,"(error");
-        if (subcadena2)
+        char 	*subcadena2 = 0;
+        //subcadena2 = strstr(message,"(error");
+        std::cout << message << std::endl;
+        if ( strncmp( ("(error"), subcadena2, 6 ) == 0 )
         {
-            /* el error lleva el ciclo en el que ocurrió??
-            sscanf(subcadena2, "(error %d", &time );
-            while( !isspace( *subcadena2 ) )
-                ++subcadena2;
-            sscanf(subcadena2+1,"%[^)]",str1);
+            // el error lleva el ciclo en el que ocurrió??
+
+            subcadena2 = move_to_next_word( subcadena2 );
+
+            sscanf( subcadena2+1,"%[^)]", str1 ); // Lee todos los caracteres menos ')'
+
             if( strcmp( str1, "illegal_mode" )==0 )
             {
-                game_data->obs_handler.error( time, ILLEGAL_MODE );
+                game_data->obs_handler.error( ILLEGAL_MODE );
             }
 
             else if ( strcmp(str1, "illegal_object_form" )==0 )
             {
-                game_data->obs_handler.error( time, ILLEGAL_OBJECT_FORM );
+                game_data->obs_handler.error( ILLEGAL_OBJECT_FORM );
             }
 
             else if ( strcmp(str1, "illegal_command_form" )==0 )
             {
-                game_data->obs_handler.error( time, ILLEGAL_COMMAND_FORM );
+                game_data->obs_handler.error( ILLEGAL_COMMAND_FORM );
             }
-            */
+            //
         }
 }
 
@@ -115,7 +116,7 @@ void Parser::parse_hear( char *message )
     char  * subcad = NULL;
     int 	time;
     int 	aux_num;
-    int 	angle;
+    //int 	angle;
     char 	aux_str[256];
     PlayModeHearable play_mode; // "playmode" que podemos escuchar del referee
     
@@ -587,8 +588,7 @@ void Parser::parse_player_type(char *message)
 
 void Parser::parse_see(char *message)
 {
-    //en la version 15.0 se reciben en orden las banderas, el balon, jugadores y al final lineas
-    //primero parseamos flags
+
 
     //std::cout << "parse see begin " << endl;
     int int_value4, int_value5, int_value6;
@@ -602,7 +602,12 @@ void Parser::parse_see(char *message)
     count = 0;
 
     sscanf(message,"(see %d",&int_value4);
-    game_data->obs_handler.begin_see(int_value4);
+
+    std::cout << "See parsing begun. Time  " << int_value4 << endl;
+
+    game_data->obs_handler.begin_see( int_value4 );
+
+    std::cout << "Parsing flags..." << std::endl;
 
             subcadena2=strstr(message,"f t l 50");
         if (subcadena2 != NULL){
@@ -796,6 +801,7 @@ void Parser::parse_see(char *message)
 
 
         //lineas
+        std::cout << "Parsing lines..." << std::endl;
                 subcadena2=strstr(message,"l t");
         if (subcadena2 != NULL){
             lipar( subcadena2, LINE_TOP);
@@ -816,8 +822,8 @@ void Parser::parse_see(char *message)
             lipar( subcadena2, LINE_LEFT);
         }
 
-    //ballon
-
+    //ball
+        std::cout << "Parsing ball..." << std::endl;
             subcadena2=strstr(message,"(b");
         if (subcadena2 != NULL)
         {
@@ -884,11 +890,14 @@ void Parser::parse_see(char *message)
 
         }
         //Jugadores
+
+        std::cout << "Parsing players..." << std::endl;
+
         count = 0;
         subcadena = strstr( message, "(p" );
         while( subcadena )
         {
-            //std::cout << " while 1" << endl;
+            std::cout << " while players" << endl;
             subcadena = subcadena + 2;
             if( (*subcadena) == ')' )
             {
@@ -976,10 +985,10 @@ void Parser::parse_see(char *message)
             has_team = false; has_number = false;
             subcadena = strstr( subcadena, "(p" );
         }
-        //std::cout << "finished " << endl;
+        //std::cout << "See parsing finished. Time  " << time << endl;
         game_data->obs_handler.see_finish();
 
-    //std::cout << "parse see finished " << endl;
+    std::cout << "parse see finished " << endl;
 }
 
 void Parser::parse_sense(char * message )

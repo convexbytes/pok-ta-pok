@@ -7,7 +7,6 @@
 
 SenseObs::SenseObs()
 {
-    type = OBS_SEE ;
     time = UNDEFINED_NUMBER;
     view_mode_quality = (ViewModeQuality)UNDEFINED_NUMBER;
     view_mode_width = (ViewModeWidth)UNDEFINED_NUMBER;
@@ -70,14 +69,12 @@ void SenseObs::print()
     printf("\ntime: %d",  this->time );
     printf("\nturn: %d",  this->turn );
     printf("\nturn_neck: %d",  this->turn_neck );
-    printf("\ntype: %d",  this->type );
     printf("\nview_mode_quality: %d",  this->view_mode_quality );
     printf("\nview_mode_width: %d",  this->view_mode_width );
 }
 
 SeeObs::SeeObs()
 {
-    type = OBS_SEE;
     this->ball_visible = false;
     this->time = UNDEFINED_NUMBER;
     this->players.clear();

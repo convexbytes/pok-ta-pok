@@ -170,7 +170,7 @@ void ObsHandler::see_finish()
     int i;
     int num_banderas;
     num_banderas = last_see.flags.size();
-
+    last_see.recognized_flags.clear();
     for( i=0; i<num_banderas; i++ )
     {
         if( last_see.flags[i].id != FLAG_UNKNOWN )
@@ -243,10 +243,9 @@ void ObsHandler::init(char side, int unum, PlayModeHearable play_mode, int playm
 }
 
 //Funciones referentes a error.
-void ObsHandler::error(int time, ErrorType error)
+void ObsHandler::error(ErrorType error)
 {
     last_obs_type = OBS_ERROR;
-    last_error.time = last_obs_time = time;
     last_error.error = error;
 }
 
