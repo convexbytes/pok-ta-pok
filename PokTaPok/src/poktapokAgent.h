@@ -3,7 +3,7 @@
 #include "agent.h"
 #include "attractorField.h"
 #include "sensorHandler.h"
-
+#include "worldModel.h"
 #define TEAM_NAME "PokTaPok"
 
 
@@ -11,17 +11,17 @@
 class PokTaPokAgentV1 : public Agent
 {
 public:
-    virtual void do_process( GameData *game_data,
-                             AgentCommand *agent_command,
-                             const AgentCommand *agent_command_commited );
+    PokTaPokAgentV1( GameData * game_data );
+    virtual void do_process( GameData * game_data,
+                             AgentCommand *agent_command );
 
 
 
 
 private:
-    WorldModelV1          M_world;
+    WorldModelV1        * world;
     AgentCommand        * command;
-    AgentCommand const  * command_c;
+    AgentCommand        * command_c;
     GameParameter       * param;
     SensorHandler       * sensor_h;
 

@@ -1,16 +1,19 @@
 #include "localizationEngine.h"
-#include "localizationMethods.h"
+//#include "localizationMethods.h"
+//#include "montecarloLocalization.h"
+#include "sensorHandler.h"
 #include "gameData.h"
 #include "geometry.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
 
-LocalizationEngine::LocalizationEngine( GameData * game_data, AgentCommand *command_commited )
+LocalizationEngine::LocalizationEngine( GameData * game_data )
 {
     int i;
     this->game_data      = game_data;
-    this->command_commited = command_commited;
+    this->command_commited = &game_data->command_commited;
     this->montecarlo_loc = new MontecarloLocalization( game_data );
 
     srand( time(NULL) );
@@ -27,10 +30,15 @@ LocalizationEngine::LocalizationEngine( GameData * game_data, AgentCommand *comm
     }
     this->p         = particulas;
     this->p_nuevas  = particulas_nuevas;
+
+    M_x = M_y = M_angle = 0.0;
 }
 
-void LocalizationEngine::updatePos(  )
+void LocalizationEngine::updatePos( )
 {
+	
+	
+
     SensorType        sensor_type;
     vector<Flag>    * banderas;
     AgentCommand     * controles;

@@ -310,21 +310,18 @@ class SeeSensor
 {
 public:
     SeeSensor();
-    bool    ball_is_visible     () const;
-    int     num_recognized_players  ();
-    int     num_recognized_flags    ();
-    int     num_recognized_lines    ();
+    bool    ballIsVisible     () const { return ball_is_visible; }
+
     void    add_player          ( Player player);
     void    add_flag            ( Flag flag);
     void    add_line            ( Line line);
     void    add_ball            ( Ball ball);
     vector<Player> players;
     vector<Flag> flags;
-    vector<Flag> recognized_flags;
     vector<Line> lines;
-    int time;
-    Ball ball;
-    bool ball_visible;
+    int 		 time;
+    Ball 	     ball;
+    bool 		 ball_is_visible;
 };
 
 class HearSensor
@@ -427,4 +424,5 @@ public:
 	int 			  time;
 	CheckBallPosition position;	
 };
+
 #endif // SENSOR_H

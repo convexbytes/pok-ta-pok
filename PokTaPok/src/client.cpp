@@ -42,21 +42,17 @@ void Client::initialize() {
     parser      = 0;
     agent       = 0;
     agent_command      = 0;
-    command_commited   = 0;
     command_to_commit  = 0;
 
 
     game_data           = new GameData  ( );
     parser              = new Parser    (game_data);
-    agent               = new PokTaPokAgentV1  ( );
+    agent               = new PokTaPokAgentV1  ( game_data );
     agent_command      = new AgentCommand     ( );
-    command_commited   = new AgentCommand     ( );
     command_to_commit  = new AgentCommand     ( );
-    //localization_engine = new LocalizationEngine( game_data, command_commited );
 
     //Comprobamos que se crearon todos los objetos
     if( !( game_data && parser && agent && agent_command
-           && command_commited //&& localization_engine
            && command_to_commit) )
     {
         std::cout << "Objects could not be created, exiting..."
@@ -72,10 +68,9 @@ void Client::initialize() {
             delete agent_command ;
         if( command_to_commit )
             delete command_to_commit ;
-        if( command_commited )
-            delete command_commited ;
 
-        exit (-1);
+
+        exit (1);
     }
 
 	this->last_msg_type = MP_NONE;
@@ -129,9 +124,6 @@ Client::~Client()
     if( instance.agent_command )
         delete instance.agent_command;
 
-    if( instance.command_commited )
-        delete instance.command_commited;
-
     if( instance.command_to_commit)
         delete instance.command_to_commit;
 
@@ -142,7 +134,6 @@ Client::~Client()
     instance.parser      = 0;
     instance.agent       = 0;
     instance.agent_command      = 0;
-    instance.command_commited   = 0;
     instance.command_to_commit  = 0;
 
 }
@@ -208,9 +199,8 @@ void * Client::Client::process_thread_function(void *parameter)
             Client::instance().parser->parse( server_message_aux );
 
             // Recibimos la respuesta del agente.
-			Client::instance().agent->do_process(Client::instance().game_data,
-                    Client::instance().agent_command,
-                    Client::instance().command_commited);
+	    Client::instance().agent->do_process(Client::instance().game_data,
+                    				 Client::instance().agent_command );
 
             // Actualizamos el comando que se tiene que enviar,
             // se utilizó un cambio de apuntadores para agilizar el proceso.
@@ -265,8 +255,8 @@ void* Client::Client::sending_thread_function(void *parameter)
                 USock::instance().Send( commands[i].c_str() );
             }
 
-            // Copiamos para saber qué es lo que se envió.
-            *Client::instance().command_commited =
+            // Copiamos lo que se envió a los datos del juego.
+            Client::instance().game_data->command_commited =
                     *Client::instance().command_to_commit;
 
         }

@@ -12,7 +12,7 @@ public:
 
 
     SeeSensor           last_see;
-    BodySensor         last_sense;
+    BodySensor          last_sense;
     HearSensor          last_hear;
     HearRefereeSensor   last_hear_referee;
     HearOurSensor       last_hear_our;

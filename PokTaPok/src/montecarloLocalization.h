@@ -1,10 +1,11 @@
 #ifndef MONTECARLOLOCALIZATION_H
 #define MONTECARLOLOCALIZATION_H
 #define NUM_PARTICULAS 300
-//#define MONT_PI 3.141592653589793
+
+#include <vector>
+
 #include "gameObject.h"
-#include "vector"
-#include "gameData.h" //arreglar esto, el scope no debería ir tan lejos
+#include "gameData.h"
 
 class Particula
 {
@@ -24,7 +25,7 @@ public:
 class MontecarloLocalization
 {
 public:
-    MontecarloLocalization( GameData * game_data );
+	MontecarloLocalization( GameData * game_data );
 
 
     int indiceMayorPeso() const { return indice_part_mayor_peso; }

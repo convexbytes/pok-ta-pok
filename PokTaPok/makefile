@@ -17,6 +17,7 @@ OBJS = 	$(BIN_DIR)gameCommand.o \
 	$(BIN_DIR)parser.o \
 	$(BIN_DIR)serializer.o \
 	$(BIN_DIR)udpSocket.o \
+	$(BIN_DIR)worldModel.o \
 	$(BIN_DIR)montecarloLocalization.o
 
 
@@ -106,6 +107,9 @@ $(BIN_DIR)serializer.o:\
 $(BIN_DIR)udpSocket.o:
 	g++ $(FLAGS) $(SOURCE_DIR)udpSocket.cpp -o $@
 
+
+$(BIN_DIR)worldModel.o:
+	g++ $(FLAGS) $(SOURCE_DIR)worldModel.cpp -o $@
 ########### Para compilar el entrenamiento ################
 
 TRAINING_SRC_DIR = training_src/

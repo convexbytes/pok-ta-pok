@@ -1,22 +1,30 @@
 #include "poktapokAgent.h"
 #include "formation.h"
 
+PokTaPokAgentV1::PokTaPokAgentV1( GameData * game_data )
+{
+    world = new WorldModelV1( game_data );
+}
+
 void PokTaPokAgentV1::do_process( GameData *game_data,
-                                  AgentCommand *agent_command,
-                                  const AgentCommand *agent_command_commited)
+                                  AgentCommand *agent_command )
 {
 
     // Guardamos las referencias a los datos del juego
 
     this->command   = agent_command;
-    this->command_c = agent_command_commited;
+    this->command_c = &game_data->command_commited;
     this->sensor_h  = &game_data->sensor_handler;
     this->param     = &game_data->game_parameter;
 
     command->reset();
-    /*
-    switch( state.playMode() )
+    world->update( game_data );
+
+
+
+    switch( world->play_mode )
     {
+
     case GOALIE_CATCH_BALL_L: on_goalie_catch_ball_l(); break;
     case GOALIE_CATCH_BALL_R: on_goalie_catch_ball_r(); break;
     case BEFORE_KICK_OFF: on_before_kick_off(); break;
@@ -80,7 +88,6 @@ void PokTaPokAgentV1::do_process( GameData *game_data,
     default:
         break;
     }
-    */
 }
 
 
@@ -140,7 +147,19 @@ void PokTaPokAgentV1::on_before_kick_off()
 
 void PokTaPokAgentV1::on_play_on()
 {
+	/* Para probar el cambio de estados
+	 *
+	Ball & ball = sensor_h->last_see.ball;
 
+	if( sensor_h->last_see.ballIsVisible() )
+	{
+		command->append_turn( ball.direction );
+	}
+	else
+	{
+		command->append_turn( 90 );
+	}
+	*/
 }
 
 void PokTaPokAgentV1::on_time_over(){}

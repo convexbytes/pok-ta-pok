@@ -4,8 +4,8 @@
 
 Vector2D ubicacionBanderaBandera(float distanciaFlag1, float direccionFlag1, Vector2D coordGlobalFlag1, float distanciaFlag2, float direccionFlag2, Vector2D coordGlobalFlag2)
 {
-    // devuelve un vector con la coordenada global en x
-    // y la coordenada global Y en la posición 1 del arreglo
+    // Devuelve un vector con la coordenada global en x
+    // y la coordenada global y
     //
     float distancia, p1[2], a, dx, dy, h;
     Vector2D posicion;
@@ -28,6 +28,7 @@ Vector2D ubicacionBanderaBandera(float distanciaFlag1, float direccionFlag1, Vec
 
     return posicion;
 }
+
 Vector2D ubicacionLineaBandera(float direccionLinea, char lineaId, float distanciaFlag, float direccionFlag, Vector2D coordGlobalFlag)
 {
     // Devuelve un vector, con la coordenada global X

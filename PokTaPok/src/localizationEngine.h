@@ -7,8 +7,7 @@
 class LocalizationEngine
 {
 public:
-    LocalizationEngine( GameData * game_data,
-                        AgentCommand * command_commited );
+    LocalizationEngine( GameData * game_data );
 
 
     double x() const { return M_x; }

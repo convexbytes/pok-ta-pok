@@ -13,8 +13,7 @@ class Agent
 public:
 
     virtual void do_process( GameData * game_data,
-                             AgentCommand * agent_response,
-                             AgentCommand const * agent_response_commited
+                             AgentCommand * agent_response
                              ) = 0;
 
 };

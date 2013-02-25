@@ -884,7 +884,7 @@ void Parser::parse_see(char *message)
         {
             float dis;
             int dir;
-            subcadena2 += 4; // Avanzamos "(B) "
+            subcadena2 += 4; // Nos saltamos "(B) "
             sscanf( subcadena2, "%f %d )", &dis, &dir );
             game_data->sensor_handler.see_ball(dis, dir);
 
@@ -895,7 +895,6 @@ void Parser::parse_see(char *message)
         subcadena = strstr( message, "(p" );
         while( subcadena )
         {
-            std::cout << " while players" << endl;
             subcadena = subcadena + 2;
             if( (*subcadena) == ')' )
             {
@@ -912,7 +911,7 @@ void Parser::parse_see(char *message)
                 if( (*subcadena) == '\"')
                 {
                     int n_readed;
-                    //std::cout << " scan 2" << endl;
+
                     sscanf( subcadena, "\"%[-0-9a-zA-Z ().+*/?<>_]\" %n", str1, &n_readed );
 
                     has_team = true;
@@ -933,14 +932,12 @@ void Parser::parse_see(char *message)
 
             {
                 subcadena++;
-                //std::cout << " while 2" << endl;
             }
                 subcadena++;
 
             subcadena2 = subcadena + 1; //la subcadena dos ahora esta en la posicion del primer parametro
             while( (*subcadena) != ')' ) //contamos los parametros
             {
-                //std::cout << " while 3" << endl;
                 if( isspace(*subcadena) )
                     count++;
                 subcadena++;
@@ -948,7 +945,6 @@ void Parser::parse_see(char *message)
             switch( count )
             {
             case 2:
-                //std::cout << " scan 4" << endl;
                 sscanf( subcadena2, "%lf %d)", &flo_value, &int_value4 ); //distancia y direccion
                 if( has_number )
                     game_data->sensor_handler.see_player(str1, unum, flo_value, int_value4 );

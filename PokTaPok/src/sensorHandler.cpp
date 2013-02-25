@@ -11,7 +11,7 @@ SensorHandler::SensorHandler()
 void SensorHandler::begin_sense( int time )
 {
     BodySensor new_sense;
-    last_sensor_type =	SENSOR_SENSE;
+    last_sensor_type =	SENSOR_BODY;
     last_sense 	  =	new_sense;
     last_sense.time = time;
 }
@@ -163,17 +163,7 @@ void SensorHandler::see_ball(float distance, int direction, float dis_change, fl
 
 void SensorHandler::see_finish()
 {
-    int i;
-    int num_banderas;
-    num_banderas = last_see.flags.size();
-    last_see.recognized_flags.clear();
-    for( i=0; i<num_banderas; i++ )
-    {
-        if( last_see.flags[i].id != FLAG_UNKNOWN )
-        {
-            last_see.recognized_flags.push_back( last_see.flags[i] );
-        }
-    }
+
 }
 
 //Funciones referentes a hear.

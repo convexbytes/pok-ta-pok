@@ -9,34 +9,37 @@
 class AgentStateV1
 {
 public:
+    Vector2D pos;
+    double   angle;
+    char 	 side;
+    int 	 unum;
 
-
-    Vector2D M_pos;
-    double   M_angle;
 };
 
 class WorldModelV1
 {
 public:
-    WorldModelV1( );
-    void update( );
+    WorldModelV1( GameData * game_data );
+    void update( GameData * game_data );
 
 
-    int              time()     const { return M_time; }
-    PlayModeHearable playMode() const { return M_play_mode; }
+    // Para guardar las referencias de que se reciben en update
+    GameData  	  * game_data;
+    AgentCommand  * command_commited;
+
+
+    AgentStateV1         me;
+    LocalizationEngine * loc_engine;
+
+    PlayModeHearable     play_mode;
+    int                  time;
 
 private:
-    AgentStateV1         M_me;
-    LocalizationEngine * M_loc_engine;
 
-    PlayModeHearable     M_play_mode;
-    int                  M_time;
-
-
-    void updateOnSense  ( BodySensor const &  body_sense );
-    void updateOnInit   ( InitSensor  const & init );
-    void updateOnSee    ( SeeSensor   const & see );
-    void updateOnHear   ( SensorHandler const & sensor_h);
+    void updateOnBody   ( );
+    void updateOnInit   ( );
+    void updateOnSee    ( );
+    void updateOnHear   ( );
 };
 
 

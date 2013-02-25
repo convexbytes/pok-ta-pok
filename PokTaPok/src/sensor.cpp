@@ -75,11 +75,10 @@ void BodySensor::print()
 
 SeeSensor::SeeSensor()
 {
-    this->ball_visible = false;
+    this->ball_is_visible = false;
     this->time = 0;
     this->players.clear();
     this->flags.clear();
-    this->recognized_flags.clear();
 }
 
 void SeeSensor::add_player(Player player)
@@ -98,27 +97,6 @@ void SeeSensor::add_line(Line line)
 void SeeSensor::add_ball(Ball ball)
 {
     this->ball = ball;
-    this->ball_visible = true;
+    this->ball_is_visible = true;
 }
 
-
-bool SeeSensor::ball_is_visible() const
-{
-    return ball_visible;
-}
-int SeeSensor::num_recognized_flags()
-{
-    int count, i, size;
-    size = flags.size();
-    count = 0;
-    for(i = 0; i < size; i++)
-    {
-        if( flags[i].id != FLAG_UNKNOWN )
-            count++;
-    }
-    return count;
-}
-int SeeSensor::num_recognized_lines()
-{
-    return lines.size();
-}
