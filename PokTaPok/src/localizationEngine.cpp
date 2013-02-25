@@ -2,20 +2,17 @@
 #include "localizationMethods.h"
 #include "gameData.h"
 #include "geometry.h"
-#include "agentResponse.h"
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
 
 LocalizationEngine::LocalizationEngine( GameData * game_data, AgentCommand *command_commited )
 {
-    int angulo_inicial;
     int i;
     this->game_data      = game_data;
     this->command_commited = command_commited;
     this->montecarlo_loc = new MontecarloLocalization( game_data );
 
-    angulo_inicial = 0;
     srand( time(NULL) );
 
     //inicializamos particulas.
@@ -25,25 +22,25 @@ LocalizationEngine::LocalizationEngine( GameData * game_data, AgentCommand *comm
 		// salir un poco de la cancha
         particulas[i].x =  particulas_nuevas[i].x =   ( drand48()*110.0 - 55.0 ); 
         particulas[i].y =  particulas_nuevas[i].y =     ( drand48()*80.0  - 40.0 );
-        particulas[i].theta = particulas_nuevas[i].theta = ( 0.0 );
+        particulas[i].theta = particulas_nuevas[i].theta = ( 0.0 ); // Ángulo inicial en cero.
 
     }
     this->p         = particulas;
     this->p_nuevas  = particulas_nuevas;
 }
 
-void LocalizationEngine::getNewPos( double &x, double &y, double &body_angle )
+void LocalizationEngine::updatePos(  )
 {
-    ObservationType   obs_type;
+    SensorType        sensor_type;
     vector<Flag>    * banderas;
     AgentCommand     * controles;
     Control           U;
     Particula       * p_aux;
 
-    banderas = & game_data->obs_handler.last_see.flags;
-    obs_type = game_data->obs_handler.last_obs_type;
+    banderas = & game_data->sensor_handler.last_see.flags;
+    sensor_type = game_data->sensor_handler.last_sensor_type;
     controles = command_commited; // El último comando que se envió al servidor
-    if( obs_type == OBS_SENSE )
+    if( sensor_type == SENSOR_BODY )
     {
         // Obtenemos los controles
         // Consideramos el caso en que la dirección del comando dash es cero
@@ -69,7 +66,7 @@ void LocalizationEngine::getNewPos( double &x, double &y, double &body_angle )
         p_nuevas = p_aux;
         montecarlo_loc->montecarlo_prediction( p, U, p_nuevas);
     }
-    else if( obs_type == OBS_SEE && banderas->size() > 0 ) // No tiene caso hacer correción con 0 banderas
+    else if( sensor_type == SENSOR_SEE && banderas->size() > 0 ) // No tiene caso hacer correción con 0 banderas
     {
         //Las particulas nuevas se convierten ahora en las viejas.
         p_aux = p;
@@ -87,9 +84,9 @@ void LocalizationEngine::getNewPos( double &x, double &y, double &body_angle )
         }
     }
 
-    this->x = x = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].x;
-    this->y = y = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].y;
-    this->angle = body_angle  = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].theta;
+    M_x = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].x;
+    M_y = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].y;
+    M_angle  = p_nuevas[ montecarlo_loc->indiceMayorPeso() ].theta;
 
 }
 

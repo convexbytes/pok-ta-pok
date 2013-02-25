@@ -4,8 +4,7 @@ SOURCE_DIR = src/
 BIN_DIR_NAME = bin
 BIN_DIR = $(BIN_DIR_NAME)/
 VPATH = src/
-OBJS = $(BIN_DIR)agentResponse.o \
-	$(BIN_DIR)gameCommand.o \
+OBJS = 	$(BIN_DIR)gameCommand.o \
 	$(BIN_DIR)gameData.o \
 	$(BIN_DIR)gameObject.o \
 	$(BIN_DIR)gameParameter.o \
@@ -13,8 +12,8 @@ OBJS = $(BIN_DIR)agentResponse.o \
 	$(BIN_DIR)localizationMethods.o \
 	$(BIN_DIR)main.o \
 	$(BIN_DIR)microParser.o \
-	$(BIN_DIR)observation.o \
-	$(BIN_DIR)obsHandler.o \
+	$(BIN_DIR)sensor.o \
+	$(BIN_DIR)sensorHandler.o \
 	$(BIN_DIR)parser.o \
 	$(BIN_DIR)serializer.o \
 	$(BIN_DIR)udpSocket.o \
@@ -27,16 +26,15 @@ $(BIN_DIR)poktapok : $(OBJS) $(BIN_DIR)poktapokAgent.o $(BIN_DIR)client.o
 clean:
 	rm $(BIN_DIR)*
 
-$(BIN_DIR)agentResponse.o: \
-	$(SOURCE_DIR)gameCommand.cpp
+$(BIN_DIR)gameCommand.o:\
+	$(SOURCE_DIR)sensor.cpp
 	echo "checking for bin directory..."
 	if [ -d bin ]; then echo continue; else mkdir bin; fi
-	g++ $(FLAGS) $(SOURCE_DIR)agentResponse.cpp -o $@
-
+	g++ $(FLAGS) $(SOURCE_DIR)gameCommand.cpp -o $@
+	
 $(BIN_DIR)client.o:\
 	$(SOURCE_DIR)udpSocket.cpp \
 	$(SOURCE_DIR)gameData.cpp \
-	$(SOURCE_DIR)agentResponse.cpp \
 	$(SOURCE_DIR)parser.cpp \
 	$(SOURCE_DIR)localizationEngine.cpp \
 	$(SOURCE_DIR)microParser.cpp \
@@ -45,15 +43,13 @@ $(BIN_DIR)client.o:\
 	$(SOURCE_DIR)poktapokAgent.cpp
 	g++ $(FLAGS) -pthread $(SOURCE_DIR)client.cpp -o $@
 
-$(BIN_DIR)gameCommand.o:\
-	$(SOURCE_DIR)observation.cpp
-	g++ $(FLAGS) $(SOURCE_DIR)gameCommand.cpp -o $@
+
 
 $(BIN_DIR)gameData.o:\
 	$(SOURCE_DIR)gameParameter.cpp \
 	$(SOURCE_DIR)gameObject.cpp \
-	$(SOURCE_DIR)obsHandler.cpp \
-	$(SOURCE_DIR)observation.cpp \
+	$(SOURCE_DIR)sensorHandler.cpp \
+	$(SOURCE_DIR)sensor.cpp \
 	$(SOURCE_DIR)parser.cpp
 	g++ $(FLAGS) $(SOURCE_DIR)gameData.cpp -o $@
 
@@ -64,9 +60,8 @@ $(BIN_DIR)gameParameter.o:
 	g++ $(FLAGS) $(SOURCE_DIR)gameParameter.cpp -o $@
 	
 $(BIN_DIR)poktapokAgent.o:\
-	$(SOURCE_DIR)agentResponse.cpp \
 	$(SOURCE_DIR)gameData.cpp \
-	$(SOURCE_DIR)observation.cpp 
+	$(SOURCE_DIR)sensor.cpp 
 	g++ $(FLAGS) $(SOURCE_DIR)poktapokAgent.cpp -o $@
 
 $(BIN_DIR)localizationEngine.o:\
@@ -87,24 +82,24 @@ $(BIN_DIR)montecarloLocalization.o:\
 	$(SOURCE_DIR)gameObject.cpp
 	g++ $(FLAGS) $(SOURCE_DIR)montecarloLocalization.cpp -o $@
 
-$(BIN_DIR)observation.o:\
+$(BIN_DIR)sensor.o:\
 	$(SOURCE_DIR)gameObject.cpp
-	g++ $(FLAGS) $(SOURCE_DIR)observation.cpp -o $@
+	g++ $(FLAGS) $(SOURCE_DIR)sensor.cpp -o $@
 	
-$(BIN_DIR)obsHandler.o:\
-	$(SOURCE_DIR)observation.cpp \
+$(BIN_DIR)sensorHandler.o:\
+	$(SOURCE_DIR)sensor.cpp \
 	$(SOURCE_DIR)gameObject.cpp 
-	g++ $(FLAGS) $(SOURCE_DIR)obsHandler.cpp -o $@
+	g++ $(FLAGS) $(SOURCE_DIR)sensorHandler.cpp -o $@
 
 $(BIN_DIR)parser.o:\
 	$(SOURCE_DIR)gameData.cpp \
 	$(SOURCE_DIR)microParser.cpp \
-	$(SOURCE_DIR)obsHandler.cpp
+	$(SOURCE_DIR)sensorHandler.cpp
 	g++ $(FLAGS) $(SOURCE_DIR)parser.cpp -o $@
 	
 
 $(BIN_DIR)serializer.o:\
-	$(SOURCE_DIR)observation.cpp \
+	$(SOURCE_DIR)sensor.cpp \
 	$(SOURCE_DIR)gameCommand.cpp 
 	g++ $(FLAGS) $(SOURCE_DIR)serializer.cpp -o $@
 

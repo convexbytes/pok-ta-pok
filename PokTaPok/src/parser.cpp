@@ -1,7 +1,7 @@
 #include "parser.h"
 #include "microParser.h"
 #include "gameData.h"
-#include "obsHandler.h"
+#include "sensorHandler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -95,17 +95,17 @@ void Parser::parse_error( char *message)
 
             if( strcmp( str1, "illegal_mode" )==0 )
             {
-                game_data->obs_handler.error( ILLEGAL_MODE );
+                game_data->sensor_handler.error( ILLEGAL_MODE );
             }
 
             else if ( strcmp(str1, "illegal_object_form" )==0 )
             {
-                game_data->obs_handler.error( ILLEGAL_OBJECT_FORM );
+                game_data->sensor_handler.error( ILLEGAL_OBJECT_FORM );
             }
 
             else if ( strcmp(str1, "illegal_command_form" )==0 )
             {
-                game_data->obs_handler.error( ILLEGAL_COMMAND_FORM );
+                game_data->sensor_handler.error( ILLEGAL_COMMAND_FORM );
             }
             //
         }
@@ -141,7 +141,7 @@ void Parser::parse_hear( char *message )
             subcad = move_to_next_word( subcad );
             sscanf( subcad, "%s", aux_str );	//extraemos el mensaje antes del paréntesis que cierra, incluyendo las comillas
             aux_str[ strlen( aux_str) -1 ] = '\0'; //quitamos el paréntesis
-            game_data->obs_handler.hear_our(time, angle, aux_num, aux_str);
+            game_data->sensor_handler.hear_our(time, angle, aux_num, aux_str);
 
         }
         else if( strcmp( aux_str, "opp" ) )
@@ -152,7 +152,7 @@ void Parser::parse_hear( char *message )
             subcad = move_to_next_word( subcad );
             sscanf( subcad, "%s", aux_str );	//extraemos el mensaje antes del paréntesis que cierra, incluyendo las comillas
             aux_str[ strlen( aux_str) -1 ] = '\0'; //quitamos el paréntesis
-            game_data->obs_handler.hear_opp(time, angle, aux_num, aux_str);
+            game_data->sensor_handler.hear_opp(time, angle, aux_num, aux_str);
             */
         //}
         //else
@@ -167,7 +167,7 @@ void Parser::parse_hear( char *message )
                 subcad = move_to_next_word( subcad );
                 sscanf( subcad, "%s", aux_str );	//extraemos el mensaje antes del paréntesis que cierra, incluyendo las comillas
                 aux_str[ strlen( aux_str) -1 ] = '\0'; //quitamos el paréntesis
-                game_data->obs_handler.hear_self(time, aux_str );
+                game_data->sensor_handler.hear_self(time, aux_str );
 
 
             break;
@@ -175,7 +175,7 @@ void Parser::parse_hear( char *message )
                 subcad = move_to_next_word( subcad );
                 sscanf( subcad, "%s", aux_str );	//extraemos el mensaje antes del paréntesis que cierra, incluyendo las comillas
                 aux_str[ strlen( aux_str) -1 ] = '\0';//quitamos el paréntesis
-                game_data->obs_handler.hear_couch(time, aux_str );
+                game_data->sensor_handler.hear_couch(time, aux_str );
 
             break;
             case 'r': //El sender es referee, recibimos el play_mode
@@ -184,7 +184,7 @@ void Parser::parse_hear( char *message )
                 aux_str[ strlen( aux_str) -1 ] = '\0';//quitamos el paréntesis
                 //obtenemos el playmode
                 play_mode = this->parse_play_mode(aux_str, aux_num );
-                game_data->obs_handler.hear_referee( time, play_mode );
+                game_data->sensor_handler.hear_referee( time, play_mode );
 
             break;
             default:
@@ -209,7 +209,7 @@ void Parser::parse_init( char *message )
 
     if( strncmp( "(init ok)", message, 9 ) == 0 )
     {
-        game_data->obs_handler.init( 'c', 0, (PlayModeHearable)0, 0 );
+        game_data->sensor_handler.init( 'c', 0, (PlayModeHearable)0, 0 );
     }
     else
     {
@@ -218,7 +218,7 @@ void Parser::parse_init( char *message )
         play_mode = parse_play_mode( str, aux_num );
         if( play_mode == 0 ) //Cuando play_mode es igual a cero, hubo un error en el parseo
             return;
-        game_data->obs_handler.init(side, unum, play_mode, aux_num );
+        game_data->sensor_handler.init(side, unum, play_mode, aux_num );
     }
 
 
@@ -237,19 +237,19 @@ void Parser::parse_ok( char *message )
         
         if  	(strcmp(str1, "change_mode")==0)
         {
-            game_data->obs_handler.ok_change_mode(  );
+            game_data->sensor_handler.ok_change_mode(  );
         }
         else if (strcmp(str1, "move")==0)
         {
-            game_data->obs_handler.ok_move(  );
+            game_data->sensor_handler.ok_move(  );
         }
         else if (strcmp(str1, "start")==0)
         {
-            game_data->obs_handler.ok_start(  );
+            game_data->sensor_handler.ok_start(  );
         }
         else if (strcmp(str1, "recover")==0)
         {
-            game_data->obs_handler.ok_recover(  );
+            game_data->sensor_handler.ok_recover(  );
         }
         else if (strcmp(str1, "ear")==0)
         {
@@ -258,11 +258,11 @@ void Parser::parse_ok( char *message )
             if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0'; // Quitamos el último paréntesis
             if( strcmp(str1, "on") == 0 )
             {
-                game_data->obs_handler.ok_ear( true );
+                game_data->sensor_handler.ok_ear( true );
             }
             else if (strcmp(str1, "off") == 0)
             {
-                game_data->obs_handler.ok_ear( false );
+                game_data->sensor_handler.ok_ear( false );
             }
         }
 		else if ( strcmp( str1, "eye" ) == 0 )
@@ -272,11 +272,11 @@ void Parser::parse_ok( char *message )
             if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0'; // Quitamos el último paréntesis
             if( strcmp(str1, "on") == 0 )
             {
-                game_data->obs_handler.ok_eye( true );
+                game_data->sensor_handler.ok_eye( true );
             }
             else if (strcmp(str1, "off") == 0)
             {
-                game_data->obs_handler.ok_eye( false );
+                game_data->sensor_handler.ok_eye( false );
             }
 		}
         
@@ -289,19 +289,19 @@ void Parser::parse_ok( char *message )
             if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0';
             if ( strcmp( str1, "in_field" ) == 0 )
             {
-                game_data->obs_handler.ok_check_ball( time, B_IN_FIELD );
+                game_data->sensor_handler.ok_check_ball( time, B_IN_FIELD );
             }
             else if ( strcmp( str1, "goal_l" ) == 0 )
             {
-                game_data->obs_handler.ok_check_ball( time, B_GOAL_L );
+                game_data->sensor_handler.ok_check_ball( time, B_GOAL_L );
             }
             else if ( strcmp( str1, "goal_r" ) == 0 )
             {
-                game_data->obs_handler.ok_check_ball( time, B_GOAL_R );
+                game_data->sensor_handler.ok_check_ball( time, B_GOAL_R );
             }
             else if ( strcmp( str1, "out_of_field") == 0 )
             {
-                game_data->obs_handler.ok_check_ball( time, B_OUT_OF_FIELD );
+                game_data->sensor_handler.ok_check_ball( time, B_OUT_OF_FIELD );
             }
         }
         else if ( strcmp( str1, "look" ) == 0 )
@@ -315,7 +315,7 @@ void Parser::parse_ok( char *message )
 			sscanf( message, "%d ( ( g r ) %lf %lf ) %n", &time, &x, &y, &n_readed );
 			message += n_readed;
 			
-			game_data->obs_handler.ok_look_begin( time );
+            game_data->sensor_handler.ok_look_begin( time );
 			
 			// Datos de la portería izquierda
 			sscanf( message, "( ( g l ) %lf %lf ) %n", &x, &y, &n_readed );
@@ -325,7 +325,7 @@ void Parser::parse_ok( char *message )
 			sscanf( message, "( (b) %lf %lf %lf %lf ) %n", &x, &y, &vx, &vy, &n_readed );
 			message += n_readed;
 			
-			game_data->obs_handler.ok_look_ball( x, y, vx, vy );
+            game_data->sensor_handler.ok_look_ball( x, y, vx, vy );
 			
 			// Datos de todos los jugadores
 			while( *message != ')' )
@@ -333,13 +333,13 @@ void Parser::parse_ok( char *message )
 				sscanf( message, "( (p \"%[-0-9a-zA-Z ().+*/?<>_]\" %d ) %lf %lf %lf %lf %lf %lf ) %n", team, &unum, &x, &y, &vx, &vy, &body_angle, &neck_angle, &n_readed );
 				message += n_readed;
 				
-				game_data->obs_handler.ok_look_player( team, unum, x, y, vx, vy, body_angle, neck_angle );
+                game_data->sensor_handler.ok_look_player( team, unum, x, y, vx, vy, body_angle, neck_angle );
 			}
 			
 		}
 		else if ( strcmp( str1, "synch_see" ) == 0 )
 		{
-            game_data->obs_handler.ok_synch_see();
+            game_data->sensor_handler.ok_synch_see();
 		}
 }
 
@@ -603,11 +603,11 @@ void Parser::parse_see(char *message)
 
     sscanf(message,"(see %d",&int_value4);
 
-    std::cout << "See parsing begun. Time  " << int_value4 << endl;
+    //std::cout << "See parsing begun. Time  " << int_value4 << endl;
 
-    game_data->obs_handler.begin_see( int_value4 );
+    game_data->sensor_handler.begin_see( int_value4 );
 
-    std::cout << "Parsing flags..." << std::endl;
+    //std::cout << "Parsing flags..." << std::endl;
 
             subcadena2=strstr(message,"f t l 50");
         if (subcadena2 != NULL){
@@ -801,7 +801,7 @@ void Parser::parse_see(char *message)
 
 
         //lineas
-        std::cout << "Parsing lines..." << std::endl;
+
                 subcadena2=strstr(message,"l t");
         if (subcadena2 != NULL){
             lipar( subcadena2, LINE_TOP);
@@ -823,7 +823,7 @@ void Parser::parse_see(char *message)
         }
 
     //ball
-        std::cout << "Parsing ball..." << std::endl;
+
             subcadena2=strstr(message,"(b");
         if (subcadena2 != NULL)
         {
@@ -842,38 +842,38 @@ void Parser::parse_see(char *message)
                 if(count==6){
                     subcadena=strstr(subcadena2,")");
                     sscanf(subcadena+1," %lf %d %lf %lf %lf %d",&flo_value,&int_value5,&flo_value1,&flo_value2,&flo_value3,&int_value6);
-                    game_data->obs_handler.see_ball(flo_value,int_value5,flo_value1,flo_value2,flo_value3,int_value6);
+                    game_data->sensor_handler.see_ball(flo_value,int_value5,flo_value1,flo_value2,flo_value3,int_value6);
                     count=0;
                 }
                 if(count==5){
                     subcadena=strstr(subcadena2,")");
                     sscanf(subcadena+1," %lf %d %lf %lf %lf",&flo_value,&int_value5,&flo_value1,&flo_value2,&flo_value3);
-                    //game_data->obs_handler.see_ball(flo_value,int_value5,flo_value1,flo_value2,flo_value3);
+                    //game_data->sensor_handler.see_ball(flo_value,int_value5,flo_value1,flo_value2,flo_value3);
 
                     count=0;
                 }
                 if(count==4){
                     subcadena=strstr(subcadena2,")");
                     sscanf(subcadena+1," %lf %d %lf %lf",&flo_value,&int_value5,&flo_value1,&flo_value2);
-                    game_data->obs_handler.see_ball(flo_value,int_value5,flo_value1,flo_value2);
+                    game_data->sensor_handler.see_ball(flo_value,int_value5,flo_value1,flo_value2);
                     count=0;
                 }
                 if(count==3){
                     subcadena=strstr(subcadena2,")");
                     sscanf(subcadena+1," %lf %d %lf",&flo_value,&int_value5,&flo_value1);
-                    //game_data->obs_handler.see_ball(flo_value,int_value5,flo_value1);
+                    //game_data->sensor_handler.see_ball(flo_value,int_value5,flo_value1);
                     count=0;
                 }
                 if(count==2){
                     subcadena=strstr(subcadena2,")");
                     sscanf(subcadena+1," %lf %d",&flo_value,&int_value5);
-                    game_data->obs_handler.see_ball(flo_value,int_value5);
+                    game_data->sensor_handler.see_ball(flo_value,int_value5);
                     count=0;
                 }
                 if(count==1){
                     subcadena=strstr(subcadena2,")");
                     sscanf(subcadena+1," %lf",&flo_value);
-                    //game_data->obs_handler.see_ball(flo_value);
+                    //game_data->sensor_handler.see_ball(flo_value);
                     count=0;
                 }
             }
@@ -886,12 +886,10 @@ void Parser::parse_see(char *message)
             int dir;
             subcadena2 += 4; // Avanzamos "(B) "
             sscanf( subcadena2, "%f %d )", &dis, &dir );
-            game_data->obs_handler.see_ball(dis, dir);
+            game_data->sensor_handler.see_ball(dis, dir);
 
         }
         //Jugadores
-
-        std::cout << "Parsing players..." << std::endl;
 
         count = 0;
         subcadena = strstr( message, "(p" );
@@ -905,7 +903,7 @@ void Parser::parse_see(char *message)
                 //std::cout << " scan 1" << endl;
                 //std::cout << subcadena << endl;
                 sscanf( subcadena, "%lf %d )", &flo_value, &int_value4 ); //distancia y direccion
-                game_data->obs_handler.see_player( flo_value, int_value4 );
+                game_data->sensor_handler.see_player( flo_value, int_value4 );
                 //std::cout << " scan 1 finished" << endl;
             }
             else if( (*subcadena) == ' ' )
@@ -953,31 +951,31 @@ void Parser::parse_see(char *message)
                 //std::cout << " scan 4" << endl;
                 sscanf( subcadena2, "%lf %d)", &flo_value, &int_value4 ); //distancia y direccion
                 if( has_number )
-                    game_data->obs_handler.see_player(str1, unum, flo_value, int_value4 );
+                    game_data->sensor_handler.see_player(str1, unum, flo_value, int_value4 );
                 else if( has_team )
                 {
-                    game_data->obs_handler.see_player(str1, flo_value, int_value4 );
+                    game_data->sensor_handler.see_player(str1, flo_value, int_value4 );
                 }
                 else
-                    game_data->obs_handler.see_player( flo_value, int_value4 );
+                    game_data->sensor_handler.see_player( flo_value, int_value4 );
 
                 break;
             case 4:
                 //std::cout << " scan 5" << endl;
                 sscanf( subcadena2, "%lf %d %lf %lf)", &flo_value, &int_value4, &flo_value1, &flo_value2 ); //dist, dir, dis_chg, dir_chg
                 if( has_number ) //aun no sabemos si podemos recibir jugadores con cuatro parametros y sin unum
-                    game_data->obs_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2 );
+                    game_data->sensor_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2 );
                 break;
             case 6:
                 //std::cout << " scan 6" << endl;
                 sscanf( subcadena2, "%lf %d %lf %lf %lf %lf)", &flo_value, &int_value4, &flo_value1, &flo_value2, &flo_value3, &flo_value4 ); //dist, dir, dis_chg, dir_chg, speed1, speed2
-                game_data->obs_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2, flo_value3, flo_value4 );
+                game_data->sensor_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2, flo_value3, flo_value4 );
                 break;
             case 8:
                 //dist, dir, dis_chg, dir_chg, speed1, speed2, body_dir, neck_dir
                 //std::cout << " scan 7" << endl;
                 sscanf( subcadena2, "%lf %d %lf %lf %lf %lf %lf %lf)", &flo_value, &int_value4, &flo_value1, &flo_value2, &flo_value3, &flo_value4, &flo_value5, &flo_value6 );
-                game_data->obs_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2, flo_value3, flo_value4, flo_value5, flo_value6 );
+                game_data->sensor_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2, flo_value3, flo_value4, flo_value5, flo_value6 );
                 break;
             }
 
@@ -985,10 +983,9 @@ void Parser::parse_see(char *message)
             has_team = false; has_number = false;
             subcadena = strstr( subcadena, "(p" );
         }
-        //std::cout << "See parsing finished. Time  " << time << endl;
-        game_data->obs_handler.see_finish();
 
-    std::cout << "parse see finished " << endl;
+        game_data->sensor_handler.see_finish();
+
 }
 
 void Parser::parse_sense(char * message )
@@ -1003,36 +1000,36 @@ void Parser::parse_sense(char * message )
 
     sscanf(message,"(sense_body %d", &int_value);
 
-    game_data->obs_handler.begin_sense( int_value ); //enviamos el tiempo
+    game_data->sensor_handler.begin_sense( int_value ); //enviamos el tiempo
 
     subcadena = strstr(message, "view_mode");
     sscanf(subcadena,"view_mode %s %s", char_s_value, char_s_value2);
 
     if( strstr( char_s_value, "high" ) )
     {
-        game_data->obs_handler.sense_view_mode_quality( HIGH );
+        game_data->sensor_handler.sense_view_mode_quality( HIGH );
     }
     else
-        game_data->obs_handler.sense_view_mode_quality( LOW );
+        game_data->sensor_handler.sense_view_mode_quality( LOW );
 
     if( strstr( char_s_value2, "narrow" ) )
     {
-        game_data->obs_handler.sense_view_mode_width( NARROW );
+        game_data->sensor_handler.sense_view_mode_width( NARROW );
     }
     else if( strstr( char_s_value2, "normal") )
     {
-        game_data->obs_handler.sense_view_mode_width( NORMAL );
+        game_data->sensor_handler.sense_view_mode_width( NORMAL );
     }
     else
-        game_data->obs_handler.sense_view_mode_width( WIDE );
+        game_data->sensor_handler.sense_view_mode_width( WIDE );
     subcadena = strstr(message, "stamina");
     if( subcadena )
     {
     //sscanf(subcadena,"stamina %lf %lf %lf", &(->stamina_1_stamina), &(this->stamina_2_effort), &(this->stamina_3) ); a'un no se si es entero o flotante la stamina
     sscanf(subcadena,"stamina %lf %lf %d", &double_value, &double_value2, &int_value3 );
-    game_data->obs_handler.sense_stamina( double_value );
-    game_data->obs_handler.sense_effort ( double_value2 );
-    game_data->obs_handler.sense_staminaCapacity(int_value3 );
+    game_data->sensor_handler.sense_stamina( double_value );
+    game_data->sensor_handler.sense_effort ( double_value2 );
+    game_data->sensor_handler.sense_staminaCapacity(int_value3 );
     }
 
     subcadena = strstr(message, "speed");
@@ -1040,8 +1037,8 @@ void Parser::parse_sense(char * message )
     {
         //sscanf(subcadena, "speed %lf %lf", &this->speed_1_amount, &this->speed_2_direction);
         sscanf(subcadena, "speed %lf %lf", &double_value, &double_value2);
-        game_data->obs_handler.sense_speed_amount( double_value );
-        game_data->obs_handler.sense_speed_direction( double_value2 );
+        game_data->sensor_handler.sense_speed_amount( double_value );
+        game_data->sensor_handler.sense_speed_direction( double_value2 );
         //std::cout << double_value2 << endl;
     }
 
@@ -1050,7 +1047,7 @@ void Parser::parse_sense(char * message )
     {
         //sscanf(subcadena, "head_angle %d", &this->head_angle);
         sscanf(subcadena, "head_angle %d", &int_value);
-        game_data->obs_handler.sense_head_angle( int_value );
+        game_data->sensor_handler.sense_head_angle( int_value );
     }
 
 
@@ -1058,28 +1055,28 @@ void Parser::parse_sense(char * message )
     if( subcadena )
     {
         sscanf(subcadena, "kick %d", &int_value);
-        game_data->obs_handler.sense_kick( int_value );
+        game_data->sensor_handler.sense_kick( int_value );
     }
 
     subcadena = strstr(message, "dash");
     if( subcadena )
     {
         sscanf(subcadena, "dash %d", &int_value );
-        game_data->obs_handler.sense_dash( int_value );
+        game_data->sensor_handler.sense_dash( int_value );
     }
 
     subcadena = strstr(message, "turn");
     if( subcadena )
     {
         sscanf(subcadena, "turn %d", &int_value );
-        game_data->obs_handler.sense_turn( int_value );
+        game_data->sensor_handler.sense_turn( int_value );
     }
 
     subcadena = strstr(message, "say");
     if( subcadena )
     {
         sscanf(subcadena, "say %d", &int_value);
-        game_data->obs_handler.sense_say( int_value );
+        game_data->sensor_handler.sense_say( int_value );
     }
 
 
@@ -1087,7 +1084,7 @@ void Parser::parse_sense(char * message )
     if( subcadena )
     {
         sscanf(subcadena, "turn_neck %d", &int_value);
-        game_data->obs_handler.sense_turn_neck( int_value );
+        game_data->sensor_handler.sense_turn_neck( int_value );
     }
 
 
@@ -1095,7 +1092,7 @@ void Parser::parse_sense(char * message )
     if( subcadena )
     {
         sscanf(subcadena, "catch %d", &int_value);
-        game_data->obs_handler.sense_catchh( int_value );
+        game_data->sensor_handler.sense_catchh( int_value );
     }
 
 
@@ -1103,7 +1100,7 @@ void Parser::parse_sense(char * message )
     if( subcadena )
     {
         sscanf(subcadena, "move %d", &int_value);
-        game_data->obs_handler.sense_move( int_value );
+        game_data->sensor_handler.sense_move( int_value );
     }
 
 
@@ -1111,7 +1108,7 @@ void Parser::parse_sense(char * message )
     if( subcadena )
     {
         sscanf(subcadena, "change_view %d", &int_value );
-        game_data->obs_handler.sense_change_view( int_value );
+        game_data->sensor_handler.sense_change_view( int_value );
     }
 
 
@@ -1122,28 +1119,28 @@ void Parser::parse_sense(char * message )
         if( subcadena )
         {
             sscanf(subcadena, "movable %d", &int_value);
-            game_data->obs_handler.sense_arm_movable( int_value );
+            game_data->sensor_handler.sense_arm_movable( int_value );
         }
 
         subcadena = strstr(subcadena, "expires");
         if( subcadena )
         {
             sscanf(subcadena, "expires %d", &int_value);
-            game_data->obs_handler.sense_arm_expires( int_value );
+            game_data->sensor_handler.sense_arm_expires( int_value );
         }
         subcadena = strstr(subcadena, "target");
         if( subcadena )
         {
             sscanf(subcadena, "target %d %d", &int_value, &int_value2);
-            game_data->obs_handler.sense_arm_target_1( int_value );
-            game_data->obs_handler.sense_arm_target_2( int_value2 );
+            game_data->sensor_handler.sense_arm_target_1( int_value );
+            game_data->sensor_handler.sense_arm_target_2( int_value2 );
 
         }
         subcadena = strstr(subcadena, "count");
         if( subcadena )
         {
             sscanf(subcadena, "count %d", &int_value);
-            game_data->obs_handler.sense_arm_count( int_value );
+            game_data->sensor_handler.sense_arm_count( int_value );
         }
     }
 
@@ -1156,19 +1153,19 @@ void Parser::parse_sense(char * message )
         subcadena = strstr(subcadena, "target");
         if( subcadena[7] == 'n' )  //subcadena[7] podria contener el inicio de 'none', o el lado del jugador
         {
-            game_data->obs_handler.sense_focus_target( 'n', 0 );
+            game_data->sensor_handler.sense_focus_target( 'n', 0 );
         }
         else
         {
             sscanf(subcadena, "target %c %d", &char_value, &int_value );
-            game_data->obs_handler.sense_focus_target( char_value, int_value);
+            game_data->sensor_handler.sense_focus_target( char_value, int_value);
         }
 
         subcadena = strstr(subcadena, "count");
         if( subcadena )
         {
             sscanf(subcadena, "count %d", &int_value);
-            game_data->obs_handler.sense_focus_count( int_value );
+            game_data->sensor_handler.sense_focus_count( int_value );
         }
     }
 
@@ -1178,10 +1175,10 @@ void Parser::parse_sense(char * message )
     {
         subcadena = strstr(subcadena, "expires");
         sscanf(subcadena, "expires %d", & int_value);
-        game_data->obs_handler.sense_tackle_expires( int_value );
+        game_data->sensor_handler.sense_tackle_expires( int_value );
         subcadena = strstr(subcadena, "count");
         sscanf(subcadena, "count %d", &int_value );
-        game_data->obs_handler.sense_tackle_count( int_value );
+        game_data->sensor_handler.sense_tackle_count( int_value );
     }
 
     subcadena = strstr(message, "collision");
@@ -1190,10 +1187,10 @@ void Parser::parse_sense(char * message )
         switch ( subcadena[10] ) //no he enlistado los tipos de collision
         {
         case 'n':
-            game_data->obs_handler.sense_collision( COLLISION_NONE );
+            game_data->sensor_handler.sense_collision( COLLISION_NONE );
             break;
         default:
-            game_data->obs_handler.sense_collision( COLLISION_NONE );
+            game_data->sensor_handler.sense_collision( COLLISION_NONE );
             break;
         }
     }
@@ -1203,20 +1200,20 @@ void Parser::parse_sense(char * message )
     {
         subcadena = strstr(subcadena, "charged");
         sscanf(subcadena, "charged %d", &int_value);
-        game_data->obs_handler.sense_foul_charged( int_value );
+        game_data->sensor_handler.sense_foul_charged( int_value );
         subcadena = strstr(subcadena, "card");
         if      ( subcadena[5] == 'n' )
-            game_data->obs_handler.sense_foul_card( FCARD_NONE );
+            game_data->sensor_handler.sense_foul_card( FCARD_NONE );
         else if ( subcadena[5] == 'y' )
-            game_data->obs_handler.sense_foul_card( FCARD_YELLOW );
+            game_data->sensor_handler.sense_foul_card( FCARD_YELLOW );
         else if ( subcadena[5] == 'r' )
-            game_data->obs_handler.sense_foul_card( FCARD_RED );
+            game_data->sensor_handler.sense_foul_card( FCARD_RED );
         else
-            game_data->obs_handler.sense_foul_card( FCARD_NONE );
+            game_data->sensor_handler.sense_foul_card( FCARD_NONE );
     }
     free( char_s_value );
     free( char_s_value2 );
-    //game_data->obs_handler.last_sense.print();
+    //game_data->sensor_handler.last_sense.print();
 }
 
 void Parser::parse_server_param(char *message)
@@ -2051,7 +2048,7 @@ void Parser::flpar( char *subcadena2, EFlag c){
                         if(count==4){
                             subcadena=strstr(subcadena2,")");
                             sscanf(subcadena+1," %lf %d %lf %lf",&flo_value,&int_value4,&flo_value1,&flo_value2);
-                            game_data->obs_handler.see_flag( c,
+                            game_data->sensor_handler.see_flag( c,
                                                              flo_value,
                                                              int_value4,
                                                              flo_value1,
@@ -2064,21 +2061,21 @@ void Parser::flpar( char *subcadena2, EFlag c){
                             sscanf(subcadena+1," %lf %d %lf",&flo_value,&int_value4,&flo_value1);
 
                             // No sabemos aún cuáles son los tres valores que recibimos
-                            //game_data->obs_handler.see_flag(c,flo_value,int_value5,flo_value1);
+                            //game_data->sensor_handler.see_flag(c,flo_value,int_value5,flo_value1);
                             // printf("id: %d  ", c); //#gil_mark
                         }
 
                         if(count==2){
                             subcadena=strstr(subcadena2,")");
                             sscanf(subcadena+1," %lf %d",&flo_value,&int_value4);
-                            game_data->obs_handler.see_flag(c,flo_value,int_value4);
+                            game_data->sensor_handler.see_flag(c,flo_value,int_value4);
                         }
                         if(count==1){
                             subcadena=strstr(subcadena2,")");
                             sscanf(subcadena+1," %lf",&flo_value);
 
                             // No sabemos aún en qué caso recibimos un solo valor y cuál es.
-                            //game_data->obs_handler.see_flag(c,flo_value);
+                            //game_data->sensor_handler.see_flag(c,flo_value);
                             //printf("id: %d  ", c); //#gil_mark
                         }
 
@@ -2111,24 +2108,24 @@ void Parser::lipar(char *subcadena2, ELine c)
             if(count==4){
                 subcadena=strstr(subcadena2,")");
                 sscanf(subcadena+1," %lf %d %lf %lf",&flo_value,&int_value4,&flo_value1,&flo_value2);
-                game_data->obs_handler.see_line(c,flo_value,int_value4,flo_value1,flo_value2);
+                game_data->sensor_handler.see_line(c,flo_value,int_value4,flo_value1,flo_value2);
 
             }
             if(count==3){
                 subcadena=strstr(subcadena2,")");
                 sscanf(subcadena+1," %lf %d %lf",&flo_value,&int_value4,&flo_value1);
-                //game_data->obs_handler.see_line(c,flo_value,int_value4,flo_value1);
+                //game_data->sensor_handler.see_line(c,flo_value,int_value4,flo_value1);
             }
 
             if(count==2){
                 subcadena=strstr(subcadena2,")");
                 sscanf(subcadena+1," %lf %d",&flo_value,&int_value4);
-                game_data->obs_handler.see_line(c,flo_value,int_value4);
+                game_data->sensor_handler.see_line(c,flo_value,int_value4);
             }
             if(count==1){
                 subcadena=strstr(subcadena2,")");
                 sscanf(subcadena+1," %lf",&flo_value);
-                //game_data->obs_handler.see_line(c,flo_value);
+                //game_data->sensor_handler.see_line(c,flo_value);
             }
 
         }
@@ -2378,7 +2375,7 @@ void Parser::parse_see_global( char * message )
 			sscanf( message, "%d ( ( g r ) %lf %lf ) %n", &time, &x, &y, &n_readed );
 			message += n_readed;
 			
-			game_data->obs_handler.see_global_begin( time );
+            game_data->sensor_handler.see_global_begin( time );
 			
 			// Datos de la portería izquierda
 			sscanf( message, "( ( g l ) %lf %lf ) %n", &x, &y, &n_readed );
@@ -2388,7 +2385,7 @@ void Parser::parse_see_global( char * message )
 			sscanf( message, "( (b) %lf %lf %lf %lf ) %n", &x, &y, &vx, &vy, &n_readed );
 			message += n_readed;
 			
-			game_data->obs_handler.see_global_ball( x, y, vx, vy );
+            game_data->sensor_handler.see_global_ball( x, y, vx, vy );
 			
 			// Datos de todos los jugadores
 			while( *message != ')' )
@@ -2396,7 +2393,7 @@ void Parser::parse_see_global( char * message )
 				sscanf( message, "( (p \"%[-0-9a-zA-Z ().+*/?<>_]\" %d ) %lf %lf %lf %lf %lf %lf ) %n", team, &unum, &x, &y, &vx, &vy, &body_angle, &neck_angle, &n_readed );
 				message += n_readed;
 				
-				game_data->obs_handler.see_global_player( team, unum, x, y, vx, vy, body_angle, neck_angle );
+                game_data->sensor_handler.see_global_player( team, unum, x, y, vx, vy, body_angle, neck_angle );
 			}
 }
 

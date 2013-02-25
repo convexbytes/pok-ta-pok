@@ -1,34 +1,37 @@
-#ifndef OBS_HANDLER_H
-#define OBS_HANDLER_H
+#ifndef SENSOR_HANDLER_H
+#define SENSOR_HANDLER_H
 #include "gameObject.h"
-#include "observation.h"
+#include "sensor.h"
 #include <vector>
 
-class ObsHandler
+class SensorHandler
 {
-
+    friend class Parser;
 public:
-    ObsHandler();
-    SeeObs           last_see;
-    SenseObs         last_sense;
-    HearObs          last_hear;
-    HearRefereeObs   last_hear_referee;
-    HearOurObs       last_hear_our;
-    HearOppObs       last_hear_opp;
-    HearCouchObs     last_hear_couch;
-    HearSelfObs      last_hear_self;
-    InitObs          last_init;
-    //MsgObs           last_msg; Lo pospongo porque el único caso en que se recibe es al terminar el partido.
-    ErrorObs         last_error;
+    SensorHandler();
+
+
+    SeeSensor           last_see;
+    BodySensor         last_sense;
+    HearSensor          last_hear;
+    HearRefereeSensor   last_hear_referee;
+    HearOurSensor       last_hear_our;
+    HearOppSensor       last_hear_opp;
+    HearCouchSensor     last_hear_couch;
+    HearSelfSensor      last_hear_self;
+    InitSensor          last_init;
+    //MsgSensor           last_msg; Lo pospongo porque el único caso en que se recibe es al terminar el partido.
+    ErrorSensor         last_error;
     OkEar			 last_ok_ear;
     OkEye			 last_ok_eye;
     OkLook			 last_ok_look;
     OkCheckBall		 last_ok_check_ball;
-    SeeGlobal		 last_see_global;
+    SeeGlobalSensor  last_see_global;
     Request          last_ok;
-    ObservationType  last_obs_type;
-    int				 last_obs_time;
+    SensorType       last_sensor_type; // tipo de sensor del que recibimos la última actualización
 
+
+private:
     void init		(char side, int unum, PlayModeHearable play_mode, int playmode_num );
 
     void begin_see	( int time);
@@ -134,4 +137,4 @@ public:
 	
 };
 
-#endif /* OBS_HANDLER_H */
+#endif // SENSOR_HANDLER_H

@@ -1,10 +1,9 @@
 #include "client.h"
+#include "signal.h"
 #include <iostream>
 
-//using namespace std;
-
-
-void signal_controller( int num ); //se ejecutará esta función cuando presionen ctrl-c en terminal
+// Se ejecutará esta función cuando presionen ctrl-c en terminal
+void signalController( int num );
 
 
 int main( int argc, char **argv )
@@ -37,7 +36,7 @@ int main( int argc, char **argv )
     }
 
     //Asociamos nuestra función para manejar señales.
-    signal(SIGINT, signal_controller);
+    signal( SIGINT, signalController );
 
     Client::instance().main_loop( goalie );
 
@@ -45,8 +44,10 @@ int main( int argc, char **argv )
 }
 
 
-void signal_controller(int num) {
+void signalController(int num)
+{
     //Este código se ejecutará cuando se reciba alguna señal.
+
    std::cout << "Signal received, exiting now..." << std::endl;
     exit(0);
 }

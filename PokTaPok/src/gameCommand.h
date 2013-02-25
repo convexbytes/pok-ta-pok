@@ -1,6 +1,6 @@
 #ifndef GAMECOMMAND_H
 #define GAMECOMMAND_H
-#include "observation.h"
+#include "sensor.h"
 enum AttentionTeam
 {
     ATTENTION_OUR,

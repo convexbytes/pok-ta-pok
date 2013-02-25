@@ -1,7 +1,6 @@
 #include "client.h"
 #include "udpSocket.h"
 #include "gameData.h"
-#include "agentResponse.h"
 #include "parser.h"
 #include "localizationEngine.h"
 #include "microParser.h"
@@ -42,40 +41,39 @@ void Client::initialize() {
     game_data   = 0;
     parser      = 0;
     agent       = 0;
-    agent_response      = 0;
-    response_commited   = 0;
-    response_to_commit  = 0;
-    localization_engine = 0;
+    agent_command      = 0;
+    command_commited   = 0;
+    command_to_commit  = 0;
 
 
     game_data           = new GameData  ( );
     parser              = new Parser    (game_data);
     agent               = new PokTaPokAgentV1  ( );
-    agent_response      = new AgentCommand     ( );
-    response_commited   = new AgentCommand     ( );
-    response_to_commit  = new AgentCommand     ( );
-    localization_engine = new LocalizationEngine( game_data, response_commited );
+    agent_command      = new AgentCommand     ( );
+    command_commited   = new AgentCommand     ( );
+    command_to_commit  = new AgentCommand     ( );
+    //localization_engine = new LocalizationEngine( game_data, command_commited );
 
     //Comprobamos que se crearon todos los objetos
-    if( !( game_data && parser && agent && agent_response
-           && response_commited && localization_engine
-           && response_to_commit) )
+    if( !( game_data && parser && agent && agent_command
+           && command_commited //&& localization_engine
+           && command_to_commit) )
     {
-        printf( "Objects could not be created, exiting...\n" );
+        std::cout << "Objects could not be created, exiting..."
+                  << std::endl;
+
         if( game_data )
-            free( game_data );
+            delete game_data ;
         if( parser )
-            free( parser );
+            delete parser ;
         if( agent )
-            free( agent );
-        if( agent_response )
-            free( agent_response );
-        if( response_to_commit )
-            free( response_to_commit );
-        if( response_commited )
-            free( response_commited );
-        if( localization_engine )
-            free( localization_engine );
+            delete agent ;
+        if( agent_command )
+            delete agent_command ;
+        if( command_to_commit )
+            delete command_to_commit ;
+        if( command_commited )
+            delete command_commited ;
 
         exit (-1);
     }
@@ -128,17 +126,14 @@ Client::~Client()
     if( instance.game_data )
         delete instance.game_data;
 
-    if( instance.agent_response )
-        delete instance.agent_response;
+    if( instance.agent_command )
+        delete instance.agent_command;
 
-    if( instance.response_commited )
-        delete instance.response_commited;
+    if( instance.command_commited )
+        delete instance.command_commited;
 
-    if( instance.response_to_commit)
-        delete instance.response_to_commit;
-
-    if( instance.localization_engine )
-        delete instance.localization_engine;
+    if( instance.command_to_commit)
+        delete instance.command_to_commit;
 
     if( instance.agent )
         delete instance.agent;
@@ -146,10 +141,9 @@ Client::~Client()
     instance.game_data   = 0;
     instance.parser      = 0;
     instance.agent       = 0;
-    instance.agent_response      = 0;
-    instance.response_commited   = 0;
-    instance.response_to_commit  = 0;
-    instance.localization_engine = 0;
+    instance.agent_command      = 0;
+    instance.command_commited   = 0;
+    instance.command_to_commit  = 0;
 
 }
 
@@ -166,13 +160,13 @@ void Client::main_loop( bool goalie )
         USock::instance().Send("(init PokTaPok (version 15.1))");
     }
 
-    MP_MessageType mp_type; //Tipo de mensaje del microparser
+
     while( server_is_alive() )
     {
 
         USock::instance().Receive( buffer_in );
 
-        mp_type = Client::instance().last_msg_type =
+        Client::instance().last_msg_type =
             (MP_MessageType) MicroParser::get_message_type(buffer_in); //Le decimos al hilo de envio el tipo de mensaje que nos lleg̣a.
         //Client::instance().last_msg_cycle = MicroParser::get_message_time( buffer_in );
 
@@ -185,7 +179,8 @@ void Client::main_loop( bool goalie )
 	}
 }
 
-void * Client::Client::process_thread_function(void *parameter) {
+void * Client::Client::process_thread_function(void *parameter)
+{
 	char server_message_aux[4096];
 	bool stack_empty;
     AgentCommand * comm_aux;
@@ -201,77 +196,83 @@ void * Client::Client::process_thread_function(void *parameter) {
         {
             pthread_mutex_lock( & Client::instance().message_stack_mutex);
 
-			strcpy( server_message_aux,
-					Client::instance().messages.front().c_str());
+                strcpy( server_message_aux,
+                        Client::instance().messages.front().c_str()
+                        );
 
-			Client::instance().messages.pop_front();
+                Client::instance().messages.pop_front();
 
             pthread_mutex_unlock(&Client::instance().message_stack_mutex);
 
-			//Pasamos al "filtro" para alimentar game_data.
-			Client::instance().pre_filter(server_message_aux);
+            // Parseo, actualiza el objeto sensor_handler.
+            Client::instance().parser->parse( server_message_aux );
 
-
-			//Recibimos la respuesta del agente.
+            // Recibimos la respuesta del agente.
 			Client::instance().agent->do_process(Client::instance().game_data,
-					Client::instance().agent_response,
-					Client::instance().response_commited);
+                    Client::instance().agent_command,
+                    Client::instance().command_commited);
 
-            comm_aux = Client::instance().agent_response;
-            Client::instance().agent_response = Client::instance().response_to_commit;
-            Client::instance().response_to_commit = comm_aux;
+            // Actualizamos el comando que se tiene que enviar,
+            // se utilizó un cambio de apuntadores para agilizar el proceso.
+            comm_aux = Client::instance().agent_command;
+            Client::instance().agent_command = Client::instance().command_to_commit;
+            Client::instance().command_to_commit = comm_aux;
 		}
 	}
 	return NULL;
 }
 
-void* Client::Client::sending_thread_function(void *parameter) {
-	int time;
-    int i;
-	MP_MessageType msg_type;
-
+void* Client::Client::sending_thread_function(void *parameter)
+{
+    int                 wait_time;
+    unsigned int        i;
+    MP_MessageType      msg_type;
     std::vector<string> commands;
-	while (1) {
+
+    while (1)
+    {
         //pthread_mutex_lock( & Client::time_mutex );
 		msg_type = Client::instance().last_msg_type;
         //pthread_mutex_unlock( & Client::time_mutex );
+
         if ( msg_type == MP_SENSE_BODY )
         {
 			//Destinado para cuando trabaje el módulo synchronizer
 			//Client::instance().synchronizer.msg_arrived(msg_type);
 			//time = Client::instance().synchronizer.get_current_cycle_wait_time();
-            time = 80000;
+
+            wait_time = 80000; // Obtenido experimentalmente
+
+            // **Esto no es threadsafe, debería tener mutex aquí
+            // **Se implementará junto con boost
+
             msg_type = Client::instance().last_msg_type = MP_NONE;
-            usleep(time);
 
-            // Esto no es threadsafe, debería tener mutex aquí
-            // Se implementará junto con boost
-
+            usleep( wait_time );
 
             commands.clear();
 
-            // Old version of serializer
-            // Serializer::generate_command( command_aux, *Client::instance().agent_response );
+            // **Esto no es threadsafe, debería tener mutex aquí
+            // **Se implementará junto con boost
 
-            // Esto no es threadsafe, debería tener mutex aquí
-            // Se implementará junto con boost
-
-            Serializer::serializeAgentCommands( *Client::instance().response_to_commit,
+            // Serializamos los comandos y los guardamos en el vector.
+            Serializer::serializeAgentCommands( *Client::instance().command_to_commit,
                                                 & commands );
 
+            // Enviamos todos los comandos generados.
             for( i=0; i<commands.size(); i++ )
             {
                 USock::instance().Send( commands[i].c_str() );
             }
 
-			*Client::instance().response_commited =
-                    *Client::instance().response_to_commit;
-
+            // Copiamos para saber qué es lo que se envió.
+            *Client::instance().command_commited =
+                    *Client::instance().command_to_commit;
 
         }
         else
         {
-			usleep(1000);
+            usleep(1000);
 		}
 
 	}
@@ -282,14 +283,6 @@ bool Client::server_is_alive()
 {
     // Reservado para un análisis de detección de conexión con el servidor.
 	return true;
-}
-
-void Client::pre_filter(char * server_msg)
-{
-
-    parser->parse(server_msg); // Parseo, llena el objeto obs_handler
-
-    //localization_engine->getNewPos( x, y, ang ); // Usa obs_handler para actualizar la pose del agente
 }
 
 

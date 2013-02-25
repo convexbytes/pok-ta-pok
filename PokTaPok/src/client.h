@@ -2,7 +2,6 @@
 #define CLIENT_H
 #include "udpSocket.h"
 #include "gameData.h"
-#include "agentResponse.h"
 #include "parser.h"
 #include "localizationEngine.h"
 #include "microParser.h"
@@ -13,7 +12,6 @@
 
 
 #include <pthread.h>
-#include <signal.h>
 #include <deque>
 #include <string>
 
@@ -38,8 +36,8 @@ public:
     static void * sending_thread_function(void *parameter);
 
 
-    pthread_mutex_t  message_stack_mutex; /* mutex para el main_loop y el process_thread */
-    pthread_mutex_t  command_mutex; /* mutex para el process_thread y el sending_thread */
+    pthread_mutex_t  message_stack_mutex; // mutex para el main_loop y el process_thread
+    pthread_mutex_t  command_mutex; // mutex para el process_thread y el sending_thread
     pthread_mutex_t  time_mutex;
     pthread_t        process_thread;
     pthread_t        sending_thread;
@@ -48,17 +46,18 @@ private:
     char buffer_in[4096]; //4096 es el tamaño usado por send y receive en udpsocket
 
     GameData        *   game_data;
-    AgentCommand    *   agent_response;
-    AgentCommand    *   response_to_commit;
-    AgentCommand    *   response_commited;
+    AgentCommand    *   agent_command;
+    AgentCommand    *   command_to_commit;
+    AgentCommand    *   command_commited;
     Parser          *   parser;
     Agent           *   agent;
-    LocalizationEngine * localization_engine;
     deque<string>       messages;
     //Synchronizer        synchronizer; //Decidimos que el sincronizador no era necesario usando tres hilos
     MP_MessageType      last_msg_type;
-    //int                 last_msg_cycle;
-    int sending_wait_time; //microsegundos
+
+
+    // Por ahora no está en funcionamiento
+    //int sending_wait_time; //microsegundos
 
     void initialize     ( );
     void pre_filter     ( char *server_msg );

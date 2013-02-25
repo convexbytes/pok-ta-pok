@@ -5,8 +5,6 @@
 
 #include "serializer.h"
 
-//std::string Serializer::generate_command( std::string & output )
-
 void Serializer::generate_command( char * output, AgentCommand &game_command )
 {
     char command_aux[4096];

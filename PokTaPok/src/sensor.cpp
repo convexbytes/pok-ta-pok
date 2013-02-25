@@ -1,45 +1,45 @@
-#include "observation.h"
+#include "sensor.h"
 #include "gameObject.h"
 #include <vector>
 #include <string>
 #include <stdio.h>
 
 
-SenseObs::SenseObs()
+BodySensor::BodySensor()
 {
-    time = UNDEFINED_NUMBER;
-    view_mode_quality = (ViewModeQuality)UNDEFINED_NUMBER;
-    view_mode_width = (ViewModeWidth)UNDEFINED_NUMBER;
-    stamina = UNDEFINED_NUMBER;
-    effort = UNDEFINED_NUMBER;
-    stamina_capacity = UNDEFINED_NUMBER;
-    speed_amount = UNDEFINED_NUMBER;
-    speed_direction = UNDEFINED_NUMBER;
-    head_angle = UNDEFINED_NUMBER;
-    kick = UNDEFINED_NUMBER;
-    dash = UNDEFINED_NUMBER;
-    turn = UNDEFINED_NUMBER;
-    say = UNDEFINED_NUMBER;
-    turn_neck = UNDEFINED_NUMBER;
-    catchh = UNDEFINED_NUMBER;
-    move = UNDEFINED_NUMBER;
-    change_view = UNDEFINED_NUMBER;
-    arm_movable = UNDEFINED_NUMBER;
-    arm_expires = UNDEFINED_NUMBER;
-    arm_target_1 = UNDEFINED_NUMBER;
-    arm_target_2 = UNDEFINED_NUMBER;
-    arm_count = UNDEFINED_NUMBER;
+    time = 0;
+    view_mode_quality = HIGH;
+    view_mode_width = NORMAL;
+    stamina = 8000.0;
+    effort = 1.0;
+    stamina_capacity = 130600;
+    speed_amount = 0.0;
+    speed_direction = 0.0;
+    head_angle = 0.0;
+    kick = 0;
+    dash = 0;
+    turn = 0;
+    say = 0;
+    turn_neck = 0;
+    catchh = 0;
+    move = 0;
+    change_view = 0;
+    arm_movable = 0;
+    arm_expires = 0;
+    arm_target_1 = 0;
+    arm_target_2 = 0;
+    arm_count = 0;
     focus_target_side = 'n';
-    focus_target_number = UNDEFINED_NUMBER;
-    focus_count = UNDEFINED_NUMBER;
-    tackle_expires = UNDEFINED_NUMBER;
-    tackle_count = UNDEFINED_NUMBER;
+    focus_target_number = 0;
+    focus_count = 0;
+    tackle_expires = 0;
+    tackle_count = 0;
     collision = COLLISION_NONE;
-    foul_charged = UNDEFINED_NUMBER;
+    foul_charged = 0;
     foul_card = FCARD_NONE;
 }
 
-void SenseObs::print()
+void BodySensor::print()
 {
     printf("\narm_count: %d",  this->arm_count );
     printf("\narm_expires: %d",  this->arm_expires );
@@ -73,40 +73,40 @@ void SenseObs::print()
     printf("\nview_mode_width: %d",  this->view_mode_width );
 }
 
-SeeObs::SeeObs()
+SeeSensor::SeeSensor()
 {
     this->ball_visible = false;
-    this->time = UNDEFINED_NUMBER;
+    this->time = 0;
     this->players.clear();
     this->flags.clear();
     this->recognized_flags.clear();
 }
 
-void SeeObs::add_player(Player player)
+void SeeSensor::add_player(Player player)
 {
     players.push_back( player);
 }
 
-void SeeObs::add_flag(Flag flag)
+void SeeSensor::add_flag(Flag flag)
 {
     flags.push_back( flag );
 }
-void SeeObs::add_line(Line line)
+void SeeSensor::add_line(Line line)
 {
     lines.push_back( line );
 }
-void SeeObs::add_ball(Ball ball)
+void SeeSensor::add_ball(Ball ball)
 {
     this->ball = ball;
     this->ball_visible = true;
 }
 
 
-bool SeeObs::ball_is_visible() const
+bool SeeSensor::ball_is_visible() const
 {
     return ball_visible;
 }
-int SeeObs::num_recognized_flags()
+int SeeSensor::num_recognized_flags()
 {
     int count, i, size;
     size = flags.size();
@@ -118,7 +118,7 @@ int SeeObs::num_recognized_flags()
     }
     return count;
 }
-int SeeObs::num_recognized_lines()
+int SeeSensor::num_recognized_lines()
 {
     return lines.size();
 }

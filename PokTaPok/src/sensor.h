@@ -1,5 +1,5 @@
-#ifndef OBSERVATION_H
-#define OBSERVATION_H
+#ifndef SENSOR_H
+#define SENSOR_H
 #include "gameObject.h"
 #include <vector>
 #include <string>
@@ -42,7 +42,8 @@ enum FocusTarget
 
 enum PlayModeHearable // "playmodes" que podemos escuchar del referee
 {
-    GOALIE_CATCH_BALL_L = 1,
+    PLAYMODE_NULL = 0,
+    GOALIE_CATCH_BALL_L,
     GOALIE_CATCH_BALL_R,
     BEFORE_KICK_OFF,
     TIME_OVER,
@@ -224,17 +225,17 @@ enum HearSender
     COUCH
 };
 
-enum ObservationType
+enum SensorType
 {
-    OBS_NONE = 0,
-    OBS_SEE,
-    OBS_SENSE,
-    OBS_HEAR,
-    OBS_MSG,
-    OBS_INIT,
-    OBS_ERROR,
-    OBS_OK,
-    OBS_SEE_GLOBAL
+    SENSOR_NONE = 0,
+    SENSOR_SEE,
+    SENSOR_BODY,
+    SENSOR_HEAR,
+    SENSOR_MSG,
+    SENSOR_INIT,
+    SENSOR_ERROR,
+    SENSOR_OK,
+    SENSOR_SEE_GLOBAL
 };
 enum Request
 {
@@ -246,7 +247,7 @@ enum Request
     EYE,
     CHECK_BALL,
     SYNCH_SEE,
-    LOOK,
+    LOOK
     
 };
 enum CheckBallPosition
@@ -264,20 +265,16 @@ enum ErrorType
     ILLEGAL_COMMAND_FORM
 };
 
-class Observation
-{
-public:
-    int time;
-    //ObservationType type; // This seems useless to me now..., pendiente de borrar
-};
 
-class SenseObs : public Observation
+
+class BodySensor
 {
 public:
 
-    SenseObs();
+    BodySensor();
     ViewModeQuality view_mode_quality; //correspondiente a high o low, se recibe en forma de cadena
     ViewModeWidth   view_mode_width; //correspondiente a narrow, normal o wide, se recibe en forma de cadena
+    int     time;
     float   stamina;
     float   effort ;
     int     stamina_capacity;
@@ -309,10 +306,10 @@ public:
     void print();
 };
 
-class SeeObs : public Observation
+class SeeSensor
 {
 public:
-    SeeObs();
+    SeeSensor();
     bool    ball_is_visible     () const;
     int     num_recognized_players  ();
     int     num_recognized_flags    ();
@@ -325,57 +322,59 @@ public:
     vector<Flag> flags;
     vector<Flag> recognized_flags;
     vector<Line> lines;
+    int time;
     Ball ball;
     bool ball_visible;
 };
 
-class HearObs : public Observation
+class HearSensor
 {
 public:
+    int time;
     HearSender sender;
     /* en caso de que el sender sea referee */
 };
 
-class HearRefereeObs : public HearObs
+class HearRefereeSensor : public HearSensor
 {
 public:
-    HearRefereeObs() { sender = REFEREE;  }
+    HearRefereeSensor() { sender = REFEREE;  }
     PlayModeHearable play_mode;
     int num; //Número correspondente a número de jugador, número de goles, etc; dependiendo el play_mode.
 };
 
-class HearOurObs : public HearObs
+class HearOurSensor : public HearSensor
 {
 public:
-    HearOurObs() { sender = OUR; }
+    HearOurSensor() { sender = OUR; }
     int uniform_number;
     string message;
     int direction;
 };
 
-class HearOppObs : public HearObs
+class HearOppSensor : public HearSensor
 {
 public:
-    HearOppObs() { sender = OUR; }
+    HearOppSensor() { sender = OUR; }
     int uniform_number;
     string message;
     int direction;
 };
-class HearCouchObs : public HearObs
+class HearCouchSensor : public HearSensor
 {
 public:
-    HearCouchObs() { sender = COUCH; }
+    HearCouchSensor() { sender = COUCH; }
     string message;
 };
 
-class HearSelfObs : public HearObs
+class HearSelfSensor : public HearSensor
 {
 public:
-    HearSelfObs() { sender = SELF; }
+    HearSelfSensor() { sender = SELF; }
     string message;
 };
 
-class InitObs
+class InitSensor
 {
 public:
     int 		uniform_number;
@@ -385,14 +384,14 @@ public:
 };
 
 
-class ErrorObs
+class ErrorSensor
 {
 public:
     ErrorType error;
 
 };
 
-class SeeGlobal
+class SeeGlobalSensor
 {
 public:
 	// Omito (g r) y (g l), ya que son siempre constantes: ((g r) 52.5 0) ((g l) -52.5 0)
@@ -428,4 +427,4 @@ public:
 	int 			  time;
 	CheckBallPosition position;	
 };
-#endif /* OBSERVATION_H */
+#endif // SENSOR_H

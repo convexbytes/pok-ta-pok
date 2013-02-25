@@ -19,6 +19,11 @@ void MontecarloLocalization::montecarlo_prediction( Particula *particulas,
 {
     int i;
 
+    /*std::cout << "Prediction on cycle:  "
+              << game_data->sensor_handler.last_obs_time
+              << std::endl;
+
+    */
     for( i=0; i<NUM_PARTICULAS; i++ )
     {
         particulas_nuevas[i] = Sample_Motion_Model( U, particulas[i] );   
@@ -32,7 +37,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 {
     int     i, j, banderas_vistas;
     int     posicion_peso_max = 0;
-    int     time;
+    //int     time;
     double  draw;
     static double  peso[NUM_PARTICULAS];
     static double  rango[NUM_PARTICULAS+1];
@@ -90,9 +95,10 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
               }
        }
 
-    /* Imprimimos la partícula de mayor peso
-*/
-    time = game_data->obs_handler.last_obs_time;
+    // Imprimimos la partícula de mayor peso
+
+    //time = game_data->sensor_handler.last_see.time;
+    /*
     printf( "time: %d x: %lf y: %lf bodyAngle: %lf weight: %lf place: %d\n",
 			time,
             particulas_nuevas[posicion_peso_max].x,
@@ -101,6 +107,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
             peso[posicion_peso_max],
             posicion_peso_max
             );
+      */
 
 
     /*if( peso[posicion_peso_max] < 0.01 )
@@ -134,11 +141,11 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
     double inertia_moment   = game_data->game_parameter.server_param.inertia_moment;
     double player_rand      = game_data->game_parameter.server_param.player_rand;
 
-    double effort          = game_data->obs_handler.last_sense.effort;
-    double stamina         = game_data->obs_handler.last_sense.stamina;
-    double body_dis_vel    = game_data->obs_handler.last_sense.speed_amount;
-    double body_dir_vel    = game_data->obs_handler.last_sense.speed_direction;
-    double neck_dir        = game_data->obs_handler.last_sense.head_angle;
+    double effort          = game_data->sensor_handler.last_sense.effort;
+    double stamina         = game_data->sensor_handler.last_sense.stamina;
+    double body_dis_vel    = game_data->sensor_handler.last_sense.speed_amount;
+    double body_dir_vel    = game_data->sensor_handler.last_sense.speed_direction;
+    double neck_dir        = game_data->sensor_handler.last_sense.head_angle;
 
     double act_ang = 0.0;
     double r1, r2, rmax, r_angle;
@@ -393,7 +400,7 @@ Vector2D MontecarloLocalization::modelo_aceleracion( double power,
     //double slownessOnTopForRight = param.slowness_on_top_for_right_team;
 
     //double M_stamina        = 0.0;
-    //game_data->obs_handler.last_sense.st
+    //game_data->sensor_handler.last_sense.st
 
     power = NormalizeDashPower  ( power, minDashPower, maxDashPower );
     dir   = NormalizeDashAngle  ( dir, minDashAngle, maxDashAngle );
