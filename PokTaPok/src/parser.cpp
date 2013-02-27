@@ -610,194 +610,229 @@ void Parser::parse_see(char *message)
     //std::cout << "Parsing flags..." << std::endl;
 
             subcadena2=strstr(message,"f t l 50");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTL50);
-        }
+
             subcadena2=strstr(message,"f t l 40");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTL40);
-        }
+
             subcadena2=strstr(message,"f t l 30");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTL30);
-        }
+
             subcadena2=strstr(message,"f t l 20");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTL20);
-        }
+
             subcadena2=strstr(message,"f t l 10");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTL10);
-        }
-            subcadena2=strstr(message,"f t 0");
-        if (subcadena2 != NULL){
-            flpar( subcadena2,FT0);
-        }
+
+
             subcadena2=strstr(message,"f t r 10");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTR10);
-        }
+
             subcadena2=strstr(message,"f t r 20");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTR20);
-        }
+
             subcadena2=strstr(message,"f t r 30");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTR30);
-        }
+
             subcadena2=strstr(message,"f t r 40");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTR40);
-        }
+
                subcadena2=strstr(message,"f t r 50");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTR50);
-        }
+
             subcadena2=strstr(message,"f r t 10");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTR10);
-        }
+
             subcadena2=strstr(message,"f r t 20");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTR20);
-        }
+
                subcadena2=strstr(message,"f r t 30");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FTR30);
-        }
+
             subcadena2=strstr(message,"f r b 10");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FRB10);
-        }
+
                 subcadena2=strstr(message,"f r b 20");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FRB20);
-        }
+
                subcadena2=strstr(message,"f r b 30");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FRB30);
-        }
+
             subcadena2=strstr(message,"f b r 50");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FBR50);
-        }
+
             subcadena2=strstr(message,"f b r 40");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FBR40);
-        }
+
             subcadena2=strstr(message,"f b r 30");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FBR30);
-        }
+
             subcadena2=strstr(message,"f b r 20");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FBR20);
-        }
+
             subcadena2=strstr(message,"f b r 10");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FBR10);
-        }
-                subcadena2=strstr(message,"f b 0");
-        if (subcadena2 != NULL){
-            flpar( subcadena2,FB0);
-            subcadena2++;
-        }
+
             subcadena2=strstr(message,"f b l 20");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FBL20);
-        }
+
             subcadena2=strstr(message,"f b l 30");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FBL30);
-        }
+
             subcadena2=strstr(message,"f b l 40");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FBL40);
-        }
+
             subcadena2=strstr(message,"f b l 50");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FBL50);
-        }
+
             subcadena2=strstr(message,"f l b 30");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FLB30);
-        }
+
             subcadena2=strstr(message,"f r t 20");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FRT20);
-        }
+
             subcadena2=strstr(message,"f l b 10");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FLB10);
-        }
-            subcadena2=strstr(message,"f l 0");
-        if (subcadena2 != NULL){
-            flpar( subcadena2,FL0);
-        }
+
+
             subcadena2=strstr(message,"f l t 10");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FLT10);
-        }
+
             subcadena2=strstr(message,"f l t 20");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FLT20);
-        }
+
             subcadena2=strstr(message,"f l t 30");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FLT30);
-        }
-            subcadena2=strstr(message,"f c t");
-        if (subcadena2 != NULL){
-            flpar( subcadena2,FCT);
-        }
+
+
             subcadena2=strstr(message,"f g r t");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FGRT);
-        }
-            subcadena2=strstr(message,"f r b");
-        if (subcadena2 != NULL){
-            flpar( subcadena2,FRB);
-        }
-            subcadena2=strstr(message,"f c b");
-        if (subcadena2 != NULL){
-            flpar( subcadena2,FCB);
-        }
-            subcadena2=strstr(message,"f l b");
-        if (subcadena2 != NULL){
-            flpar( subcadena2,FLB);
-        }
-                subcadena2=strstr(message,"g l");
-        if (subcadena2 != NULL){
-            flpar( subcadena2,GL);
-        }
+
+
+        subcadena2 = strstr( message, "f g l t");
+        if( subcadena2 != NULL )
+            flpar( subcadena2, FGLT );
+
+        subcadena2 = strstr( message, "f g l b" );
+        if( subcadena2 != NULL )
+            flpar( subcadena2, FGLB );
+
+        subcadena2 = strstr( message, "f g r t");
+        if( subcadena2 != NULL )
+            flpar( subcadena2, FGRT );
+
+        subcadena2 = strstr( message, "f g r b" );
+        if( subcadena2 != NULL )
+            flpar( subcadena2, FGRB );
+
             subcadena2=strstr(message,"f p l t");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FPLT);
-        }
+
                subcadena2=strstr(message,"f p r t");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FPRT);
-        }
+
             subcadena2=strstr(message,"f p r c");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FPRC);
-        }
+
             subcadena2=strstr(message,"f p r b");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FPRB);
-        }
+
             subcadena2=strstr(message,"f p l b");
-        if (subcadena2 != NULL){
+        if (subcadena2 != NULL)
             flpar( subcadena2,FPLB);
-        }
-            subcadena2=strstr(message,"f p l c");
-        if (subcadena2 != NULL){
+
+        subcadena2=strstr(message,"f p l c");
+        if (subcadena2 != NULL)
             flpar( subcadena2,FPLC);
-        }
-            subcadena2=strstr(message,"f c");
-        if (subcadena2 != NULL){
+
+        subcadena2=strstr(message,"f r b");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,FRB);
+
+        subcadena2=strstr(message,"f c b");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,FCB);
+
+        subcadena2=strstr(message,"f l b");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,FLB);
+
+        subcadena2=strstr(message,"f r t");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,FRT);
+
+        subcadena2=strstr(message,"f c t");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,FCT);
+
+        subcadena2=strstr(message,"f l t");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,FLT);
+
+        subcadena2=strstr(message,"f t 0");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,FT0);
+
+        subcadena2=strstr(message,"f b 0");
+        if (subcadena2 != NULL)
+        flpar( subcadena2,FB0);
+
+        subcadena2=strstr(message,"f c t");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,FCT);
+
+        subcadena2=strstr(message,"f l 0");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,FL0);
+
+           subcadena2=strstr(message,"f c");
+        if (subcadena2 != NULL)
             flpar( subcadena2,FC);
-        }
+
+        subcadena2=strstr(message,"g r");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,GR);
+
+        subcadena2=strstr(message,"g l");
+        if (subcadena2 != NULL)
+            flpar( subcadena2,GL);
+
 
 
         //lineas
