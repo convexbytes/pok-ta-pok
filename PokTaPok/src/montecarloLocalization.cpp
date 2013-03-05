@@ -314,13 +314,13 @@ double MontecarloLocalization::Landmark_Model_Known_Corresponce(    Flag      & 
     //r_min = exp( (rint ( log(  (rint( bandera.distance/ 0.1 ) - 0.5 ) * 0.1 ) / q_step_l ) - 0.5 ) * q_step_l );
     //r_max = exp( (rint ( log(  (rint( bandera.distance/ 0.1 ) + 0.5 ) * 0.1 ) / q_step_l ) + 0.5 ) * q_step_l );
 
-    r_min = exp( (rint ( log(  (rint( bandera.distance/ 0.1 ) - 0.5 ) * 0.1 ) / 0.1 ) - 0.5 ) * 0.01 );
-    r_max = exp( (rint ( log(  (rint( bandera.distance/ 0.1 ) + 0.5 ) * 0.1 ) / 0.1 ) + 0.5 ) * 0.01 );
+    r_min = exp( (rint ( log(  (rint( bandera.dis/ 0.1 ) - 0.5 ) * 0.1 ) / 0.1 ) - 0.5 ) * 0.01 );
+    r_max = exp( (rint ( log(  (rint( bandera.dis/ 0.1 ) + 0.5 ) * 0.1 ) / 0.1 ) + 0.5 ) * 0.01 );
 
     desviacion_r = r_max - r_min;
 
-    phi_min = (rint( bandera.direction / 1.0) - 0.5) * 1.0;
-    phi_max = (rint( bandera.direction / 1.0) + 0.5) * 1.0;
+    phi_min = (rint( bandera.dir / 1.0) - 0.5) * 1.0;
+    phi_max = (rint( bandera.dir / 1.0) + 0.5) * 1.0;
 
     desviacion_phi = phi_max - phi_min;
 
@@ -330,9 +330,9 @@ double MontecarloLocalization::Landmark_Model_Known_Corresponce(    Flag      & 
       //                                               desviacion_r );
 
     // Fijamos la desviación a 3.0 para aumentar las prob.
-    variable_momentanea1 = prob_normal_distribution( bandera.distance - r_aprox, 3.0 );
+    variable_momentanea1 = prob_normal_distribution( bandera.dis - r_aprox, 3.0 );
 
-    valiable_momentanea2 = prob_normal_distribution(  bandera.direction  - Rad2Deg( phi_aprox_rad ),
+    valiable_momentanea2 = prob_normal_distribution(  bandera.dir  - Rad2Deg( phi_aprox_rad ),
                                                       desviacion_phi );
 
 

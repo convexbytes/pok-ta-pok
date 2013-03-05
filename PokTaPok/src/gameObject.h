@@ -101,15 +101,15 @@ using namespace std;
 #define FLT_Y -34
 #define FCT_Y -34
 #define FRT_Y -34
-#define FGRT_Y 7
+#define FGRT_Y -7
 #define GR_Y 0
-#define FGRB_Y 7.01
+#define FGRB_Y 7
 #define FRB_Y 34
 #define FCB_Y 34
 #define FLB_Y 34
-#define FGLB_Y 7.01
+#define FGLB_Y 7
 #define GL_Y 0
-#define FGLT_Y -7.01
+#define FGLT_Y -7
 #define FPLT_Y -20
 #define FPRT_Y -20
 #define FPRC_Y 0
@@ -132,7 +132,7 @@ enum EFlag
     , FTR10
     , FTR20
     , FTR30
-    , FTR40
+    , FTR40 //10
     , FTR50
     , FRT30
     , FRT20
@@ -142,7 +142,7 @@ enum EFlag
     , FRB20
     , FRB30
     , FBR50
-    , FBR40
+    , FBR40 //20
     , FBR30
     , FBR20
     , FBR10
@@ -152,7 +152,7 @@ enum EFlag
     , FBL30
     , FBL40
     , FBL50
-    , FLB30
+    , FLB30 //30
     , FLB20
     , FLB10
     , FL0
@@ -162,7 +162,7 @@ enum EFlag
     , FLT
     , FCT
     , FRT
-    , FGRT
+    , FGRT //40
     , GR
     , FGRB
     , FRB
@@ -172,7 +172,7 @@ enum EFlag
     , GL
     , FGLT
     , FPLT
-    , FPRT
+    , FPRT //50
     , FPRC
     , FPRB
     , FPLB
@@ -191,25 +191,24 @@ enum ELine
 class GameObject
 {
 public:
-    double distance;
-    double direction;
+    double dis;
+    double dir;
 };
 
 
 class MobileObject : public GameObject
 {
 public:
-    double direction_change;
-    double distance_change;
-    Vector2D speed_vector;
+    double dir_chg;
+    double dis_chg;
 };
 
 class Line : public GameObject
 {
 public:
     ELine id;
-    double direction_change;
-    double distance_change;
+    double dir_chg;
+    double dis_chg;
     void print();
 };
 
@@ -218,8 +217,8 @@ class Flag : public GameObject
 public:
     EFlag id;
     Vector2D get_global_coord() const;
-    double direction_change;
-    double distance_change;
+    double dir_chg;
+    double dis_chg;
     void print();
 };
 
@@ -241,11 +240,15 @@ public:
     }
 
     string team;
-    //char side;
-    int uniform_number;
-    int body_direction;
-    //int face_direction;  //Venia en el manual, pero no estoy seguro qué es.
-    int neck_direction;
+    int unum;
+    double body_dir;
+    double head_dir;
+    double point_dir;
+    bool is_goalie;
+
+    bool on_tackle;
+    bool on_kick;
+
     void print();
 
 };

@@ -5,6 +5,11 @@
 #include "microParser.h"
 #include "sensorHandler.h"
 
+#ifndef NDEF_NUM
+#define NDEF_NUM -999999.0 // El rango de cualquier información provista por el servidor no es tan pequeño
+#endif
+
+
 enum ParserMsgType
 {
     P_PARSING_ERROR,

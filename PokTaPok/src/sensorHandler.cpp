@@ -21,8 +21,8 @@ void SensorHandler::sense_stamina          ( float stamina) { last_sense.stamina
 void SensorHandler::sense_effort           ( float effort) { last_sense.effort = effort; }
 void SensorHandler::sense_staminaCapacity  ( int staminaCapacity) { last_sense.stamina_capacity = staminaCapacity; }
 void SensorHandler::sense_speed_amount     ( float speed_amount) { last_sense. speed_amount = speed_amount; }
-void SensorHandler::sense_speed_direction      ( int speed_direction) { last_sense. speed_direction = speed_direction; }
-void SensorHandler::sense_head_angle           ( int head_angle) { last_sense. head_angle = head_angle; }
+void SensorHandler::sense_speed_direction  ( int speed_dir) { last_sense. speed_direction = speed_dir; }
+void SensorHandler::sense_head_angle       ( int head_angle) { last_sense. head_angle = head_angle; }
 void SensorHandler::sense_kick         ( int kick) { last_sense. kick = kick; }
 void SensorHandler::sense_dash         ( int dash) { last_sense. dash = dash; }
 void SensorHandler::sense_turn         ( int turn) { last_sense. turn = turn; }
@@ -30,7 +30,7 @@ void SensorHandler::sense_say          ( int say) { last_sense. say = say; }
 void SensorHandler::sense_turn_neck    ( int turn_neck) { last_sense. turn_neck = turn_neck; }
 void SensorHandler::sense_catchh       ( int catchh) { last_sense. catchh = catchh; }
 void SensorHandler::sense_move         ( int move) { last_sense. move = move; }
-void SensorHandler::sense_change_view      ( int change_view) { last_sense. change_view = change_view; }
+void SensorHandler::sense_change_view      ( int chg_view) { last_sense. change_view = chg_view; }
 void SensorHandler::sense_arm_movable      ( int arm_movable) { last_sense. arm_movable = arm_movable; }
 void SensorHandler::sense_arm_expires      ( int arm_expires) { last_sense. arm_expires = arm_expires; }
 void SensorHandler::sense_arm_target_1     ( int arm_target_1) { last_sense. arm_target_1 = arm_target_1; }
@@ -54,117 +54,95 @@ void SensorHandler::begin_see( int time )
     last_see.time 	= time;
 }
 
-void SensorHandler::see_player( string team, int unum,  float distance, int direction,
-                                float dis_change, float dir_change, float speed_x,
-                                float speed_y, int body_dir, int neck_dir)
+void SensorHandler::see_player( string team, int unum, bool goalie,
+								double dist,
+								double dir,
+								double distch,
+								double dirch,
+								double body_dir,
+								double head_dir,
+								double point_dir,
+								bool   on_tackle,
+								bool   on_kick )
 {
-    Player player;
-    player.team = team;
-    player.uniform_number = unum;
-    player.distance = distance;
-    player.direction = direction;
-    player.distance_change = dis_change;
-    player.direction_change = dir_change;
-    player.speed_vector.x = speed_x;
-    player.speed_vector.y = speed_y;
-    player.neck_direction = neck_dir;   /* creo que se da en caso de que el jugador este muy cerca */
-    player.body_direction = body_dir;   /* creo que se da en caso de que el jugador este muy cerca */
-    last_see.add_player( player );
-    if( PRINT_SENSOR ) player.print();
-}
+	static Player player;
 
-void SensorHandler::see_player(float distance, int direction)
-{
-    this->see_player("", UNDEFINED_NUMBER, distance, direction, UNDEFINED_NUMBER, UNDEFINED_NUMBER, UNDEFINED_NUMBER, UNDEFINED_NUMBER,UNDEFINED_NUMBER, UNDEFINED_NUMBER);
-}
-
-void SensorHandler::see_player(string team, float distance, int direction)
-{
-    this->see_player(team, UNDEFINED_NUMBER, distance, direction, UNDEFINED_NUMBER, UNDEFINED_NUMBER, UNDEFINED_NUMBER, UNDEFINED_NUMBER,UNDEFINED_NUMBER,UNDEFINED_NUMBER);
-}
-void SensorHandler::see_player(string team, int unum, float distance, int direction)
-{
-    this->see_player(team, unum, distance, direction, UNDEFINED_NUMBER, UNDEFINED_NUMBER, UNDEFINED_NUMBER, UNDEFINED_NUMBER,UNDEFINED_NUMBER,UNDEFINED_NUMBER);
-}
-void SensorHandler::see_player(string team, int unum, float distance, int direction, float dis_change, float dir_change)
-{
-    this->see_player(team, unum, distance, direction, dis_change, dir_change, UNDEFINED_NUMBER, UNDEFINED_NUMBER,UNDEFINED_NUMBER, UNDEFINED_NUMBER);
-}
-
-void SensorHandler::see_player(string team, int unum, float distance, int direction, float dis_change, float dir_change, float speed_x, float speed_y)
-{
- this->see_player(team, unum, distance, direction, dis_change, dir_change, speed_x, speed_y,UNDEFINED_NUMBER, UNDEFINED_NUMBER);
+	player.team.assign( team );
+	player.unum = unum;
+	player.is_goalie = goalie;
+	player.dis = dist;
+	player.dir = dir;
+	player.dis_chg = distch;
+	player.dir_chg = dirch;
+	player.body_dir = body_dir;
+	player.head_dir = head_dir;
+	player.point_dir = point_dir;
+	player.on_tackle = on_tackle;
+	player.on_kick = on_kick;
+	//player.print();
+	//this->last_see.add_player( )
 }
 
 
-void SensorHandler::see_flag(EFlag id, float distance, int direction, float dis_chg, float dir_chg)
+void SensorHandler::see_flag(EFlag id, float dis, int dir, float dis_chg, float dir_chg)
 {
     Flag flag;
-    flag.direction = direction;
-    flag.distance = distance;
-    flag.direction_change = dir_chg;
-    flag.distance_change = dis_chg;
+    flag.dir = dir;
+    flag.dis = dis;
+    flag.dir_chg = dir_chg;
+    flag.dis_chg = dis_chg;
     flag.id = id;
     last_see.add_flag( flag );
     if( PRINT_SENSOR ) flag.print();
 }
-void SensorHandler::see_flag(float distance, int direction)
+void SensorHandler::see_flag(float dis, int dir)
 {
-    this->see_flag(FLAG_UNKNOWN, distance, direction, UNDEFINED_NUMBER, UNDEFINED_NUMBER);
+    this->see_flag(FLAG_UNKNOWN, dis, dir, NDEF_NUM, NDEF_NUM);
 }
 
-void SensorHandler::see_flag(EFlag id, float distance, int direction)
+void SensorHandler::see_flag(EFlag id, float dis, int dir)
 {
-    this->see_flag(id, distance, direction, UNDEFINED_NUMBER, UNDEFINED_NUMBER);
+    this->see_flag(id, dis, dir, NDEF_NUM, NDEF_NUM);
 }
 
 
-void SensorHandler::see_line(ELine id, float distance, int direction, float dir_chg, float dis_chg)
+void SensorHandler::see_line(ELine id, float dis, int dir, float dir_chg, float dis_chg)
 {
     Line line;
-    line.direction = direction;
-    line.distance = distance;
-    line.direction_change = dir_chg;
-    line.distance_change = dis_chg;
+    line.dir = dir;
+    line.dis = dis;
+    line.dir_chg = dir_chg;
+    line.dis_chg = dis_chg;
     line.id = id;
     last_see.add_line( line );
     if( PRINT_SENSOR ) line.print();
 }
 
-void SensorHandler::see_line(ELine id, float distance, int direction)
+void SensorHandler::see_line(ELine id, float dis, int dir)
 {
-    this->see_line(id, distance, direction, UNDEFINED_NUMBER, UNDEFINED_NUMBER);
+    this->see_line(id, dis, dir, NDEF_NUM, NDEF_NUM);
 }
 
 
-void SensorHandler::see_ball( float distance, int direction, float dis_change,
-                             float dir_change , float speed_x, float speed_y)
+void SensorHandler::see_ball( float dis,
+							  int dir,
+							  float dis_chg,
+                              float dir_chg )
 {
     Ball ball;
-    ball.distance = distance;
-    ball.direction = direction;
-    ball.distance_change = dis_change;
-    ball.direction_change = dir_change;
-    ball.speed_vector.x = speed_x;
-    ball.speed_vector.y = speed_y;
+    ball.dis = dis;
+    ball.dir = dir;
+    ball.dis_chg = dis_chg;
+    ball.dir_chg = dir_chg;
     last_see.add_ball( ball );
-    if( PRINT_SENSOR ) ball.print();
+    //if( PRINT_SENSOR ) ball.print();
 }
 
-void SensorHandler::see_ball(float distance, int direction)
+void SensorHandler::see_ball(float dis, int dir)
 {
-    this->see_ball( distance, direction, UNDEFINED_NUMBER, UNDEFINED_NUMBER, UNDEFINED_NUMBER, UNDEFINED_NUMBER);
+    this->see_ball( dis, dir, NDEF_NUM, NDEF_NUM);
 }
 
-void SensorHandler::see_ball(float distance, int direction, float dis_change, float dir_change)
-{
-    this->see_ball( distance, direction, dis_change, dir_change, UNDEFINED_NUMBER, UNDEFINED_NUMBER);
-}
-
-void SensorHandler::see_finish()
-{
-
-}
 
 //Funciones referentes a hear.
 void SensorHandler::hear_couch(int time, string msg)
@@ -176,23 +154,23 @@ void SensorHandler::hear_couch(int time, string msg)
 
 }
 
-void SensorHandler::hear_our(int time, int direction, int unum, string msg)
+void SensorHandler::hear_our(int time, int dir, int unum, string msg)
 {
     last_sensor_type = SENSOR_HEAR;
     last_hear.time = last_hear_our.time = time;
     last_hear.sender = OUR;
-    last_hear_our.direction = direction;
-    last_hear_our.uniform_number = unum;
+    last_hear_our.dir = dir;
+    last_hear_our.unum = unum;
     last_hear_our.message = msg;
 }
 
-void SensorHandler::hear_opp(int time, int direction, int unum, string msg)
+void SensorHandler::hear_opp(int time, int dir, int unum, string msg)
 {
     last_sensor_type = SENSOR_HEAR;
     last_hear.time = last_hear_our.time = time;
     last_hear.sender = OPP;
-    last_hear_opp.direction = direction;
-    last_hear_opp.uniform_number = unum;
+    last_hear_opp.dir = dir;
+    last_hear_opp.unum = unum;
     last_hear_opp.message = msg;
 }
 
@@ -207,7 +185,7 @@ void SensorHandler::hear_referee(int time, PlayModeHearable play_mode, int num )
 
 void SensorHandler::hear_referee(int time, PlayModeHearable play_mode)
 {
-    hear_referee(time, play_mode, UNDEFINED_NUMBER );
+    hear_referee(time, play_mode, NDEF_NUM );
 }
 
 void SensorHandler::hear_self(int time, string msg)
@@ -223,7 +201,7 @@ void SensorHandler::init(char side, int unum, PlayModeHearable play_mode, int pl
     //playmode_num es el número incrustado en los modos de juego, por ejemplo, 2 en goal_r_2.
     last_sensor_type = SENSOR_INIT;
     last_init.side = side;
-    last_init.uniform_number = unum;
+    last_init.unum = unum;
     last_init.play_mode = play_mode;
     last_init.playmode_num = playmode_num;
 }

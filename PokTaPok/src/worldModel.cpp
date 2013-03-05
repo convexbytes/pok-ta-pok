@@ -75,7 +75,7 @@ void WorldModelV1::updateOnInit()
 	InitSensor & init = game_data->sensor_handler.last_init;
 	this->play_mode = init.play_mode;
 	me.side = init.side;
-	me.unum = init.uniform_number;
+	me.unum = init.unum;
 
 }
 

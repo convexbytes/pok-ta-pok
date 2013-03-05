@@ -598,241 +598,237 @@ void Parser::parse_see(char *message)
     char * subcadena = NULL;
     char * subcadena3 = NULL;
     char str1[256];
-    bool has_team = false, has_number = false;
     count = 0;
 
     sscanf(message,"(see %d",&int_value4);
 
-    //std::cout << "See parsing begun. Time  " << int_value4 << endl;
-
     game_data->sensor_handler.begin_see( int_value4 );
 
-    //std::cout << "Parsing flags..." << std::endl;
 
-            subcadena2=strstr(message,"f t l 50");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTL50);
+    subcadena2=strstr(message,"(f t l 50)"); // 1
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTL50);
 
-            subcadena2=strstr(message,"f t l 40");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTL40);
+     subcadena2=strstr(message,"(f t l 40)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTL40);
 
-            subcadena2=strstr(message,"f t l 30");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTL30);
+     subcadena2=strstr(message,"(f t l 30)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTL30);
 
-            subcadena2=strstr(message,"f t l 20");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTL20);
+     subcadena2=strstr(message,"(f t l 20)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTL20);
 
-            subcadena2=strstr(message,"f t l 10");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTL10);
-
-
-            subcadena2=strstr(message,"f t r 10");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTR10);
-
-            subcadena2=strstr(message,"f t r 20");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTR20);
-
-            subcadena2=strstr(message,"f t r 30");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTR30);
-
-            subcadena2=strstr(message,"f t r 40");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTR40);
-
-               subcadena2=strstr(message,"f t r 50");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTR50);
-
-            subcadena2=strstr(message,"f r t 10");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTR10);
-
-            subcadena2=strstr(message,"f r t 20");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTR20);
-
-               subcadena2=strstr(message,"f r t 30");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FTR30);
-
-            subcadena2=strstr(message,"f r b 10");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FRB10);
-
-                subcadena2=strstr(message,"f r b 20");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FRB20);
-
-               subcadena2=strstr(message,"f r b 30");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FRB30);
-
-            subcadena2=strstr(message,"f b r 50");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FBR50);
-
-            subcadena2=strstr(message,"f b r 40");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FBR40);
-
-            subcadena2=strstr(message,"f b r 30");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FBR30);
-
-            subcadena2=strstr(message,"f b r 20");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FBR20);
-
-            subcadena2=strstr(message,"f b r 10");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FBR10);
-
-            subcadena2=strstr(message,"f b l 20");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FBL20);
-
-            subcadena2=strstr(message,"f b l 30");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FBL30);
-
-            subcadena2=strstr(message,"f b l 40");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FBL40);
-
-            subcadena2=strstr(message,"f b l 50");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FBL50);
-
-            subcadena2=strstr(message,"f l b 30");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FLB30);
-
-            subcadena2=strstr(message,"f r t 20");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FRT20);
-
-            subcadena2=strstr(message,"f l b 10");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FLB10);
+     subcadena2=strstr(message,"(f t l 10)");// 5
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTL10);
 
 
-            subcadena2=strstr(message,"f l t 10");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FLT10);
+     subcadena2=strstr(message,"(f t r 10)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTR10);
 
-            subcadena2=strstr(message,"f l t 20");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FLT20);
+     subcadena2=strstr(message,"(f t r 20)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTR20);
 
-            subcadena2=strstr(message,"f l t 30");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FLT30);
+     subcadena2=strstr(message,"(f t r 30)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTR30);
+
+     subcadena2=strstr(message,"(f t r 40)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTR40);
+
+        subcadena2=strstr(message,"(f t r 50)"); // 10
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FTR50);
+
+     subcadena2=strstr(message,"(f r t 10)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FRT10);
+
+     subcadena2=strstr(message,"(f r t 20)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FRT20);
+
+        subcadena2=strstr(message,"(f r t 30)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FRT30);
+
+     subcadena2=strstr(message,"(f r b 10)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FRB10);
+
+         subcadena2=strstr(message,"(f r b 20)"); // 15
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FRB20);
+
+        subcadena2=strstr(message,"(f r b 30)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FRB30);
+
+     subcadena2=strstr(message,"(f b r 50)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBR50);
+
+     subcadena2=strstr(message,"(f b r 40)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBR40);
+
+     subcadena2=strstr(message,"(f b r 30)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBR30);
+
+     subcadena2=strstr(message,"(f b r 20)"); // 20
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBR20);
+
+     subcadena2=strstr(message,"(f b r 10)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBR10);
+
+ subcadena2=strstr(message,"(f b l 10)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBL10);
+
+     subcadena2=strstr(message,"(f b l 20)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBL20);
+
+     subcadena2=strstr(message,"(f b l 30)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBL30);
+
+     subcadena2=strstr(message,"(f b l 40)"); // 25
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBL40);
+
+     subcadena2=strstr(message,"(f b l 50)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FBL50);
+
+     subcadena2=strstr(message,"(f l b 30)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FLB30);
+
+     subcadena2=strstr(message,"(f l b 20)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FLB20);
+
+     subcadena2=strstr(message,"(f l b 10)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FLB10);
 
 
-            subcadena2=strstr(message,"f g r t");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FGRT);
+     subcadena2=strstr(message,"(f l t 10)"); // 30
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FLT10);
+
+     subcadena2=strstr(message,"(f l t 20)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FLT20);
+
+     subcadena2=strstr(message,"(f l t 30)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FLT30);
 
 
-        subcadena2 = strstr( message, "f g l t");
-        if( subcadena2 != NULL )
-            flpar( subcadena2, FGLT );
+     subcadena2=strstr(message,"(f g r t)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FGRT);
 
-        subcadena2 = strstr( message, "f g l b" );
-        if( subcadena2 != NULL )
-            flpar( subcadena2, FGLB );
 
-        subcadena2 = strstr( message, "f g r t");
-        if( subcadena2 != NULL )
-            flpar( subcadena2, FGRT );
+ subcadena2 = strstr( message, "(f g l t)");
+ if( subcadena2 != NULL )
+     flpar( subcadena2, FGLT );
 
-        subcadena2 = strstr( message, "f g r b" );
-        if( subcadena2 != NULL )
-            flpar( subcadena2, FGRB );
+ subcadena2 = strstr( message, "(f g l b)" ); // 35
+ if( subcadena2 != NULL )
+     flpar( subcadena2, FGLB );
 
-            subcadena2=strstr(message,"f p l t");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FPLT);
 
-               subcadena2=strstr(message,"f p r t");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FPRT);
+ subcadena2 = strstr( message, "(f g r b)" );
+ if( subcadena2 != NULL )
+     flpar( subcadena2, FGRB );
 
-            subcadena2=strstr(message,"f p r c");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FPRC);
+     subcadena2=strstr(message,"(f p l t)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FPLT);
 
-            subcadena2=strstr(message,"f p r b");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FPRB);
+        subcadena2=strstr(message,"(f p r t)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FPRT);
 
-            subcadena2=strstr(message,"f p l b");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FPLB);
+     subcadena2=strstr(message,"(f p r c)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FPRC);
 
-        subcadena2=strstr(message,"f p l c");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FPLC);
+     subcadena2=strstr(message,"(f p r b)"); // 40
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FPRB);
 
-        subcadena2=strstr(message,"f r b");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FRB);
+     subcadena2=strstr(message,"(f p l b)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FPLB);
 
-        subcadena2=strstr(message,"f c b");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FCB);
+ subcadena2=strstr(message,"(f p l c)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FPLC);
 
-        subcadena2=strstr(message,"f l b");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FLB);
+ subcadena2=strstr(message,"(f r b)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FRB);
 
-        subcadena2=strstr(message,"f r t");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FRT);
+ subcadena2=strstr(message,"(f c b)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FCB);
 
-        subcadena2=strstr(message,"f c t");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FCT);
+ subcadena2=strstr(message,"(f l b)"); // 45
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FLB);
 
-        subcadena2=strstr(message,"f l t");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FLT);
+ subcadena2=strstr(message,"(f r t)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FRT);
 
-        subcadena2=strstr(message,"f t 0");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FT0);
+ subcadena2=strstr(message,"(f c t)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FCT);
 
-        subcadena2=strstr(message,"f b 0");
-        if (subcadena2 != NULL)
-        flpar( subcadena2,FB0);
+ subcadena2=strstr(message,"(f l t)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FLT);
 
-        subcadena2=strstr(message,"f c t");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FCT);
+ subcadena2=strstr(message,"(f t 0)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FT0);
 
-        subcadena2=strstr(message,"f l 0");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FL0);
+ subcadena2=strstr(message,"(f b 0)"); // 50
+ if (subcadena2 != NULL)
+ flpar( subcadena2,FB0);
 
-           subcadena2=strstr(message,"f c");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,FC);
+ subcadena2=strstr(message,"(f l 0)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FL0);
 
-        subcadena2=strstr(message,"g r");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,GR);
+ subcadena2=strstr(message,"(f r 0)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FR0);
 
-        subcadena2=strstr(message,"g l");
-        if (subcadena2 != NULL)
-            flpar( subcadena2,GL);
+    subcadena2=strstr(message,"(f c)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,FC);
 
+ subcadena2=strstr(message,"(g r)");
+ if (subcadena2 != NULL)
+     flpar( subcadena2,GR);
+
+ subcadena2=strstr(message,"(g l)"); // 55
+ if (subcadena2 != NULL)
+     flpar( subcadena2,GL);
 
 
         //lineas
@@ -876,8 +872,8 @@ void Parser::parse_see(char *message)
                 }
                 if(count==6){
                     subcadena=strstr(subcadena2,")");
-                    sscanf(subcadena+1," %lf %d %lf %lf %lf %d",&flo_value,&int_value5,&flo_value1,&flo_value2,&flo_value3,&int_value6);
-                    game_data->sensor_handler.see_ball(flo_value,int_value5,flo_value1,flo_value2,flo_value3,int_value6);
+                    //sscanf(subcadena+1," %lf %d %lf %lf %lf %d",&flo_value,&int_value5,&flo_value1,&flo_value2,&flo_value3,&int_value6);
+
                     count=0;
                 }
                 if(count==5){
@@ -924,97 +920,410 @@ void Parser::parse_see(char *message)
             game_data->sensor_handler.see_ball(dis, dir);
 
         }
+
         //Jugadores
 
-        count = 0;
+        // name info
+        int  name_ndata  	= 0; // Número de datos del nombre (equipo, número,...)
+        bool has_team 		= false;
+        bool has_unum 		= false;
+        bool has_goalie 	= false;
+
+        // regular info
+        int  player_ndata 	= 0; // Número de datos del jugador (distancia, dirección, ...)
+        double dist 	= 0.0;
+        double dir		= 0.0;
+        double distch   = 0.0;
+        double dirch	= 0.0;
+        double body		= 0.0;
+        double head		= 0.0;
+        double pointdir = 0.0;
+        bool   tackle   = false;
+        bool   kick	    = false;
+
+        // auxiliar variables
+
+        char * aux_cad 		= NULL;
+        int n_readed		= 0;
+        char team_name[128];
+
+        // situamos a subcadena en la posición del primer jugador (si lo hay)
+        // y repetimos para todos los jugadores
+
+        // Falta tomar en cuenta el caso cuando está detrás el jugador:
+        // ((P) <DISTANCE> <DIRECTION>)
         subcadena = strstr( message, "(p" );
         while( subcadena )
         {
-            subcadena = subcadena + 2;
-            if( (*subcadena) == ')' )
+        	team_name[0] = '\0';
+        	unum 		 = NDEF_NUM;
+        	has_goalie	 = false;
+
+            player_ndata= 0; // Número de datos del jugador (distancia, dirección, ...)
+            dist 		= NDEF_NUM;
+            dir			= NDEF_NUM;
+            distch   	= NDEF_NUM;
+            dirch		= NDEF_NUM;
+            body		= NDEF_NUM;
+            head		= NDEF_NUM;
+            pointdir	= NDEF_NUM;
+            tackle   	= false;
+            kick	    = false;
+            n_readed	= 0;
+
+        	aux_cad = subcadena; // Usamos aux_cad para contar los parámetros
+
+        	// Saltamos "(p"
+        	aux_cad = aux_cad + 2;
+
+        	// Contamos cuántos datos del nombre tenemos
+            while( *aux_cad != ')' )
             {
-                subcadena++;
-                //std::cout << " scan 1" << endl;
-                //std::cout << subcadena << endl;
-                sscanf( subcadena, "%lf %d )", &flo_value, &int_value4 ); //distancia y direccion
-                game_data->sensor_handler.see_player( flo_value, int_value4 );
-                //std::cout << " scan 1 finished" << endl;
+                if( *aux_cad == ' ' )
+                    name_ndata++;
+                // El nombre podría contener espacios, saltamos todo el nombre
+                // es decir, lo que está dentro de las comillas.
+                if( *aux_cad == '\"')
+                    do aux_cad++; while( *aux_cad != '\"' );
+
+                aux_cad++;
             }
-            else if( (*subcadena) == ' ' )
+
+            // Tomaré todas las combinaciones por si se llegan a necesitar, aunque las usuales son:
+            // (p), (p "TEAMNAME"), (p "TEAMNAME" UNUM), (p "TEAMNAME" UNUM goalie), ....
+
+
+            switch( name_ndata )
             {
-                subcadena++;
-                if( (*subcadena) == '\"')
-                {
-                    int n_readed;
+            // En todos los casos, el puntero termina en el paréntesis que cierra los datos del nombre
+            case 0: // (p)
+            	n_readed = 0;
+            	subcadena += 2;
+            	break;
+            case 1:
+            	subcadena += 3; // Saltamos "(p "
+            	if( *subcadena == '\"' ) // (p "TEAMNAME")
+            	{
+            		has_team = true;
+            		sscanf( subcadena, " \"%[-0-9a-zA-Z ().+*/?<>_]\" %n", team_name, &n_readed );
+            		subcadena += n_readed;
+            	}
+            	else if( isdigit( *subcadena ) ) // (p UNUM)
+            	{
+            		has_unum = true;
+            		sscanf( subcadena, " %d %n", &unum, &n_readed );
+            		subcadena += n_readed;
+            	}
+            	else if( *subcadena == 'g' ) // // (p goalie)
+            	{
+            		has_goalie = true;
+            		subcadena += 6; // "goalie"
+            	}
+            	break;
+            case 2:
+            	subcadena += 3; // Saltamos "(p "
+            	if( *subcadena == '\"' ) // (p "TEAMNAME"...
+            	{
+            		has_team = true;
+            		sscanf( subcadena, " \"%[-0-9a-zA-Z ().+*/?<>_]\" %n", team_name, &n_readed );
+            		subcadena += n_readed;
+            		if( isdigit( *subcadena ) ) // (p "TEAMNAME" UNUM)
+            		{
+            			has_unum = true;
+            			sscanf( subcadena, "%d %n", &unum, &n_readed );
+            			subcadena += n_readed;
+            		}
+            		else if( *subcadena == 'g' ) // (p "TEAMNAME" goalie)
+            		{
+            			has_goalie = true;
+            			subcadena += 6;
+            		}
+            	}
+            	else if( isdigit( *subcadena ) ) // (p UNUM
+            	{
+            		has_unum = true;
+            		sscanf( subcadena, "%d %n", &unum, &n_readed );
+            		subcadena += n_readed;
+            		if( *subcadena == '\"' ) // (p UNUM "TEAMNAME")
+            		{
+            			has_team = true;
+            			sscanf( subcadena, " \"%[-0-9a-zA-Z ().+*/?<>_]\" %n", team_name, &n_readed );
+            			subcadena += n_readed;
+            		}
+            		else if( *subcadena == 'g' )
+            		{
+            			has_goalie = true;
+            			subcadena += 6;
+            		}
+            	}
+            	else if( *subcadena == 'g' ) // // (p goalie
+            	{
+            		has_goalie = true;
+            		subcadena += 6; // goalie
+            		subcadena ++; // El espacio
+            		if( isdigit( *subcadena ) )
+            		{
+            			has_unum = true;
+            			sscanf( subcadena, "%d %n", &unum, &n_readed );
+            			subcadena += n_readed;
+            		}
+            		else if( *subcadena == '\"')
+            		{
+            			has_team = true;
+            			sscanf( subcadena, " \"%[-0-9a-zA-Z ().+*/?<>_]\" %n", team_name, &n_readed );
+            			subcadena += n_readed;
+            		}
+            	}
+            	break;
+            case 3:
+            	has_goalie  = true;
+            	has_unum	= true;
+            	has_team	= true;
+            	subcadena += 3;
+            	if( *subcadena == '\"' ) // (p "TEAMNAME"...
+            	{
+            		sscanf( subcadena, " \"%[-0-9a-zA-Z ().+*/?<>_]\" %n", team_name, &n_readed );
+            		subcadena += n_readed;
+            		if( isdigit( *subcadena ) ) // (p "TEAMNAME" UNUM goalie)
+            		{
+            			sscanf( subcadena, "%d %n", &unum, &n_readed );
+            			subcadena += n_readed;
+            			subcadena += 6;
+            		}
+            		else if( *subcadena == 'g' ) // (p "TEAMNAME" goalie UNUM)
+            		{
+            			subcadena += 6; // goalie
+            			subcadena ++; // espacio
+            			sscanf( subcadena, "%d %n", &unum, &n_readed );
+            			subcadena += n_readed;
+            		}
+            	}
+            	else if( isdigit( *subcadena ) ) // (p UNUM...
+            	{
+            		sscanf( subcadena, "%d %n", &unum, &n_readed );
+            		subcadena += n_readed;
+            		subcadena ++;
+            		if( *subcadena == '\"' ) // (p UNUM "TEAMNAME" goalie)
+            		{
+            			sscanf( subcadena, " \"%[-0-9a-zA-Z ().+*/?<>_]\" %n", team_name, &n_readed );
+            			subcadena += n_readed;
+            			subcadena ++; // espacio
+            			subcadena += 6; // goalie
+            		}
+            		else if( *subcadena == 'g' ) //(p UNUM goalie "TEAMNAME")
+            		{
 
-                    sscanf( subcadena, "\"%[-0-9a-zA-Z ().+*/?<>_]\" %n", str1, &n_readed );
+            			subcadena += 6; // goalie
+            			subcadena ++;	// espacio
+            			sscanf( subcadena, " \"%[-0-9a-zA-Z ().+*/?<>_]\" %n", team_name, &n_readed );
+            			subcadena += n_readed;
+            		}
 
-                    has_team = true;
+            	}
+            	else if( *subcadena == 'g' )
+            	{
+            		subcadena += 6; // goalie
+            		subcadena ++; // espacio
+            		if( isdigit( *subcadena ) ) // (p goalie UNUM "TEAMNAME")
+            		{
+            			sscanf( subcadena,
+            					"%d \"%[-0-9a-zA-Z ().+*/?<>_]\" %n",
+            					&unum, team_name, &n_readed );
+            			subcadena += n_readed;
 
+            		}
+            		else if( *subcadena == '\"' ) // (p goalie "TEAMNAME" UNUM)
+            		{
+            			sscanf( subcadena,
+            					"\"%[-0-9a-zA-Z ().+*/?<>_]\" %d %n",
+            					team_name, &unum, &n_readed );
+            			subcadena += n_readed;
+            		}
+            	}
+            	break;
+            }
+
+            // Saltamos al paréntesis que cierra la info del nombre
+            while( *subcadena != ')' )
+            	subcadena++;
+            subcadena ++; // Saltamos el paréntesis
+
+
+            aux_cad = subcadena; // aux_cad y subcadena ahora está en la posicion del primer parametro
+            while( (*aux_cad) != ')' ) //contamos los parametros
+            {
+            	if( isspace(*aux_cad) )
+            		player_ndata ++;
+            	aux_cad++;
+            }
+
+            // Comentarios tomados de la librería librcsc-4.1.0
+            // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <POINTDIR> <TACKLE|KICK>)" : space = 8
+            // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <POINTDIR>)" : space = 7
+            // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <TACKLE|KICK>)" : space = 7
+            // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD>)" : space = 6
+            // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY>)" : space = 5  only sserver-4
+            // " <DIST> <DIR> <DISTCH> <DIRCH>)" : space = 4
+            // " <DIST> <DIR> <POINTDIR> <TACKLE|KICK>)" : space = 4
+            // " <DIST> <DIR> <POINTDIR>)" : space = 3
+            // " <DIST> <DIR> <TACKLE|KICK>)" : space = 3
+            // " <DIST> <DIR>)" : space = 2
+            // " <DIR>)" : space = 1
+
+
+            // subcadena está en la posicion del primer parametro
+            switch( player_ndata )
+            {
+            case 1: // " <DIR>)" : space = 1
+            	sscanf( subcadena, "%lf %n", &dir, &n_readed );
+            	subcadena += n_readed;
+            	break;
+            case 2:// " <DIST> <DIR>)" : space = 2
+            	sscanf( subcadena, "%lf %lf %n", &dist, &dir, &n_readed );
+            	subcadena += n_readed;
+            	break;
+            case 3:// " <DIST> <DIR> <TACKLE|KICK>)" : space = 3
+            	sscanf( subcadena, "%lf %lf %n", &dist, &dir, &n_readed );
+            	subcadena += n_readed;
+            	if( *subcadena == 'k' )
+            	{
+            		kick = true;
+            		subcadena += 4; // kick
+            	}
+            	else if( *subcadena == 't' )
+            	{
+            		tackle = true;
+            		subcadena += 6; // tackle
+            	}
+            	break;
+            case 4:
+            	// " <DIST> <DIR> <POINTDIR> <TACKLE|KICK>)" : space = 4
+            	// " <DIST> <DIR> <DISTCH> <DIRCH>)" : space = 4
+
+            	sscanf( subcadena, "%lf %lf %n", &dir, &dist, &n_readed );
+            	subcadena += n_readed;
+            	aux_cad = subcadena;
+            	aux_cad = move_to_next_word( aux_cad );
+            	if( *aux_cad == 't' ) // " <DIST> <DIR> <POINTDIR> tackle)
+            	{
+            		tackle = true;
+            		sscanf( subcadena,
+            				"%lf tackle %n",
+            				&pointdir, &n_readed );
                     subcadena += n_readed;
 
-                    if( (*subcadena) == ' ' )
-                    {
-                        //std::cout << " scan 3" << endl;
-                        sscanf( subcadena+1, " %d )", &unum );
-                        has_number = true;
-                    }
-
-                }
-            }
-
-            while( (*subcadena) != ')' )
-
-            {
-                subcadena++;
-            }
-                subcadena++;
-
-            subcadena2 = subcadena + 1; //la subcadena dos ahora esta en la posicion del primer parametro
-            while( (*subcadena) != ')' ) //contamos los parametros
-            {
-                if( isspace(*subcadena) )
-                    count++;
-                subcadena++;
-            }
-            switch( count )
-            {
-            case 2:
-                sscanf( subcadena2, "%lf %d)", &flo_value, &int_value4 ); //distancia y direccion
-                if( has_number )
-                    game_data->sensor_handler.see_player(str1, unum, flo_value, int_value4 );
-                else if( has_team )
+            	}
+            	else if( *aux_cad == 'k' ) // " <DIST> <DIR> <POINTDIR> kick)
+            	{
+            		kick = true;
+            		sscanf( subcadena,
+            				"%lf kick %n",
+            				&pointdir, &n_readed );
+                    subcadena += n_readed;
+            	}
+            	else if( isdigit( *aux_cad ) ) //  " <DIST> <DIR> <DISTCH> <DIRCH>)
+            	{
+            		sscanf( subcadena,
+            				"%lf %lf %n",
+            				&distch, &dirch, &n_readed );
+                    subcadena += n_readed;
+            	}
+            	break;
+            case 5:// " <DIST> <DIR> <DISTCH> <DIRCH> <BODY>)" : space = 5  only sserver-4
+            	sscanf( subcadena,
+            			"%lf %lf %lf %lf %lf %n",
+            			&dist, &dir, &distch, &dirch, &body, &n_readed );
+                subcadena += n_readed;
+                break;
+            case 6: // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD>)" : space = 6
+            	sscanf( subcadena,
+            			"%lf %lf %lf %lf %lf",
+            			&dist, &dir, &distch, &dirch, &body, &head, &n_readed );
+                subcadena += n_readed;
+                break;
+            case 7:
+            	// " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <POINTDIR>)" : space = 7
+            	// " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <TACKLE|KICK>)" : space = 7
+            	sscanf( subcadena,
+            			"%lf %lf %lf %lf %lf %lf %n",
+            			&dist, &dir, &distch, &dirch, &body, &head, &n_readed );
+                subcadena += n_readed;
+                //std::cout << subcadena << std::endl;
+                if( isdigit(*subcadena) ) // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <POINTDIR>)"
                 {
-                    game_data->sensor_handler.see_player(str1, flo_value, int_value4 );
+                	sscanf( subcadena,
+                			"%lf %n",
+                			&pointdir, &n_readed );
                 }
-                else
-                    game_data->sensor_handler.see_player( flo_value, int_value4 );
+                else if( *subcadena == 't' ) // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> tackle)"
+                {
+                	tackle = true;
+                	subcadena += 6;
 
-                break;
-            case 4:
-                //std::cout << " scan 5" << endl;
-                sscanf( subcadena2, "%lf %d %lf %lf)", &flo_value, &int_value4, &flo_value1, &flo_value2 ); //dist, dir, dis_chg, dir_chg
-                if( has_number ) //aun no sabemos si podemos recibir jugadores con cuatro parametros y sin unum
-                    game_data->sensor_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2 );
-                break;
-            case 6:
-                //std::cout << " scan 6" << endl;
-                sscanf( subcadena2, "%lf %d %lf %lf %lf %lf)", &flo_value, &int_value4, &flo_value1, &flo_value2, &flo_value3, &flo_value4 ); //dist, dir, dis_chg, dir_chg, speed1, speed2
-                game_data->sensor_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2, flo_value3, flo_value4 );
+                }
+                else if( *subcadena == 'k' ) // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> kick)"
+                {
+                	kick = true;
+                	subcadena += 4;
+                }
                 break;
             case 8:
-                //dist, dir, dis_chg, dir_chg, speed1, speed2, body_dir, neck_dir
-                //std::cout << " scan 7" << endl;
-                sscanf( subcadena2, "%lf %d %lf %lf %lf %lf %lf %lf)", &flo_value, &int_value4, &flo_value1, &flo_value2, &flo_value3, &flo_value4, &flo_value5, &flo_value6 );
-                game_data->sensor_handler.see_player(str1, unum, flo_value, int_value4, flo_value1, flo_value2, flo_value3, flo_value4, flo_value5, flo_value6 );
+            	// " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <POINTDIR> <TACKLE|KICK>)" : space = 8
+            	sscanf( subcadena,
+            			"%lf %lf %lf %lf %lf %lf %lf %n",
+            			&dist, &dir, &distch, &dirch, &body, &head, &pointdir, &n_readed );
+                subcadena += n_readed;
+                if( *subcadena == 't' )
+                {
+                	tackle = true;
+                	subcadena += 6;
+                }
+                else if( *subcadena == 'k' )
+                {
+                	kick = true;
+                	subcadena += 4;
+
+                }
                 break;
-            }
+            } // switch player_ndata
+            game_data->sensor_handler.see_player( team_name, unum, has_goalie,
+                        										  dist,
+                        										  dir,
+                        										  distch,
+                        										  dirch,
+                        										  body,
+                        										  head,
+                        										  pointdir,
+                        										  tackle,
+                        										  kick
+                        										  );
 
-            count = 0;
-            has_team = false; has_number = false;
-            subcadena = strstr( subcadena, "(p" );
-        }
+             //Para probar
+            /*
+            std::cout << "name_ndata = " << name_ndata << std::endl;
+			std::cout << "has_team   = " << has_team << std::endl;
+                    std::cout << "has_unum   = " << has_unum << std::endl;
+                    std::cout << "has_goalie = " << has_goalie << std::endl;
+                    std::cout << "team_name  = " << team_name << std::endl;
+                    std::cout << "unum       = " << unum << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "player_ndata = " << player_ndata << std::endl;
+                    std::cout << "dist = " << dist << std::endl;
+                    std::cout << "dir = " << dir << std::endl;
+                    std::cout << "distch = " << distch << std::endl;
+                    std::cout << "dirch = " << dirch << std::endl;
+                    std::cout << "body = " << body << std::endl;
+                    std::cout << "head = " << head << std::endl;
+                    std::cout << "pointdir = " << pointdir << std::endl;
+                    std::cout << "kick = " << kick << std::endl;
+                    std::cout << "tackle = " << tackle << std::endl;
+                    std::cout << subcadena << std::endl;
+                    //*/
 
+
+        // Repetimos para todos los jugadores
+        subcadena = strstr( subcadena, "(p" );
+    }
         game_data->sensor_handler.see_finish();
 
 }

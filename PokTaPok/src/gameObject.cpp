@@ -73,35 +73,37 @@ Vector2D Flag::get_global_coord() const
 
 void Player::print()
 {
-    cout << endl;
-    cout << "team " << this->team << " ";
-    cout << "unum " << this->uniform_number << " ";
-    cout << "dis " << this->distance << " ";
-    cout << "dir " << this->direction << " ";
-    cout << "dis_chg " << this->distance_change << " ";
-    cout << "dir_chg " << this->direction_change << " ";
-    cout << "body_dir " << this->body_direction << " ";
-    cout << "neck_dir " << this->neck_direction << " ";
+    cout << "team " << this->team << endl;
+    cout << "unum " << this->unum <<  endl;
+    cout << "isgoalie " << this->is_goalie << endl;
+    cout << "dis " << this->dis << endl;
+    cout << "dir " << this->dir << endl;
+    cout << "dis_chg " << this->dis_chg << endl;
+    cout << "dir_chg " << this->dir_chg << endl;
+    cout << "body_dir " << this->body_dir << endl;
+    cout << "neck_dir " << this->head_dir << endl;
+    cout << "on_kick " << this->on_kick << endl;
+    cout << "on_tackle " << this->on_tackle << endl;
 }
 
 void Flag::print()
 {
     cout << endl;
     cout << "id " << this->id << " ";
-    cout << "dis " << this->distance << " ";
-    cout << "dir " << this->direction << " ";
-    cout << "dis_chg " << this->distance_change << " ";
-    cout << "dir_chg " << this->direction_change;
+    cout << "dis " << this->dis << " ";
+    cout << "dir " << this->dir << " ";
+    cout << "dis_chg " << this->dis_chg << " ";
+    cout << "dir_chg " << this->dir_chg;
 }
 
 void Line::print()
 {
     cout << endl;
     cout << "id " << this->id << " ";
-    cout << "dis " << this->distance << " ";
-    cout << "dir " << this->direction << " ";
-    cout << "dis_chg " << this->distance_change << " ";
-    cout << "dir_chg " << this->direction_change;
+    cout << "dis " << this->dis << " ";
+    cout << "dir " << this->dir << " ";
+    cout << "dis_chg " << this->dis_chg << " ";
+    cout << "dir_chg " << this->dir_chg;
 }
 
 void Ball::print()

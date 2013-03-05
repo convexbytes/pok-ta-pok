@@ -4,8 +4,8 @@
 #include <vector>
 #include <string>
 
-#ifndef UNDEFINED_NUMBER
-#define UNDEFINED_NUMBER -9999999
+#ifndef NDEF_NUM
+#define NDEF_NUM -999999.0 // El rango de cualquier información provista por el servidor no es tan pequeño
 #endif
 
 using namespace std;
@@ -344,18 +344,18 @@ class HearOurSensor : public HearSensor
 {
 public:
     HearOurSensor() { sender = OUR; }
-    int uniform_number;
+    int unum;
     string message;
-    int direction;
+    double dir;
 };
 
 class HearOppSensor : public HearSensor
 {
 public:
     HearOppSensor() { sender = OUR; }
-    int uniform_number;
+    int unum;
     string message;
-    int direction;
+    double dir;
 };
 class HearCouchSensor : public HearSensor
 {
@@ -374,7 +374,7 @@ public:
 class InitSensor
 {
 public:
-    int 		uniform_number;
+    int 		unum;
     char 		side; // 'l' | 'r'
     PlayModeHearable 	play_mode;
     int 		playmode_num;

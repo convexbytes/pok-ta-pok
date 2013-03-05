@@ -35,16 +35,31 @@ private:
     void init		(char side, int unum, PlayModeHearable play_mode, int playmode_num );
 
     void begin_see	( int time);
-    void see_player	( string team, int unum ,  float distance , int direction , float dis_change ,
-                       float dir_change , float speed_x , float speed_y ,
-                       int body_dir , int neck_dir );
-    void see_player	( string team , int unum ,  float distance , int direction , float dis_change ,
-                       float dir_change , float speed_x , float speed_y );
-    void see_player	( string team , int unum ,  float distance , int direction , float dis_change ,
-                       float dir_change );
-    void see_player	( string team , int unum ,  float distance , int direction );
-    void see_player	( string team ,  float distance , int direction );
-    void see_player	( float distance , int direction );
+
+
+    // Comentarios tomados de la librería librcsc-4.1.0
+    // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <POINTDIR> <TACKLE|KICK>)" : space = 8
+    // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <POINTDIR>)" : space = 7
+    // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD> <TACKLE|KICK>)" : space = 7
+    // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD>)" : space = 6
+    // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY>)" : space = 5  only sserver-4
+    // " <DIST> <DIR> <DISTCH> <DIRCH>)" : space = 4
+    // " <DIST> <DIR> <POINTDIR> <TACKLE|KICK>)" : space = 4
+    // " <DIST> <DIR> <POINTDIR>)" : space = 3
+    // " <DIST> <DIR> <TACKLE|KICK>)" : space = 3
+    // " <DIST> <DIR>)" : space = 2
+    // " <DIR>)" : space = 1
+
+    void see_player ( string team, int unum, bool is_goalie ,
+    				  double dist,
+    				  double dir,
+    				  double distch,
+    				  double dirch,
+    				  double body_dir,
+    				  double head_dir,
+    				  double point_dir,
+    				  bool	 on_tackle,
+    				  bool   on_kick);
 
 	
     void see_flag( EFlag id , float distance, int direction , float dir_chg , float dis_chg );
@@ -52,10 +67,8 @@ private:
     void see_flag( float distance, int direction );
     void see_line( ELine id, float distance , int direction , float dir_chg , float dis_chg );
     void see_line( ELine id, float distance , int direction );
-    void see_ball(float distance, int direction, float dis_change, float dir_change, float speed_x, float speed_y);
     void see_ball(float distance, int direction, float dis_change, float dir_change);
     void see_ball(float distance, int direction);
-    void see_finish(); // Le decimos que ya terminó para que haga algunas tareas como ordenar, pendiente a remover esta función.
     
     void begin_sense(int time);
     void sense_view_mode_quality( ViewModeQuality );
