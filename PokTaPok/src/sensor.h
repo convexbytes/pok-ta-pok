@@ -312,10 +312,10 @@ public:
     SeeSensor();
     bool    ballIsVisible     () const { return ball_is_visible; }
 
-    void    add_player          ( Player player);
-    void    add_flag            ( Flag flag);
-    void    add_line            ( Line line);
-    void    add_ball            ( Ball ball);
+    void    add_player          ( Player const & player);
+    void    add_flag            ( Flag  const & flag);
+    void    add_line            ( Line  const & line);
+    void    add_ball            ( Ball  const & ball);
     vector<Player> players;
     vector<Flag> flags;
     vector<Line> lines;

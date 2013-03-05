@@ -81,20 +81,20 @@ SeeSensor::SeeSensor()
     this->flags.clear();
 }
 
-void SeeSensor::add_player(Player player)
+void SeeSensor::add_player(Player const & player)
 {
     players.push_back( player);
 }
 
-void SeeSensor::add_flag(Flag flag)
+void SeeSensor::add_flag(Flag const & flag)
 {
     flags.push_back( flag );
 }
-void SeeSensor::add_line(Line line)
+void SeeSensor::add_line(Line const & line)
 {
     lines.push_back( line );
 }
-void SeeSensor::add_ball(Ball ball)
+void SeeSensor::add_ball(Ball const & ball)
 {
     this->ball = ball;
     this->ball_is_visible = true;

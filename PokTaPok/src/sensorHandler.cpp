@@ -80,7 +80,7 @@ void SensorHandler::see_player( string team, int unum, bool goalie,
 	player.on_tackle = on_tackle;
 	player.on_kick = on_kick;
 	//player.print();
-	//this->last_see.add_player( )
+	this->last_see.add_player( player );
 }
 
 
