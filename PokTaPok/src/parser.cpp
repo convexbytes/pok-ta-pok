@@ -1324,7 +1324,6 @@ void Parser::parse_see(char *message)
         // Repetimos para todos los jugadores
         subcadena = strstr( subcadena, "(p" );
     }
-        game_data->sensor_handler.see_finish();
 
 }
 
