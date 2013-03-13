@@ -81,17 +81,14 @@ ParserMsgType Parser::parse(char *message )
 
 void Parser::parse_error( char *message)
 {
-        char 	str1[128];
-        char 	*subcadena2 = 0;
-        //subcadena2 = strstr(message,"(error");
+        char 	str1[256];
         std::cout << message << std::endl;
-        if ( strncmp( ("(error"), subcadena2, 6 ) == 0 )
+        if ( strncmp( ("(error"), message, 6 ) == 0 )
         {
-            // el error lleva el ciclo en el que ocurrió??
 
-            subcadena2 = move_to_next_word( subcadena2 );
+        	message = move_to_next_word( message );
 
-            sscanf( subcadena2+1,"%[^)]", str1 ); // Lee todos los caracteres menos ')'
+            sscanf( message+1,"%[^)]", str1 ); // Lee todos los caracteres menos ')'
 
             if( strcmp( str1, "illegal_mode" )==0 )
             {
@@ -107,7 +104,8 @@ void Parser::parse_error( char *message)
             {
                 game_data->sensor_handler.error( ILLEGAL_COMMAND_FORM );
             }
-            //
+
+            // Aún faltan más mensajes de error
         }
 }
 
