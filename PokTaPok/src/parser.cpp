@@ -589,13 +589,13 @@ void Parser::parse_see(char *message)
 
 
     //std::cout << "parse see begin " << endl;
-    int int_value4, int_value5, int_value6;
-    double flo_value, flo_value1, flo_value2, flo_value3, flo_value4, flo_value5, flo_value6;
+    int int_value4, int_value5;
+    double flo_value, flo_value1, flo_value2, flo_value3;
     int unum, count, j, k, l, g;
     char * subcadena2 = NULL;
     char * subcadena = NULL;
     char * subcadena3 = NULL;
-    char str1[256];
+
     count = 0;
 
     sscanf(message,"(see %d",&int_value4);

@@ -47,7 +47,6 @@ private:
 
     GameData        *   game_data;
     AgentCommand    *   agent_command;
-    AgentCommand    *   command_to_commit;
     Parser          *   parser;
     Agent           *   agent;
     deque<string>       messages;

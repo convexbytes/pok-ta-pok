@@ -18,6 +18,7 @@ void PokTaPokAgentV1::do_process( GameData *game_data,
     this->param     = &game_data->game_parameter;
 
     command->reset();
+    command->append_turn( 1 );
     world->update( game_data );
 
 
