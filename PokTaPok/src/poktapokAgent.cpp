@@ -18,7 +18,6 @@ void PokTaPokAgentV1::do_process( GameData *game_data,
     this->param     = &game_data->game_parameter;
 
     command->reset();
-    command->append_turn( 1 );
     world->update( game_data );
 
 
@@ -143,24 +142,40 @@ void PokTaPokAgentV1::on_before_kick_off()
     else
         command->append_move( - position->x,
                               position->y );
-*/
+    */
+    command->append_move(-14,-25);
 }
 
 void PokTaPokAgentV1::on_play_on()
 {
 	/* Para probar el cambio de estados
-	 *
+	 */
 	Ball & ball = sensor_h->last_see.ball;
 
-	if( sensor_h->last_see.ballIsVisible() )
-	{
-		command->append_turn( ball.direction );
-	}
-	else
-	{
-		command->append_turn( 90 );
-	}
+    //command->append_dash( 80 );
+    
+    //command->append_turn(1);
+    
+    /*  
+       command->append_dash(20);
+    else
+       command->append_turn(ball.direction); 
 	*/
+	 
+	
+	if( sensor_h->last_see.ballIsVisible() )
+	      {
+		   //if(ball.direction < 10.0 && ball.direction > -10.0) 	  
+		        command->append_dash( 70 );
+		       // command->append_turn(47);
+		  // else    		        
+		     //   command->append_turn(ball.direction); 
+	      } 
+	else
+	      {
+		   command->append_turn( 50 );		   
+	      }
+	
 }
 
 void PokTaPokAgentV1::on_time_over(){}

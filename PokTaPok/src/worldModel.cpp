@@ -22,10 +22,9 @@ void WorldModelV1::update( GameData * game_data )
 	loc_engine->updatePos( );
 
 	// Actualizamos la localización
-	me.pos.x = loc_engine->x();
-	me.pos.y = loc_engine->y();
-	me.angle = loc_engine->angle();
-
+	me.pos.x = loc_engine->x;
+	me.pos.y = loc_engine->y;
+	me.angle = loc_engine->angle;
 
 	// Actualizamos los demás datos del modelo del mundo en base
 	// a la información del último sensor que recibimos

@@ -1,11 +1,13 @@
 #ifndef MONTECARLOLOCALIZATION_H
 #define MONTECARLOLOCALIZATION_H
-#define NUM_PARTICULAS 300
 
-#include <vector>
+#define NUM_PARTICULAS 4     
+#define tamGrid        15    
 
+//#define MONT_PI 3.141592653589793
 #include "gameObject.h"
-#include "gameData.h"
+#include "vector"
+#include "gameData.h" //arreglar esto, el scope no debería ir tan lejos
 
 class Particula
 {
@@ -25,19 +27,17 @@ public:
 class MontecarloLocalization
 {
 public:
-	MontecarloLocalization( GameData * game_data );
-
+    MontecarloLocalization( GameData * game_data );
 
     int indiceMayorPeso() const { return indice_part_mayor_peso; }
 
     void montecarlo_prediction( Particula   * particulas,
                                 Control       U,
                                 Particula   * particulas_nuevas
-
                                 );
 
     void montecarlo_correction( Particula       * particulas,
-                                vector<Flag>    * banderas,
+                                SeeSensor       * visual,
                                 Particula       * particulas_nuevas
                                 );
 
@@ -48,13 +48,15 @@ private:
     int indice_part_mayor_peso;
 
     Particula Sample_Motion_Model       ( Control const &   U,
-                                          Particula const & particula
-                                          );
+                                          Particula const & particula,
+                                          int   indice
+                                         );
 
     double  Landmark_Model_Known_Corresponce( Flag & bandera,
-                                              Particula &pose
-                                              );
-
+                                              double x,
+                                              double y
+                                            );                                             
+    
     double  prob_normal_distribution     ( double x,
                                            double stdev
                                            );
@@ -64,18 +66,15 @@ private:
 
 
     Vector2D modelo_aceleracion( double power,
-                                                         double dir,
-                                                         double stamina,
-                                                         double effort,
-                                                         double body_angle
-                                                         );
+                                 double dir,
+                                 double stamina,
+                                 double effort,
+                                 double body_angle
+                                );
     Vector2D modelo_aceleracion_gomez( double dash_power,
                                        double stamina,
                                        double effort,
                                        double body_angle);
-
-
-
 
 };
 

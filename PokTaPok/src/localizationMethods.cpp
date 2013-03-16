@@ -38,16 +38,17 @@ Vector2D ubicacionLineaBandera(float direccionLinea, char lineaId, float distanc
     float B,O,angulox,anguloy;
     float coor[2];
     Vector2D p;
-    B = (-1)*( signo(direccionLinea) )*( 90 - absoluto(direccionLinea) ); // Ángulo de la bisectriz a la
+    B = (-1.0)*( signo(direccionLinea) )*( 90.0 - absoluto(direccionLinea) ); // Ángulo de la bisectriz a la
                                                                                // perpendicular de la linea
-    O = orientation(lineaId) - B;            // Obtenemos el ángulo Global
+    O = orientation(lineaId) - B;              // Obtenemos el ángulo Global
     angulox = Deg2Rad( direccionFlag + O);      // Conversion de grados a radianes
-    anguloy = Deg2Rad(direccionFlag + O);
+    anguloy = Deg2Rad( direccionFlag + O);
     coor[0] = coordGlobalFlag.x - ( distanciaFlag * cos( angulox ) );    // Conversion de polares a cartesianas
     coor[1] = coordGlobalFlag.y - ( distanciaFlag * sin( anguloy ) );
 
     p.x = coor[0];
     p.y = coor[1];
+    
     return p;
 }
 

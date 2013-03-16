@@ -42,7 +42,6 @@ void Client::initialize() {
 	parser      = 0;
 	agent       = 0;
 	agent_command      = 0;
-	command_to_commit  = 0;
 
 	//Iniciamos todos los objetos.
 	game_data           = new GameData  ( );
@@ -216,7 +215,7 @@ void* Client::Client::sending_thread_function(void *parameter)
 	timespec rem_check_time;
 	wait_check_time.tv_nsec = 100000; // .1 milisegundo
 	wait_check_time.tv_sec = 0;
-	wait_time.tv_nsec = 80000000; // 80 milisegundos
+	wait_time.tv_nsec = 70000000; // 70 milisegundos
 	wait_time.tv_sec = 0;
 	while (1)
 	{
