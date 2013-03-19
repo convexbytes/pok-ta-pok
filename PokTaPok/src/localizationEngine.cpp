@@ -85,7 +85,7 @@ void LocalizationEngine::updatePos(  )
         y          = (p_nuevas[0].y + p_nuevas[3].y)/2.0 ;
         angle      =  p_nuevas[0].theta;                
         
-        printf("%d %lf %lf %lf\n",time,x,y,angle);  
+        //printf("%d %lf %lf %lf\n",time,x,y,angle);
                
     }
     else if( sensor_type == SENSOR_SEE && banderas->size() > 0 ) // No tiene caso hacer correción con 0 banderas
@@ -101,7 +101,7 @@ void LocalizationEngine::updatePos(  )
         y          = (p_nuevas[0].y + p_nuevas[3].y)/2.0 ;
         angle      =  p_nuevas[0].theta;                
         
-        printf("%d %lf %lf %lf +\n",time,x,y,angle);  
+        //printf("%d %lf %lf %lf +\n",time,x,y,angle);
     }
 
     if( command_commited->move_is_set() )  ///Si aplicamos comando Move() colocamos la particula en esa posicion
