@@ -4,6 +4,7 @@
 PokTaPokAgentV1::PokTaPokAgentV1( GameData * game_data )
 {
     world = new WorldModelV1( game_data );
+    //ball_btc = new BitacoraBall( game_data, world );
 }
 
 void PokTaPokAgentV1::do_process( GameData *game_data,
@@ -44,6 +45,9 @@ void PokTaPokAgentV1::update()
 
 	state_m.update( *this->game_data );
 
+	//if( sensor_h->last_sensor_type == SENSOR_SEE )
+		//ball_btc->insertData();
+
 }
 
 void PokTaPokAgentV1::onInitial()
@@ -58,5 +62,5 @@ void PokTaPokAgentV1::onPrep()
 
 void PokTaPokAgentV1::onPlay()
 {
-
+	//if()
 }

@@ -1,5 +1,4 @@
 #include "worldModel.h"
-#include "client.h"
 
 WorldModelV1::WorldModelV1( GameData * game_data )
 {

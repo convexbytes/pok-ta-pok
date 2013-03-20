@@ -4,6 +4,7 @@
 #include "attractorField.h"
 #include "sensorHandler.h"
 #include "worldModel.h"
+//#include "bitacoraBall.h"
 #include "state.h"
 #define TEAM_NAME "PokTaPok"
 
@@ -28,6 +29,7 @@ private:
     SensorHandler       * sensor_h;
     StateMachine		  state_m;
 
+    //BitacoraBall		* ball_btc;
     void update();
 
     void onInitial();

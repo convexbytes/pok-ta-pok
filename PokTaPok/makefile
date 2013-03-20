@@ -18,6 +18,7 @@ OBJS = 	$(BIN_DIR)gameCommand.o \
 	$(BIN_DIR)serializer.o \
 	$(BIN_DIR)udpSocket.o \
 	$(BIN_DIR)worldModel.o \
+	$(BIN_DIR)state.o \
 	$(BIN_DIR)montecarloLocalization.o
 
 
@@ -110,31 +111,7 @@ $(BIN_DIR)udpSocket.o:
 
 $(BIN_DIR)worldModel.o:
 	g++ $(FLAGS) $(SOURCE_DIR)worldModel.cpp -o $@
-########### Para compilar el entrenamiento ################
 
-TRAINING_SRC_DIR = training_src/
-
-$(BIN_DIR)primeraTrainer :\
-	$(OBJS) \
-	$(BIN_DIR)trainerClient.o  \
-	$(BIN_DIR)primeraTrainer.o
-	g++ $(OBJS) $(BIN_DIR)trainerClient.o $(BIN_DIR)primeraTrainer.o -lpthread -o $@
-
-$(BIN_DIR)primeraApprentice : $(OBJS) $(BIN_DIR)primeraApprentice.o  $(BIN_DIR)primeraAppClient.o 	$(BIN_DIR)primeraTrainer.o
-	g++ $(OBJS)  $(BIN_DIR)primeraApprentice.o  $(BIN_DIR)primeraAppClient.o $(BIN_DIR)primeraTrainer.o -lpthread -o $@
-
-$(BIN_DIR)primeraAppClient.o : 
-	g++ $(TRAINING_SRC_DIR)primeraAppClient.cpp -c -o $@
-
-$(BIN_DIR)primeraTrainer.o :
-	g++ $(TRAINING_SRC_DIR)primeraTrainer.cpp -c -o $@
-
-$(BIN_DIR)primeraApprentice.o :	\
-	$(BIN_DIR)gameCommand.o \
-	$(BIN_DIR)primeraTrainer.o
-	g++ $(TRAINING_SRC_DIR)primeraApprentice.cpp -c -o $@
-
-	
-$(BIN_DIR)trainerClient.o : $(OBJS)
-	g++ $(TRAINING_SRC_DIR)trainerClient.cpp -c -o $@
+$(BIN_DIR)state.o:
+	g++ $(FLAGS) $(SOURCE_DIR)state.cpp -o $@
 

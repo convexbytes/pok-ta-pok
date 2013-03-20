@@ -5,7 +5,6 @@
 #include "gameCommand.h"
 #include "localizationEngine.h"
 
-
 class AgentStateV1
 {
 public:
