@@ -2,6 +2,7 @@
 #define GEOMETRY_H
 #define M_PI 3.1415926535897932
 #include <cmath>
+#include <iostream>
 class Vector2D
 {
 public:
@@ -105,6 +106,12 @@ public:
         else
             return 0.0;
     }
+
+friend std::ostream & operator <<( std::ostream & os, Vector2D const & v)
+{
+	os << "Vector2D(" << v.x << "," << v.y << ")";
+	return os;
+}
 
     static
     Vector2D fromPolar( const double & r,

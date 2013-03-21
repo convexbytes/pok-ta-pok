@@ -1,5 +1,19 @@
 #include "worldModel.h"
 
+AgentStateV1::AgentStateV1()
+{
+	this->angle = 0.0;
+	this->pos = 0.0;
+	this->side = 'l';
+	this->synch_see_on = false;
+	this->unum = 0;
+	this->view_mode_w = NORMAL;
+	this->view_mode_q = HIGH;
+	this->stamina = 8000;
+	this->effort = 1.0;
+	this->head_angle = 0.0;
+}
+
 WorldModelV1::WorldModelV1( GameData * game_data )
 {
 	time = 0;
@@ -47,6 +61,7 @@ void WorldModelV1::update( GameData * game_data )
 
 		break;
 	case SENSOR_OK:
+		this->updateOnOk();
 
 		break;
 	case SENSOR_SEE:
@@ -60,7 +75,13 @@ void WorldModelV1::update( GameData * game_data )
 
 void WorldModelV1::updateOnBody()
 {
+	BodySensor const & body = game_data->sensor_handler.last_sense;
 
+	me.effort 	= body.effort;
+	me.stamina 	= body.stamina;
+	me.view_mode_q = body.view_mode_quality;
+	me.view_mode_w = body.view_mode_width;
+	me.head_angle = body.head_angle;
 }
 
 void WorldModelV1::updateOnSee()
@@ -70,7 +91,7 @@ void WorldModelV1::updateOnSee()
 
 void WorldModelV1::updateOnInit()
 {
-	InitSensor & init = game_data->sensor_handler.last_init;
+	InitSensor const & init = game_data->sensor_handler.last_init;
 	this->play_mode = init.play_mode;
 	me.side = init.side;
 	me.unum = init.unum;
@@ -80,12 +101,39 @@ void WorldModelV1::updateOnInit()
 void WorldModelV1::updateOnHear()
 {
 	SensorHandler & sensor_h = game_data->sensor_handler;
-	HearSender sender = sensor_h.last_hear.sender;
 
 	time = sensor_h.last_hear.time;
 
-	if( sender == REFEREE )
+	if( sensor_h.last_hear.sender == REFEREE )
 	{
 		play_mode = sensor_h.last_hear_referee.play_mode;
+	}
+}
+
+void WorldModelV1::updateOnOk()
+{
+	SensorHandler & sensor_h = game_data->sensor_handler;
+
+	switch( sensor_h.last_ok )
+	{
+	case CHANGE_MODE: // Propio del coach, no lo usamos
+		break;
+	case MOVE:
+		break;
+	case RECOVER: // Propio del coach, no lo usamos
+		break;
+	case EAR:
+		break;
+	case EYE: // Propio del coach, no lo usamos
+		break;
+	case CHECK_BALL: // Propio del coach, no lo usamos
+		break;
+	case SYNCH_SEE:
+		me.synch_see_on = true;
+		break;
+	case LOOK: // Propio del coach, no lo usamos
+		break;
+	case START: // Propio del coach, no lo usamos
+		break;
 	}
 }

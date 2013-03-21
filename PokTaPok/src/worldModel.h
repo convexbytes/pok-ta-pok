@@ -2,16 +2,26 @@
 #ifndef WORLD_MODEL_H
 #define WORLD_MODEL_H
 #include "sensorHandler.h"
+#include "sensor.h"
 #include "gameCommand.h"
 #include "localizationEngine.h"
 
 class AgentStateV1
 {
 public:
+	AgentStateV1();
+
     Vector2D pos;
     double   angle;
     char 	 side;
     int 	 unum;
+    ViewModeQuality view_mode_q;
+    ViewModeWidth   view_mode_w;
+    bool 	synch_see_on;
+
+    double stamina;
+    double effort;
+    double head_angle;
 
 };
 
@@ -35,10 +45,12 @@ public:
 
 private:
 
-    void updateOnBody   ( );
-    void updateOnInit   ( );
-    void updateOnSee    ( );
-    void updateOnHear   ( );
+    void updateOnBody   ();
+    void updateOnInit   ();
+    void updateOnSee    ();
+    void updateOnHear   ();
+    void updateOnOk		();
+
 };
 
 
