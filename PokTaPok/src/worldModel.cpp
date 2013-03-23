@@ -77,11 +77,15 @@ void WorldModelV1::updateOnBody()
 {
 	BodySensor const & body = game_data->sensor_handler.last_sense;
 
-	me.effort 	= body.effort;
-	me.stamina 	= body.stamina;
-	me.view_mode_q = body.view_mode_quality;
-	me.view_mode_w = body.view_mode_width;
-	me.head_angle = body.head_angle;
+	me.effort 		= body.effort;
+	me.stamina 		= body.stamina;
+	me.view_mode_q 	= body.view_mode_quality;
+	me.view_mode_w 	= body.view_mode_width;
+	me.head_angle 	= body.head_angle;
+
+
+	// Actualizamos en base a los comandos enviados
+	this->updateOnCommandSent();
 }
 
 void WorldModelV1::updateOnSee()
@@ -95,6 +99,7 @@ void WorldModelV1::updateOnInit()
 	this->play_mode = init.play_mode;
 	me.side = init.side;
 	me.unum = init.unum;
+
 
 }
 
@@ -136,4 +141,56 @@ void WorldModelV1::updateOnOk()
 	case START: // Propio del coach, no lo usamos
 		break;
 	}
+}
+
+
+void WorldModelV1::updateOnCommandSent()
+{
+	AgentCommand const & com = game_data->command_commited;
+	if( com.attention_to_is_set() )
+	{
+
+	}
+	if( com.catch_is_set() )
+	{
+
+	}
+	if( com.change_view_is_set() )
+	{
+		me.view_mode_q = com.change_view_quality;
+		me.view_mode_w = com.change_view_width;
+	}
+	if( com.dash_is_set() )
+	{
+
+	}
+	if( com.kick_is_set() )
+	{
+
+	}
+	if( com.move_is_set() )
+	{
+
+	}
+	if( com.say_is_set() )
+	{
+
+	}
+	if( com.score_is_set() )
+	{
+
+	}
+	if( com.synch_see_is_set() )
+	{
+
+	}
+	if( com.turn_is_set() )
+	{
+
+	}
+	if( com.turn_neck_is_set() )
+	{
+
+	}
+
 }

@@ -44,6 +44,38 @@ void StateMachine::update( GameData const & game_data )
 				this->eRefereeFoulCharge();
 		}
 	}
+	else if( sensor_h.last_sensor_type == SENSOR_INIT )
+	{
+		pm = sensor_h.last_init.play_mode;
+		if( pm == BEFORE_KICK_OFF )
+			this->eRefereeBefKickOff();
+		else if( pm == KICK_OFF_L || pm == KICK_OFF_R )
+			this->eRefereeKickOff();
+		else if( pm == PLAY_ON )
+			this->eRefereePlayOn();
+		else if( pm == KICK_IN_L || pm == KICK_IN_R )
+			this->eRefereeKickIn();
+		else if( pm == FREE_KICK_L || pm == FREE_KICK_R )
+			this->eRefereeFreeKick();
+		else if( pm == CORNER_KICK_L || pm == CORNER_KICK_R )
+			this->eRefereeCornerKick();
+		else if( pm == GOALIE_CATCH_BALL_L || pm == GOALIE_CATCH_BALL_R )
+			this->eRefereeGoalieCatch();
+		else if( pm == GOAL_KICK_L || pm == GOAL_KICK_R )
+			this->eRefereeGoalKick();
+		else if( pm == INDIRECT_FREE_KICK_L || pm == INDIRECT_FREE_KICK_R )
+			this->eRefereeIndirectFreeKick();
+		else if( pm == PLAY_ON )
+			this->eRefereePlayOn();
+		else if( pm == GOAL_L || pm == GOAL_R )
+			this->eRefereeGoal();
+		else if( pm == TIME_OVER )
+			this->eRefereeTimeOver();
+		else if( pm == BACK_PASS_L || pm == BACK_PASS_R )
+			this->eRefereeBackPass();
+		else if( pm == FOUL_CHARGE_L || pm == FOUL_CHARGE_R )
+			this->eRefereeFoulCharge();
+	}
 }
 
 void StateMachine::eRefereeBackPass()

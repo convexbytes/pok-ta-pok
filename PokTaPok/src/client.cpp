@@ -215,7 +215,7 @@ void* Client::Client::sending_thread_function(void *parameter)
 	timespec rem_check_time;
 	wait_check_time.tv_nsec = 100000; // .1 milisegundo
 	wait_check_time.tv_sec = 0;
-	wait_time.tv_nsec = 70000000; // 70 milisegundos
+	wait_time.tv_nsec = 60000000; // 60 milisegundos
 	wait_time.tv_sec = 0;
 	while (1)
 	{
@@ -233,20 +233,20 @@ void* Client::Client::sending_thread_function(void *parameter)
 			commands.clear();
 
 			// Serializamos los comandos y los guardamos en el vector.
-			pthread_mutex_lock( &Client::instance().command_mutex );
+			//pthread_mutex_lock( &Client::instance().command_mutex );
 			Serializer::serializeAgentCommands( *Client::instance().agent_command,
 					& commands );
-			pthread_mutex_unlock( &Client::instance().command_mutex );
+			//pthread_mutex_unlock( &Client::instance().command_mutex );
 
 			// Enviamos todos los comandos generados.
 			for( it = commands.begin(); it != commands.end(); ++it )
 				USock::instance().Send( it->c_str() );
 
 			//Copiamos lo que se envió a los datos del juego.
-			pthread_mutex_lock( &Client::instance().command_mutex );
+			//pthread_mutex_lock( &Client::instance().command_mutex );
 			Client::instance().game_data->command_commited =
 					*Client::instance().agent_command;
-			pthread_mutex_unlock( &Client::instance().command_mutex );
+			//pthread_mutex_unlock( &Client::instance().command_mutex );
 		}
 		else
 		{

@@ -1,10 +1,11 @@
 #include "poktapokAgent.h"
 #include "formation.h"
+#include "analyticalAbility.h"
 
 PokTaPokAgentV1::PokTaPokAgentV1( GameData * game_data )
 {
     world = new WorldModelV1( game_data );
-    //ball_btc = new BitacoraBall( game_data, world );
+    bitacora = new Bitacora( game_data, world );
 }
 
 void PokTaPokAgentV1::do_process( GameData *game_data,
@@ -45,13 +46,14 @@ void PokTaPokAgentV1::update()
 
 	state_m.update( *this->game_data );
 
-	//if( sensor_h->last_sensor_type == SENSOR_SEE )
-		//ball_btc->insertData();
+	if( sensor_h->last_sensor_type == SENSOR_SEE )
+		bitacora->insertData();
 
 }
 
 void PokTaPokAgentV1::onInitial()
 {
+
 
 }
 
@@ -62,5 +64,6 @@ void PokTaPokAgentV1::onPrep()
 
 void PokTaPokAgentV1::onPlay()
 {
-	//if()
+
+
 }

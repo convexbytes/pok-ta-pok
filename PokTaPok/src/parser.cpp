@@ -177,7 +177,7 @@ void Parser::parse_hear( char *message )
 
             break;
             case 'r': //El sender es referee, recibimos el play_mode
-                subcad = move_to_next_word( subcad );
+                subcad = move_to_next_word( subcad ); //#gil_mark
                 sscanf( subcad, "%s", aux_str );	//extraemos el mensaje antes del paréntesis que cierra
                 aux_str[ strlen( aux_str) -1 ] = '\0';//quitamos el paréntesis
                 //obtenemos el playmode

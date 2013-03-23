@@ -15,13 +15,22 @@ public:
     double   angle;
     char 	 side;
     int 	 unum;
-    ViewModeQuality view_mode_q;
-    ViewModeWidth   view_mode_w;
-    bool 	synch_see_on;
+
 
     double stamina;
     double effort;
     double head_angle;
+
+
+    // About vision
+    ViewModeQuality view_mode_q;
+    ViewModeWidth   view_mode_w;
+
+    bool 			synch_see_on;
+
+    int 			last_recv_visual_time;
+    ViewModeQuality	last_recv_visual_q;
+    ViewModeWidth	last_recv_visual_w;
 
 };
 
@@ -50,6 +59,7 @@ private:
     void updateOnSee    ();
     void updateOnHear   ();
     void updateOnOk		();
+    void updateOnCommandSent();
 
 };
 

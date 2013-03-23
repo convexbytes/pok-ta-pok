@@ -1,13 +1,14 @@
 #ifndef POKTAPOK_AGENT_H
 #define POKTAPOK_AGENT_H
 #include "agent.h"
-#include "attractorField.h"
 #include "sensorHandler.h"
 #include "worldModel.h"
-//#include "bitacoraBall.h"
+#include "bitacora.h"
 #include "state.h"
+#include "potentialField.h"
+#ifndef TEAM_NAME
 #define TEAM_NAME "PokTaPok"
-
+#endif // TEAM_NAME
 
 
 class PokTaPokAgentV1 : public Agent
@@ -29,7 +30,7 @@ private:
     SensorHandler       * sensor_h;
     StateMachine		  state_m;
 
-    //BitacoraBall		* ball_btc;
+    Bitacora    		* bitacora;
     void update();
 
     void onInitial();

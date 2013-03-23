@@ -25,7 +25,7 @@ public:
     Bitacora( GameData * game_data, WorldModelV1 * world_model );
     void insertData();          
 	deque <objetoBitacora>  bitacoraRivales[11]; // 11 rivales
-	deque <objetoBitacora>  bitacoraAmigos[10];  // 10 amgios
+	deque <objetoBitacora>  bitacoraAmigos[11];  // 10 amgios, el lugar nuestro se queda vacío
  	deque <objetoBitacora>  bitacoraBalon;       // balon               
 	
 // deque <MobileObject> bitacora[22]  // 	<----  O bien

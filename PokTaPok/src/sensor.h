@@ -329,7 +329,6 @@ class HearSensor
 public:
     int time;
     HearSender sender;
-    /* en caso de que el sender sea referee */
 };
 
 class HearRefereeSensor : public HearSensor

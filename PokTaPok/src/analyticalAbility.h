@@ -2,8 +2,11 @@
 #define ANALYTICAL_ABILITY_H
 #include "utilities.h"
 #include "geometry.h"
+#include "gameCommand.h"
 
-#include <math.h>
+
+#include <cstdio>
+#include <cmath>
 #include <iostream>
 
 Vector2D dePrimera( double vel_r_t1,
@@ -56,9 +59,9 @@ Vector2D freezeBall( double vel_r_t0,
                      double ball_distance,
                      double ball_direction,
                      double neck_angle,
-                     double kickable_margin,
-                     double kick_power_rate,
-                     double decay)
+                     double kickable_margin = 0.7,
+                     double kick_power_rate = 0.027,
+                     double decay = 0.94)
 {
     Vector2D kick_vector; // kick_vector.x = power, kick_vector.y = angle
 
@@ -161,6 +164,128 @@ Vector2D ballRelativeInterceptionModel( double ball_distance,
 
 }
 
+
+
+void GoToXY ( double   xTarget ,
+              double   yTarget ,
+              double   x,
+              double   y,
+              double   angle,
+              Vector2D velocidad,
+              AgentCommand * command
+            )
+{
+
+    double  disToPoint;
+    double  dirToPoint;
+    double  radPermisible;
+    double  angPermisible;
+    double  turnParameter;
+    double  dashParameter;
+    double const dash_power_rate = 0.006, effort = 0.8;
+    double const inertia_moment = 5.0;
+
+   //anguloCuerpo =  angle + angleCuelloCuerpo; // angleCuelloCuerpo se obtiene del sense_body
+   //consideramos el angle como el angulo del cuerpo
+
+
+    radPermisible = 2.0;
+
+    disToPoint = sqrt( (xTarget - x)*(xTarget - x)  + (yTarget - y)*(yTarget - y) );
+    dirToPoint = Rad2Deg(atan2( yTarget - y , xTarget - x));
+
+
+    if( disToPoint > radPermisible )  // el agente no ha llegado al punto
+       {
+
+        angPermisible = Rad2Deg( atan2( radPermisible , disToPoint ) );
+        //angPermisible = 10.0;
+        turnParameter = dirToPoint - angle;
+        turnParameter = entre180( turnParameter );
+
+        if( fabs(turnParameter) > angPermisible )  // el agente no esta bien alineado al punto
+           {
+            velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y) );
+            //turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.normita()));
+            //printf("Vel norm: %lf \n", velocidad.normita());
+            turnParameter = entre180(turnParameter);
+            //printf("Turn Parameter: %lf \n",turnParameter);
+            command->append_turn(turnParameter);
+           }
+        else
+           {
+            velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y - angle) );
+            dashParameter = (disToPoint - velocidad.x)  / ( dash_power_rate * effort );
+            if( dashParameter > 100.0)
+                dashParameter = 100.0;
+            //printf("Dash Parameter: %lf \n",dashParameter);
+            command->append_dash( dashParameter );
+           }
+       }
+    else
+       {
+         // el agente llego al punto
+         //printf("\n***********El agente llego al punto*********\n");
+       }
+
+    //double  x,y,angle;  // pose del robot
+  /*
+
+
+    double  disToPoint;
+    double  radPermisible;
+    double  angPermisible;
+    double  angAux;
+    double  angForTurn;
+    double  dashParameter;
+    double  turnParameter;
+    double const dash_power_rate = 0.0006, effort = 0.8 , inertia_moment = 5.0;
+
+    Vector2D velCartesian;
+
+//        double  dash_power_rate = game_data-> game_parameter.dash_power_rate;
+//      double  efferot         = game_data-> game_parameter.effort;
+//    double  inertia_moment  = game_data-> game_parameter.inertie_moment;
+
+    // x     = world->me.pos.x;
+     //y     = world->me.pos.y;
+     //angle = world->me.pos.angle;
+
+//////////*******************//////////////
+    //velocidad = ;/// vector de elocidad del agente
+/*
+    disToPoint = sqrt(
+                      pow( (yTarget - y) , 2 ) +
+                      pow( (xTarget - x) , 2 )
+                     );
+
+    if ( disToPoint > radPermisible )
+        {
+         angPermisible = Rad2Deg( atan2( radPermisible , disToPoint ) );
+         angAux        = Rad2Deg( atan2( yTarget - y , xTarget - x ) );
+         angForTurn    = angAux - angle;
+
+         if ( fabs(angForTurn) < angPermisible )
+             {
+              velCartesian      = Vector2D::toPolar( velocidad.x, velocidad.y - angle );
+              dashParameter     = ( disToPoint - velCartesian.x ) / ( dash_power_rate * effort );
+              command->append_dash( dashParameter );
+
+             }
+         else
+             {
+              velCartesian    = Vector2D::toPolar(velocidad.x,velocidad.y);
+              turnParameter  = 1.0 + inertia_moment * velCartesian.normita();
+              command->append_turn(turnParameter);
+             }
+        }
+    else
+        {
+         // El agente llego al punto
+        }
+
+    */
+}
 
 
 #endif //ANALYTICAL_ABILITY_H
