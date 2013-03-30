@@ -72,13 +72,17 @@ void Client::initialize() {
 	//Creamos los mutex.
 	if ( (     pthread_mutex_init( & Client::instance().message_stack_mutex, NULL )
 			|| pthread_mutex_init( & Client::instance().command_mutex, NULL)
-			|| pthread_mutex_init( & Client::instance().time_mutex, NULL)
+			|| pthread_mutex_init( & Client::instance().sending_thread_cond_mutex, NULL)
 	) != 0 )
 	{
 		std::cerr << "Mutex could not be created, exiting..."
 				  << std::endl;
 		exit(1);
 	}
+
+	//Condición para el envío
+	pthread_cond_init( &Client::instance().sending_thread_cond, NULL);
+
 	//Creamos los hilos.
 	process_thread_error = pthread_create( & Client::instance().process_thread,
 			NULL,
@@ -97,6 +101,7 @@ void Client::initialize() {
 		exit(1);
 	}
 
+
 }
 
 Client::~Client()
@@ -107,7 +112,8 @@ Client::~Client()
 	pthread_kill            ( Client::instance().sending_thread, SIGQUIT );
 	pthread_mutex_destroy   ( & Client::instance().message_stack_mutex );
 	pthread_mutex_destroy   ( & Client::instance().command_mutex );
-	pthread_mutex_destroy   ( & Client::instance().time_mutex );
+	pthread_mutex_destroy   ( & Client::instance().sending_thread_cond_mutex );
+	pthread_cond_destroy	( & Client::instance().sending_thread_cond );
 
 	if( instance.parser )
 		delete instance.parser;
@@ -132,6 +138,7 @@ void Client::main_loop( bool goalie )
 {
 	Client::instance().initialize();
 	USock::instance().Initial("localhost", 6000);
+	MP_MessageType msg_type;
 
 	if( goalie )
 	{
@@ -148,9 +155,15 @@ void Client::main_loop( bool goalie )
 
 		USock::instance().Receive( buffer_in );
 
-		Client::instance().last_msg_type =
+		Client::instance().last_msg_type = msg_type =
 				(MP_MessageType) MicroParser::get_message_type(buffer_in); //Le decimos al hilo de envio el tipo de mensaje que nos lleg̣a.
-		//Client::instance().last_msg_cycle = MicroParser::get_message_time( buffer_in );
+
+		if( msg_type == MP_SENSE_BODY )
+		{
+			pthread_mutex_lock( &Client::instance().sending_thread_cond_mutex );
+			pthread_cond_signal( &Client::instance().sending_thread_cond );
+			pthread_mutex_unlock( &Client::instance().sending_thread_cond_mutex );
+		}
 
 		pthread_mutex_lock( & Client::instance().message_stack_mutex );
 
@@ -206,52 +219,44 @@ void * Client::Client::process_thread_function(void *parameter)
 
 void* Client::Client::sending_thread_function(void *parameter)
 {
-	MP_MessageType      msg_type;
+
 	std::vector<string> commands;
 	std::vector<string>::const_iterator it;
 	timespec wait_time;
 	timespec rem_time;
-	timespec wait_check_time;
-	timespec rem_check_time;
-	wait_check_time.tv_nsec = 100000; // .1 milisegundo
-	wait_check_time.tv_sec = 0;
-	wait_time.tv_nsec = 60000000; // 60 milisegundos
+
+	wait_time.tv_nsec = 80000000; // 60 milisegundos
 	wait_time.tv_sec = 0;
+
 	while (1)
 	{
-		//pthread_mutex_lock( & Client::time_mutex );
-		msg_type = Client::instance().last_msg_type;
-		//pthread_mutex_unlock( & Client::time_mutex );
 
-		if ( msg_type == MP_SENSE_BODY )
-		{
-
-			msg_type = Client::instance().last_msg_type = MP_NONE;
+			pthread_mutex_lock( &Client::instance().sending_thread_cond_mutex );
+			pthread_cond_wait( &Client::instance().sending_thread_cond,
+							   &Client::instance().sending_thread_cond_mutex);
 
 			nanosleep( &wait_time, &rem_time );
 
 			commands.clear();
 
 			// Serializamos los comandos y los guardamos en el vector.
-			//pthread_mutex_lock( &Client::instance().command_mutex );
+			pthread_mutex_lock( &Client::instance().command_mutex );
 			Serializer::serializeAgentCommands( *Client::instance().agent_command,
 					& commands );
-			//pthread_mutex_unlock( &Client::instance().command_mutex );
+			pthread_mutex_unlock( &Client::instance().command_mutex );
 
 			// Enviamos todos los comandos generados.
 			for( it = commands.begin(); it != commands.end(); ++it )
 				USock::instance().Send( it->c_str() );
 
 			//Copiamos lo que se envió a los datos del juego.
-			//pthread_mutex_lock( &Client::instance().command_mutex );
+			pthread_mutex_lock( &Client::instance().command_mutex );
 			Client::instance().game_data->command_commited =
 					*Client::instance().agent_command;
-			//pthread_mutex_unlock( &Client::instance().command_mutex );
-		}
-		else
-		{
-			nanosleep( &wait_check_time, &rem_check_time);
-		}
+			pthread_mutex_unlock( &Client::instance().command_mutex );
+
+
+			pthread_mutex_unlock( &Client::instance().sending_thread_cond_mutex );
 
 	}
 	return NULL;

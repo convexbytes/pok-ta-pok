@@ -36,11 +36,16 @@ public:
     static void * sending_thread_function(void *parameter);
 
 
-    pthread_mutex_t  message_stack_mutex; // mutex para el main_loop y el process_thread
-    pthread_mutex_t  command_mutex; // mutex para el process_thread y el sending_thread
-    pthread_mutex_t  time_mutex;
+    // mutex para acceder a la pila de mensajes. Lo usan: main_loop y process_thread
+    pthread_mutex_t  message_stack_mutex;
+    // mutex para acceder al comando a enviar. Lo usan: process_thread y sending_thread
+    pthread_mutex_t  command_mutex;
+    // threads
     pthread_t        process_thread;
     pthread_t        sending_thread;
+    // variable de condición para el envío y su respectivo mutex
+    pthread_cond_t	 sending_thread_cond;
+    pthread_mutex_t	 sending_thread_cond_mutex;
 
 private:
     char buffer_in[4096]; //4096 es el tamaño usado por send y receive en udpsocket
@@ -53,9 +58,6 @@ private:
     //Synchronizer        synchronizer; //Decidimos que el sincronizador no era necesario usando tres hilos
     MP_MessageType      last_msg_type;
 
-
-    // Por ahora no está en funcionamiento
-    //int sending_wait_time; //microsegundos
 
     void initialize     ( );
     void pre_filter     ( char *server_msg );
