@@ -45,7 +45,7 @@ void AgentCommand::append_dash(double power)
     dash_set = true;
     dash_power = power;
 }
-void AgentCommand::append_turn(int angle)
+void AgentCommand::append_turn(double angle)
 {
     dash_set = false; /* exclusion de comandos en el mismo ciclo */
     catch_set = false;

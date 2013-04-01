@@ -2,12 +2,12 @@
 #include "utilities.h"
 #include "geometry.h"
 
-Vector2D ubicacionBanderaBandera(float distanciaFlag1, float direccionFlag1, Vector2D coordGlobalFlag1, float distanciaFlag2, float direccionFlag2, Vector2D coordGlobalFlag2)
+Vector2D ubicacionBanderaBandera(double distanciaFlag1, double direccionFlag1, Vector2D coordGlobalFlag1, double distanciaFlag2, double direccionFlag2, Vector2D coordGlobalFlag2)
 {
     // Devuelve un vector con la coordenada global en x
     // y la coordenada global y
     //
-    float distancia, p1[2], a, dx, dy, h;
+    double distancia, p1[2], a, dx, dy, h;
     Vector2D posicion;
     dx = coordGlobalFlag2.x - coordGlobalFlag1.x;
     dy = coordGlobalFlag2.y - coordGlobalFlag1.y;
@@ -29,14 +29,14 @@ Vector2D ubicacionBanderaBandera(float distanciaFlag1, float direccionFlag1, Vec
     return posicion;
 }
 
-Vector2D ubicacionLineaBandera(float direccionLinea, char lineaId, float distanciaFlag, float direccionFlag, Vector2D coordGlobalFlag)
+Vector2D ubicacionLineaBandera(double direccionLinea, char lineaId, double distanciaFlag, double direccionFlag, Vector2D coordGlobalFlag)
 {
     // Devuelve un vector, con la coordenada global X
     // y la coordenada global Y
     // Linea puede tomar los valores r,l,t,b (right, left, top, bottom)
     //
-    float B,O,angulox,anguloy;
-    float coor[2];
+    double B,O,angulox,anguloy;
+    double coor[2];
     Vector2D p;
     B = (-1.0)*( signo(direccionLinea) )*( 90.0 - absoluto(direccionLinea) ); // Ángulo de la bisectriz a la
                                                                                // perpendicular de la linea

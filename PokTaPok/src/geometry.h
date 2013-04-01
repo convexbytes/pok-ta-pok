@@ -6,6 +6,11 @@
 class Vector2D
 {
 public:
+
+    double x;
+    double y;
+
+
     Vector2D()
     {
         this->x = 0.0;
@@ -17,9 +22,10 @@ public:
         this->y = y;
     }
 
-
-    double x;
-    double y;
+    Vector2D( double a )
+    {
+    	this->x = this->y = a;
+    }
 
     void operator=( Vector2D const & v)
     {
@@ -32,12 +38,12 @@ public:
         x = y = a;
     }
 
-    Vector2D & operator+(const Vector2D & v1)
+    Vector2D & operator+(const Vector2D & v1) const
     {
         static Vector2D v;
         v.x = v1.x + this->x;
         v.y = v1.y + this->y;
-	return v;
+        return v;
     }
 
     void operator+=(const Vector2D & v1)
@@ -54,11 +60,14 @@ public:
         return v1;
     }
 
-    Vector2D & operator/( double r )
+    Vector2D & operator/( double r ) const
     {
         static Vector2D v;
         if( r == 0 )
-            return *this;
+        {
+        	std::cerr << "Warning. Vector2D::operator/(): zero division." << std::endl;
+            return v;
+        }
         v.x = x/r;
         v.y = y/r;
         return v;
@@ -72,13 +81,20 @@ public:
         this->y /= r;
     }
 
+    Vector2D & operator *( double r) const
+    {
+    	static Vector2D v;
+    	v.x = this->x*r;
+    	v.y = this->y*r;
+    	return v;
+    }
     void operator*=( double r )
     {
         this->x *= r;
         this->y *= r;
     }
 
-    double normita()
+    double normita() const
     {
         return sqrt( x*x + y*y );
     }
@@ -95,23 +111,32 @@ public:
 
     double angleBetween( Vector2D const & v ) const
     {
-        Vector2D v1 = *this-v;
-        return v1.angle();
+
+        return (*this-v).angle();
     }
 
     double angle() const
     {
         if( x != 0.0 || y != 0.0 )
-            return atan2(y,x);
+            return std::atan2(y,x);
         else
             return 0.0;
     }
 
-friend std::ostream & operator <<( std::ostream & os, Vector2D const & v)
-{
-	os << "Vector2D(" << v.x << "," << v.y << ")";
-	return os;
-}
+
+    void rotate( double angle_rad )
+    {
+    	double x_tmp = this->x;
+
+        x = x*cos(angle_rad) - y*sin(angle_rad);
+        y = x_tmp*sin(angle_rad) + y*cos(angle_rad);
+    }
+
+    friend std::ostream & operator <<( std::ostream & os, Vector2D const & v)
+    {
+    	os << "Vector2D(" << v.x << "," << v.y << ")";
+    	return os;
+    }
 
     static
     Vector2D fromPolar( const double & r,

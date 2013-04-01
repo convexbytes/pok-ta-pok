@@ -13,7 +13,7 @@ public:
     AgentCommand();
     void reset();
     void append_dash        ( double power );
-    void append_turn        ( int angle );
+    void append_turn        ( double angle );
     void append_turn_neck   ( int angle );
     void append_say         ( std::string message );
     void append_say         ( const char *message );
@@ -46,7 +46,7 @@ public:
     int catch_direction;
     double kick_power, kick_direction;
     double dash_power;
-    int turn_angle;
+    double turn_angle;
     int turn_neck_angle;
     int attention_uniform_number;
     AttentionTeam attention_team;

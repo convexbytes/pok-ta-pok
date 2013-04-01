@@ -266,6 +266,8 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
     Vector2D coorb1,coorb2,posicion;
     vector<Flag>   *banderas = &vision->flags;
         
+    double neck_dir = game_data->sensor_handler.last_sense.head_angle;
+
     pesoMax = 0.0;
     banderas_vistas = banderas->size();
     orientacion = 0.0;
@@ -452,7 +454,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 	
 	for (i = 0; i < NUM_PARTICULAS; i++)
 	    {
-		 particulas_nuevas[i].theta = entre180( Rad2Deg(finalOrientation));	
+		 particulas_nuevas[i].theta = entre180( Rad2Deg(finalOrientation+neck_dir));
 	/*	 printf(" %lf %lf %lf p[%d] +\n",particulas_nuevas[i].x,
 									   particulas_nuevas[i].y,
 									   particulas_nuevas[i].theta,

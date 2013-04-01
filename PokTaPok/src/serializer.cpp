@@ -21,7 +21,7 @@ void Serializer::generate_command( char * output, AgentCommand &game_command )
 
     else if ( game_command.turn_is_set() )
     {
-        sprintf(command_aux2, "(turn %d)", game_command.turn_angle );
+        sprintf(command_aux2, "(turn %lf)", game_command.turn_angle );
         strcat(command_aux, command_aux2);
     }
     else if ( game_command.catch_is_set() )
@@ -117,7 +117,7 @@ void Serializer::serializeAgentCommands(const AgentCommand &command, vector<stri
 
     else if ( command.turn_is_set() )
     {
-        sprintf(command_aux2, "(turn %d)", command.turn_angle );
+        sprintf(command_aux2, "(turn %lf)", command.turn_angle );
         new_command.assign( command_aux2 );
         container->push_back( new_command );
     }

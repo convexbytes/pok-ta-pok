@@ -16,58 +16,58 @@ Parser::Parser(GameData *game_data)
 
 ParserMsgType Parser::parse(char *message )
 {
-    if( strstr( message, "server_param" ) )
+    if( strncmp( message, "(server_param", 13) == 0 )
     {
         parse_server_param( message );
         return P_SERVER_PARAM;
     }
 
-    else if( strstr(message, "player_param") )
+    else if( strncmp(message, "(player_param", 13) == 0 )
     {
         parse_player_param( message );
         return P_PLAYER_PARAM;
     }
-    else if( strstr(message, "player_type") )
+    else if( strncmp(message, "(player_type", 12) == 0 )
     {
         parse_player_type( message );
         return P_PLAYER_TYPE;
     }
-    else if( strstr( message, "see_global") )
+    else if( strncmp( message, "(see_global", 11) == 0 )
     {
         parse_see_global( message );
         return P_SEE_GLOBAL;
     }
-    else if( strstr(message, "see") )
+    else if( strncmp(message, "(see", 4) == 0 )
     {
         parse_see( message );
         return P_SEE;
     }
-    else if( strstr(message, "sense") )
+    else if( strncmp(message, "(sense", 6) == 0 )
     {
         parse_sense( message );
         return P_SENSE;
     }
-    else if( strstr(message, "hear") )
+    else if( strncmp(message, "(hear", 5) == 0 )
     {
         parse_hear( message );
         return P_HEAR;
     }
-    else if( strstr(message, "msg") )
+    else if( strncmp(message, "(msg", 4) == 0 )
     {
         //parse_msg( message );
         return P_MSG;
     }
-    else if( strstr(message, "init") )
+    else if( strncmp(message, "(init", 5) == 0 )
     {
         parse_init( message );
         return P_INIT;
     }
-    else if( strstr(message, "ok") )
+    else if( strncmp(message, "(ok", 3) == 0 )
     {
         parse_ok( message );
         return P_OK;
     }
-    else if( strstr(message, "error") )
+    else if( strncmp(message, "(error", 6) == 0 )
     {
         parse_error( message );
         return P_ERROR;
@@ -76,7 +76,6 @@ ParserMsgType Parser::parse(char *message )
     {
         return P_PARSING_ERROR;
     }
-
 }
 
 void Parser::parse_error( char *message)
@@ -226,13 +225,9 @@ void Parser::parse_ok( char *message )
 {
         char str1[256];
         int time;
-        char *subcadena2=NULL;
-        subcadena2 = strstr(message,"(ok");
-        if( !subcadena2 ) return;
-        subcadena2 = move_to_next_word( subcadena2 );
-        sscanf( subcadena2, "%s", str1 );
-        if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1] = '\0'; // Quitamos el último paréntesis para que la comparación sea limpia
-        
+        char *subcad = message;
+        subcad = move_to_next_word( subcad );
+        sscanf( subcad,"%[^)]", str1 );
         if  	(strcmp(str1, "change_mode")==0)
         {
             game_data->sensor_handler.ok_change_mode(  );
@@ -251,8 +246,8 @@ void Parser::parse_ok( char *message )
         }
         else if (strcmp(str1, "ear")==0)
         {
-            subcadena2 = move_to_next_word( subcadena2 );
-            sscanf( subcadena2, "%s", str1 );
+        	subcad = move_to_next_word( subcad );
+            sscanf( subcad, "%s", str1 );
             if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0'; // Quitamos el último paréntesis
             if( strcmp(str1, "on") == 0 )
             {
@@ -265,8 +260,8 @@ void Parser::parse_ok( char *message )
         }
 		else if ( strcmp( str1, "eye" ) == 0 )
         {
-			subcadena2 = move_to_next_word( subcadena2 );
-			sscanf( subcadena2, "%s", str1 );
+			subcad = move_to_next_word( subcad );
+			sscanf( subcad, "%s", str1 );
             if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0'; // Quitamos el último paréntesis
             if( strcmp(str1, "on") == 0 )
             {
@@ -280,10 +275,10 @@ void Parser::parse_ok( char *message )
         
         else if (strcmp(str1, "check_ball")==0)
         {
-            subcadena2 = move_to_next_word( subcadena2 );
-            sscanf(subcadena2, "%d", &time ); // Obtenemos tiempo
-            subcadena2 = move_to_next_word( subcadena2 );
-            sscanf( subcadena2, "%s", str1 ); // Obtenemos in_field, goal_l, etc...
+        	subcad = move_to_next_word( subcad );
+            sscanf(subcad, "%d", &time ); // Obtenemos tiempo
+            subcad = move_to_next_word( subcad );
+            sscanf( subcad, "%s", str1 ); // Obtenemos in_field, goal_l, etc...
             if( str1[ strlen( str1 ) -1 ] == ')' ) str1[ strlen( str1 ) -1 ] = '\0';
             if ( strcmp( str1, "in_field" ) == 0 )
             {
@@ -328,17 +323,19 @@ void Parser::parse_ok( char *message )
 			// Datos de todos los jugadores
 			while( *message != ')' )
 			{
-				sscanf( message, "( (p \"%[-0-9a-zA-Z ().+*/?<>_]\" %d ) %lf %lf %lf %lf %lf %lf ) %n", team, &unum, &x, &y, &vx, &vy, &body_angle, &neck_angle, &n_readed );
+				sscanf( message, "( (p \"%[-0-9a-zA-Z ().+*/?<>_]\" %d ) %lf %lf %lf %lf %lf %lf ) %n",
+						team, &unum, &x, &y, &vx, &vy, &body_angle, &neck_angle, &n_readed );
 				message += n_readed;
 				
                 game_data->sensor_handler.ok_look_player( team, unum, x, y, vx, vy, body_angle, neck_angle );
 			}
-			
 		}
 		else if ( strcmp( str1, "synch_see" ) == 0 )
 		{
             game_data->sensor_handler.ok_synch_see();
 		}
+		else
+			std::cout << "'Parser::parse_ok(): 'ok' unkown form" << std::endl;
 }
 
 void Parser::parse_player_param(char *message)

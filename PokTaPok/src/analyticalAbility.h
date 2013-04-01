@@ -9,7 +9,7 @@
 #include <cmath>
 #include <iostream>
 
-Vector2D dePrimera( double vel_r_t1,
+Vector2D dePrimera(  double vel_r_t1,
                       double vel_angle_t1,
                       double vel_r_t0,
                       double vel_angle_t0,
@@ -75,95 +75,110 @@ Vector2D freezeBall( double vel_r_t0,
                               kickable_margin,
                               kick_power_rate,
                               decay);
-    /*
-( double vel_r_t1,
-                      double vel_angle_t1,
-                      double vel_r_t0,
-                      double vel_angle_t0,
-                      double ball_distance, // La dirección a la que vemos el balón
-                      double ball_direction,
-                      double neck_angle,
-                      double kickable_margin,
-                      double kick_power_rate,
-                      double decay)
 
-      */
     return kick_vector;
 }
 
 
-Vector2D ballAbsoluteInterceptionModel( double x0_ball, // posición x del balón en el tiempo 0
-                                          double y0_ball, // posición y del balón en el tiempo 0
-                                          double x0_agent, // posición x del agente en el tiempo 0
-                                          double y0_agent, // posición y del agente en el tiempo 0
-                                          double vx0_ball, // velocidad inicial x del balón
-                                          double vy0_ball, // velocidad inicial y del balón
-                                          double decay, // constante de decaimiento
-                                          int t
-                                          )
+Vector2D velToInterceptBall( Vector2D const & b, // Posición del balón
+							 Vector2D const & p, // Posición del jugador
+							 Vector2D const & v, // Velocidad del balón
+							 int t,
+							 double ball_decay = 0.94 // constante de decaimiento
+							)
 {
     // Regresa la velocidad en x y en y necesarias para interceptar el baĺón en el tiempo t
 
     Vector2D vel_needed;
-    // La constante de ajuste sirve para contrarrestar el tiempo que tarda en acelerar a su max. vel
-    // con 0.9 de poder
-    static double const acceleration_fitting_const = 0.72;
-    double ln_decay = log( decay );
-    //double pow_dec_t_ln;
-    //for( i=1; )
+    double ln_decay = log( ball_decay );
+    double decay_ala_t = std::pow(ball_decay, t);
 
-
-        double vx_needed = ( x0_ball - x0_agent + vx0_ball * ( pow(decay, t) - 1 )  / ln_decay )
-                /
-                (double)t;
-        double vy_needed = ( y0_ball - y0_agent + vy0_ball * ( pow(decay, t) - 1 )  / ln_decay )
-                /
-                (double)t;
-
-
-        //vel_needed.x /= ( effort * dash_power_rate );
-        //vel_needed.y /= ( effort * dash_power_rate );
-
-
-        // Hacemos ajuste debido al ciclo que tarda en girar, y a los dos ciclos que tarda en "estabilizar"
-        // la velocidad para llegar al máximo
-        vel_needed.x = ( (t - 2*acceleration_fitting_const) * vx_needed ) / (t-3);
-        vel_needed.y = ( (t - 2*acceleration_fitting_const) * vy_needed ) / (t-3);
-
-        //vel_needed.x = vx_needed;
-        //vel_needed.y = vy_needed;
-        //std::cout << t << std::endl;
+        vel_needed.x = ( b.x - p.x + v.x * ( decay_ala_t - 1 )  / ln_decay )
+                		/
+                		(double)t;
+        vel_needed.y = ( b.y - p.y + v.y * ( decay_ala_t - 1 )  / ln_decay )
+                		/
+                		(double)t;
 
     return vel_needed;
 }
 
-Vector2D ballRelativeInterceptionModel( double ball_distance,
-                                        double ball_direction,
-                                        double neck_angle,
-                                        double ball_dis_vel,
-                                        double ball_dir_vel,
-                                        double decay,
-                                        int t)
+double ActualKickPowerRate(int dir,double dist)
 {
-    // Regresa el la magnitud y la dirección de la velocidad necesarias para interceptar
-    // el balón al tiempo t
+    double kick_power_rate = 0.027,kickable_margin = 1.0;
+    double act_kpr = kick_power_rate * (( 1.0 - ((0.25 * dir) / 180.0)) - ((0.25 * dist) / kickable_margin));
 
-    Vector2D vel_needed;
-
-    vel_needed = ballAbsoluteInterceptionModel( ball_distance * cos( ball_direction - neck_angle),
-                                                ball_distance * sin( ball_direction - neck_angle),
-                                                0.0,
-                                                0.0,
-                                                ball_dis_vel * cos( ball_dir_vel ),
-                                                ball_dis_vel * sin( ball_dir_vel ),
-                                                decay,
-                                                t);
-
-    return Vector2D::toPolar( vel_needed.x, vel_needed.y );
-
-
+    return act_kpr;
 }
 
+double KickPowerForSpeed(double speed,double actkpr)
+{
+    double kickPower = speed / actkpr;
+
+    return kickPower;
+}
+
+//     KickSpeedToTravel(distancia Player-Objetivo , Vel final Deseada)
+double KickSpeedToTravel(double d,double e)
+{
+    if( e == 0 )
+       {
+        e = 0.01;
+       }
+    double ball_decay = 0.94;
+    double r = 1.0 / ball_decay;
+    double n = log(d*(r - 1.0)/e + 1.0 ) / log(r);
+    double s = e / pow(ball_decay,n);
+
+    return s;   // Vel inicial necesaria para que cumpla la Vel final deseada
+}
+
+
+
+
+
+Vector2D PasePunto( double xTarget,    // punto final
+                    double yTarget,
+                    double x,          // coordenadas agente
+                    double y,
+                    int    angle,      // angulo del cuerpo
+                    double velDes,     // velocidad final
+                    double xBall,      // coordenadas de la pelota
+                    double yBall)
+{
+Vector2D Kick;
+double disToPoint;
+double disBP;
+double speed;
+double anguloRel;
+double momBP;
+double act_kpr;
+                                     //Distancia del jugador al punto final del balón
+disToPoint = sqrt(  (xTarget - x)*(xTarget - x) +
+                    (yTarget - y)*(yTarget - y)
+                 );
+
+                                    //Distancia del jugador al balón
+disBP      = sqrt((xBall - x)*(xBall - x) +
+                  (yBall - y)*(yBall - y));
+
+speed      = KickSpeedToTravel(disToPoint,velDes);    //velocidad inicial necesaria
+
+anguloRel  = Rad2Deg( atan2(yTarget - y,xTarget - x) )- angle;  //Ángulo para kick
+
+momBP      = Rad2Deg( atan2(yBall - y,xBall - x) ) - angle; //Ángulo entre posicíon del balon y jugador
+
+act_kpr    = ActualKickPowerRate(momBP,disBP);        //valor real del poder del kick
+
+Kick.x  = rint(KickPowerForSpeed(speed,act_kpr));  //Kick.power  = Kick.x
+
+if(Kick.x > 100.0)
+    Kick.x = 100.0;
+
+Kick.y = rint( anguloRel );   //Kick.moment = Kick.y
+
+return Kick;
+}
 
 
 void GoToXY ( double   xTarget ,
@@ -171,6 +186,7 @@ void GoToXY ( double   xTarget ,
               double   x,
               double   y,
               double   angle,
+              double   radio,
               Vector2D velocidad,
               AgentCommand * command
             )
@@ -178,7 +194,6 @@ void GoToXY ( double   xTarget ,
 
     double  disToPoint;
     double  dirToPoint;
-    double  radPermisible;
     double  angPermisible;
     double  turnParameter;
     double  dashParameter;
@@ -188,105 +203,86 @@ void GoToXY ( double   xTarget ,
    //anguloCuerpo =  angle + angleCuelloCuerpo; // angleCuelloCuerpo se obtiene del sense_body
    //consideramos el angle como el angulo del cuerpo
 
-
-    radPermisible = 2.0;
-
     disToPoint = sqrt( (xTarget - x)*(xTarget - x)  + (yTarget - y)*(yTarget - y) );
     dirToPoint = Rad2Deg(atan2( yTarget - y , xTarget - x));
 
-
-    if( disToPoint > radPermisible )  // el agente no ha llegado al punto
+    if( disToPoint > radio )  // el agente no ha llegado al punto
        {
 
-        angPermisible = Rad2Deg( atan2( radPermisible , disToPoint ) );
-        //angPermisible = 10.0;
+        angPermisible = Rad2Deg( atan2( radio , disToPoint ) );
         turnParameter = dirToPoint - angle;
         turnParameter = entre180( turnParameter );
 
+        if( angPermisible < turnParameter * 0.1  &&  disToPoint > 15.0 )
+            angPermisible = 25.0;
+
         if( fabs(turnParameter) > angPermisible )  // el agente no esta bien alineado al punto
            {
+
             velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y) );
-            //turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.normita()));
-            //printf("Vel norm: %lf \n", velocidad.normita());
+            turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.normita()));
             turnParameter = entre180(turnParameter);
-            //printf("Turn Parameter: %lf \n",turnParameter);
             command->append_turn(turnParameter);
+
            }
         else
            {
+
             velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y - angle) );
             dashParameter = (disToPoint - velocidad.x)  / ( dash_power_rate * effort );
+
             if( dashParameter > 100.0)
                 dashParameter = 100.0;
-            //printf("Dash Parameter: %lf \n",dashParameter);
+
             command->append_dash( dashParameter );
            }
        }
     else
        {
          // el agente llego al punto
-         //printf("\n***********El agente llego al punto*********\n");
        }
 
-    //double  x,y,angle;  // pose del robot
-  /*
-
-
-    double  disToPoint;
-    double  radPermisible;
-    double  angPermisible;
-    double  angAux;
-    double  angForTurn;
-    double  dashParameter;
-    double  turnParameter;
-    double const dash_power_rate = 0.0006, effort = 0.8 , inertia_moment = 5.0;
-
-    Vector2D velCartesian;
-
-//        double  dash_power_rate = game_data-> game_parameter.dash_power_rate;
-//      double  efferot         = game_data-> game_parameter.effort;
-//    double  inertia_moment  = game_data-> game_parameter.inertie_moment;
-
-    // x     = world->me.pos.x;
-     //y     = world->me.pos.y;
-     //angle = world->me.pos.angle;
-
-//////////*******************//////////////
-    //velocidad = ;/// vector de elocidad del agente
-/*
-    disToPoint = sqrt(
-                      pow( (yTarget - y) , 2 ) +
-                      pow( (xTarget - x) , 2 )
-                     );
-
-    if ( disToPoint > radPermisible )
-        {
-         angPermisible = Rad2Deg( atan2( radPermisible , disToPoint ) );
-         angAux        = Rad2Deg( atan2( yTarget - y , xTarget - x ) );
-         angForTurn    = angAux - angle;
-
-         if ( fabs(angForTurn) < angPermisible )
-             {
-              velCartesian      = Vector2D::toPolar( velocidad.x, velocidad.y - angle );
-              dashParameter     = ( disToPoint - velCartesian.x ) / ( dash_power_rate * effort );
-              command->append_dash( dashParameter );
-
-             }
-         else
-             {
-              velCartesian    = Vector2D::toPolar(velocidad.x,velocidad.y);
-              turnParameter  = 1.0 + inertia_moment * velCartesian.normita();
-              command->append_turn(turnParameter);
-             }
-        }
-    else
-        {
-         // El agente llego al punto
-        }
-
-    */
 }
 
+void runWithBall (double   xTarget ,
+                  double   yTarget ,
+                  double   x,
+                  double   y,
+                  double   angle,
+                  double   xBall,
+                  double   yBall,
+                  double   disBall,
+                  Vector2D velocidad,
+                  double   radio,
+                  AgentCommand * command
+                 )
+{
+    double angToPoint;
+    double auxX,auxY;
+    Vector2D Kick;
+
+    if( disBall <= radio )
+    {
+
+        angToPoint = Rad2Deg( atan2(  yTarget   - y,   xTarget   - x) )- angle;
+
+        /*Este 5.0 es similar a lo que queremos que adelante la pelota
+        para valores grandes la adelanta mucho*/
+
+        auxX = 5.0 * cos( Deg2Rad( angToPoint ) );
+        auxY = 5.0 * sin( Deg2Rad( angToPoint ) );
+
+        Kick = PasePunto(x+auxX,y+auxY,x,y,angle,0.0, xBall , yBall );
+
+        Kick.y = angToPoint;
+
+        command->append_kick(Kick.x,Kick.y);
+    }
+    else
+    {
+        GoToXY(xBall,yBall,x,y,angle,radio,velocidad,command );  // vamos por la pelota
+    }
+}
 
 #endif //ANALYTICAL_ABILITY_H
     
