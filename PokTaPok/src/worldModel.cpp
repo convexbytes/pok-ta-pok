@@ -508,7 +508,7 @@ WorldModelV1::predictBallCurrentVel( Vector2D * v )
 			// Usamos la última velocidad y le aplicamos el decay
 			*v = bitacoraBalon.begin()->vel;
 			diferencia_tiempo =  time - bitacoraBalon.begin()->ciclo;
-			*v *= std::pow( ball_decay, time );
+			*v *= std::pow( ball_decay, diferencia_tiempo );
 			return true;
 		}
 	}

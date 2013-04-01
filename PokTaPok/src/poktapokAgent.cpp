@@ -1,17 +1,19 @@
 #include "poktapokAgent.h"
 #include "formation.h"
 #include "analyticalAbility.h"
-
+#include <cmath>
 PokTaPokAgentV1::PokTaPokAgentV1( GameData * game_data )
 {
     world = new WorldModelV1( game_data );
-    ball_intercept = new BallIntercept( game_data,
-    									world );
+    freeze_ball	   = new FreezeBall		( game_data, world );
+    ball_intercept = new BallIntercept	( game_data, world, freeze_ball );
+
 }
 PokTaPokAgentV1::~PokTaPokAgentV1()
 {
 	delete world;
 	delete ball_intercept;
+	delete freeze_ball;
 }
 
 void PokTaPokAgentV1::do_process( GameData *game_data,
@@ -53,15 +55,6 @@ void PokTaPokAgentV1::update()
 
 void PokTaPokAgentV1::onInitial()
 {
-	Vector2D cero(0.0);
-
-	if( world->me.synch_see_on == false )
-			command->append_synch_see();
-		if( world->me.view_mode_q != HIGH || world->me.view_mode_w != NARROW )
-			command->append_change_view( HIGH, NARROW );
-
-	if( (world->me.pos - cero).normita() > 2.0 )
-		command->append_move(0, 0);
 
 	ball_intercept->reset();
 }
@@ -73,19 +66,17 @@ void PokTaPokAgentV1::onPrep()
 
 void PokTaPokAgentV1::onPlay()
 {
-	SeeSensor 	& visual = game_data->sensor_handler.last_see;
-	if( visual.ballIsVisible() && visual.ball.dis < 1 )
-		command->append_kick( -10 , 0);
-	else
-		ball_intercept->call( command );
+
 }
 
 
 BallIntercept::BallIntercept( GameData 	   * game_data,
-							  WorldModelV1 * world )
+							  WorldModelV1 * world,
+							  FreezeBall   * freeze_ball)
 {
 	this->game_data = game_data;
 	this->world		= world;
+	this->freeze_ball = freeze_ball;
 	this->param     = &game_data->game_parameter.server_param;
 	this->visual	= &game_data->sensor_handler.last_see;
 	this->body		= &game_data->sensor_handler.last_sense;
@@ -96,6 +87,7 @@ BallIntercept::BallIntercept( GameData 	   * game_data,
 	this->turn_param2	= NDEF_NUM;
 	time_to_reach_s = NDEF_NUM;
 	time_to_reach_s2 = NDEF_NUM;
+	reset();
 }
 
 void
@@ -105,7 +97,7 @@ BallIntercept::reset()
 	first_turn_requested = false;
 	second_turn_done 	 = false;
 	second_turn_requested= false;
-
+	on_search 	 = false;
 	on_side_walk = false;
 	turn_param1	= NDEF_NUM;
 	turn_param2	= NDEF_NUM;
@@ -127,14 +119,13 @@ BallIntercept::call( AgentCommand * command )
 		//std::cout << "time " << world->time << " search return " << std::endl;
 		return;
 	}
-	if( game_data->sensor_handler.last_see.ballIsVisible()
-		&& game_data->sensor_handler.last_see.ball.dis < 1 )
+	if( on_search && game_data->sensor_handler.last_see.ballIsVisible()  )
 	{
-		freeze(); // calcula kick_angle_param y kick_power_param
-		// aún no está completa...
+		reset();
+		call( command );
 		//std::cout << "time " << world->time << " freeze return " << std::endl;
-		return;
 	}
+
 	if( world->time - last_call_time > 1 )
 		reset();
 
@@ -151,27 +142,33 @@ BallIntercept::call( AgentCommand * command )
 		    second_turn_done = true;
 	}
 	// Elegimos la acción
-
+	if( visual->ballIsVisible() && visual->ball.dis<1 )
+	{
+		freeze_ball->call( command );
+		reset();
+	}
+	else
+	if( on_search == true )
+	{
+		search();
+		command->append_turn( search_turn_param );
+	}
+	else
 	if( first_turn_done == false )
 	{
-		//if( !visual->ballIsVisible() )
-		//{
-		//	search();
-		//	return;
-		//}
+
 		computePointTurn1(); // genera turn_param1
 		command->append_turn( turn_param1 );
 		first_turn_requested = true;
 		// Aquí se incluirá la habilidad checksidewalk
 
 		//std::cout << "time " << world->time << " compute 1 " << std::endl;
-
 	}
 
 	else
 	{
-		if( (world->time - start_time_s) > time_to_reach_s/2
-			  && second_turn_done == false )
+		if( ( (world->time - start_time_s) > time_to_reach_s/2  && second_turn_done == false )
+			   )
 		{
 			computePointTurn2(); // genera turn_param2
 			command->append_turn( turn_param2 );
@@ -179,12 +176,12 @@ BallIntercept::call( AgentCommand * command )
 
 			//std::cout << "time " << world->time << " compute 2 " << std::endl;
 		}
-		else if( world->time - start_time_s2 > time_to_reach_s2
+		else if( (world->time - start_time_s2 > time_to_reach_s2 || world->time - start_time_s2 > 15 )
 				&& second_turn_done == true
 				 )
-		{	//Completamos la habilidad sin éxito
+		{	// Terminó el tiempo en que debimos alcanzar el balón
 			//std::cout << "time " << world->time << " chase " << std::endl;
-			reset();	// Reseteamos los parámetros
+			on_search = true;
 			call( command ); //  Volvemos a llamarla para que calcule el nuevo turn
 		}
 		else
@@ -419,18 +416,6 @@ BallIntercept::search()
 }
 
 void
-BallIntercept::freeze()
-{
-	Vector2D ball_vel;
-	if( world->bitacoraBalon.begin()->vel.x != NDEF_NUM &&
-			world->bitacoraBalon.begin()->vel.y != NDEF_NUM )
-	{
-		ball_vel = world->bitacoraBalon.begin()->vel;
-	}
-	// Completar...
-}
-
-void
 BallIntercept::checkSideWalk()
 {
 	// Revisamos, en el caso de que el punto pase por el area
@@ -456,8 +441,75 @@ BallIntercept::checkSideWalk()
 		side_walk_case = true;
 		// terminar
 	}
+}
 
-
+FreezeBall::FreezeBall( GameData * game_data, WorldModelV1 * world )
+{
+	this->game_data = game_data;
+	this->world 	= world;
 
 }
 
+void
+FreezeBall::call( AgentCommand * command )
+{
+	this->command = command;
+	SeeSensor   & visual = game_data->sensor_handler.last_see;
+	BodySensor  & body   = game_data->sensor_handler.last_sense;
+	ServerParam & param  = game_data->game_parameter.server_param;
+	double pow_needed;
+	double angle_needed;
+	//if( !visual.ballIsVisible() )
+	//{	// No podemos congelar el balón sin datos visuales de él
+	//	return;
+	//	}
+	//Vector2D v = world->bitacoraBalon.begin()->vel; // vel...
+
+	int		 t = world->time;	//
+	Vector2D p = world->me.pos; // Posición del agente
+	double theta = world->me.angleDeg();
+	Vector2D b = world->bitacoraBalon.begin()->pos; // posición del balón en el ciclo tb
+
+	Vector2D v;
+	world->predictBallCurrentVel( &v ); // No usar esto...
+	int		tb = world->bitacoraBalon.begin()->ciclo; // tiempo en que se vio el balón
+	int t_diff = t-tb; // Tiempo transcurrido desde que se vio el balón
+	Vector2D pv = Vector2D::fromPolar( body.speed_amount,
+									   Deg2Rad( body.speed_direction  + theta ) );
+
+	Vector2D pn_bn; // vector de bn a pn
+	// Predicciones
+	Vector2D pn = p + pv; //Posición del agente en el siguiente ciclo
+
+	Vector2D vn = v*param.ball_decay; // Velocidad del balón en el siguiente ciclo
+	Vector2D bn;
+	// Calculamos la posición del balón
+	bn.x =   v.x*(std::pow( param.ball_decay, t_diff +1 ) - 1 )
+			/ log( param.ball_decay ) + b.x;
+	bn.y =   v.y*(std::pow( param.ball_decay, t_diff +1 ) - 1 )
+			/ log( param.ball_decay ) + b.y;
+
+	Vector2D zero_vel(0.0, 0.0);
+
+	pn_bn = pn-bn;
+
+	double dis 		= pn_bn.normita();
+	double dir_diff = std::abs( entre180( theta - Rad2Deg( pn_bn.angle() ) ) );
+	double f = (1 - 0.25*(dir_diff/180.0) -0.25*(dis/param.kickable_margin) );
+
+
+
+	if( vn.x == 0.0 && vn.y == 0.0 )
+	{
+		pow_needed = 0.0;
+		angle_needed = 0.0;
+	}
+	else
+	{
+		pow_needed = vn.normita() / ( param.kick_power_rate * f ) ;
+		angle_needed = entre180( Rad2Deg( std::atan2( vn.y, vn.x )  ) + 180 - theta);
+	}
+
+	command->append_kick( pow_needed, angle_needed );
+
+}

@@ -11,6 +11,7 @@
 
 class PokTaPokAgentV1;
 class BallIntercept;
+class FreezeBall;
 
 class PokTaPokAgentV1 : public Agent
 {
@@ -32,7 +33,9 @@ private:
     SensorHandler       * sensor_h;
     StateMachine		  state_m;
 
+    // Habilidades
     BallIntercept		* ball_intercept;
+    FreezeBall			* freeze_ball;
 
     void update();
 
@@ -47,10 +50,13 @@ class BallIntercept
 {
 public:
 	BallIntercept( GameData 		* game_data,
-					 WorldModelV1 	* world );
+				   WorldModelV1 	* world,
+				   FreezeBall		* freeze_ball );
 	void reset(); //
 	void call( AgentCommand * command);
 private:
+	FreezeBall	* freeze_ball; // Habilidad de congelar el balón
+
 	GameData 	 * game_data;
 	AgentCommand * command;
 	WorldModelV1 * world;
@@ -96,15 +102,17 @@ private:
 	double turn_param2;
 
 	double search_turn_param;
+	bool   on_search;
 
-	double dash_param;
-
-	double turn_neck_param;
-
-	ViewModeWidth view_mode_w_param;
+	double 			dash_param;
+	double 			turn_neck_param;
+	ViewModeWidth 	view_mode_w_param;
 
 	double side_walk_dash_param;
 	double side_walk_angle_param;
+
+	//double kick_angle_param;
+	//double kick_power_param;
 
 	void computePointTurn1();
 	void computePointTurn2();
@@ -113,9 +121,20 @@ private:
 	//void sidewalk();
 	void lookAtBall();
 	void search();
-	void freeze();
-	void chaseBall();
 
 };
 
+class FreezeBall
+{
+public:
+	FreezeBall( GameData * game_data, WorldModelV1 * world );
+	void call( AgentCommand * command );
+private:
+	GameData 	 * game_data;
+	WorldModelV1 * world;
+	AgentCommand * command;
+
+	//double pow_param;
+	//double angle_param;
+};
 #endif // POKTAPOK_AGENT_H
