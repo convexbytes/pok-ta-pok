@@ -19,7 +19,6 @@ OBJS = 	$(BIN_DIR)gameCommand.o \
 	$(BIN_DIR)udpSocket.o \
 	$(BIN_DIR)worldModel.o \
 	$(BIN_DIR)state.o \
-	$(BIN_DIR)bitacora.o \
 	$(BIN_DIR)montecarloLocalization.o
 
 
@@ -116,6 +115,4 @@ $(BIN_DIR)worldModel.o:
 $(BIN_DIR)state.o:
 	g++ $(FLAGS) $(SOURCE_DIR)state.cpp -o $@
 
-$(BIN_DIR)bitacora.o:
-	g++ $(FLAGS) $(SOURCE_DIR)bitacora.cpp -o $@
 
