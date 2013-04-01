@@ -38,6 +38,11 @@ public:
         x = y = a;
     }
 
+    void set( double x, double y )
+    {
+    	this->x = x;
+    	this->y = y;
+    }
     Vector2D & operator+(const Vector2D & v1) const
     {
         static Vector2D v;

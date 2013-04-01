@@ -189,7 +189,7 @@ void GoToXY ( double   xTarget ,
 			velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y) );
 			turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.normita()));
 			turnParameter = entre180(turnParameter);
-			cout<<"Giro TURN"<<endl;
+			//cout<<"Giro TURN"<<endl;
 			command->append_turn(turnParameter);
 
 		}
@@ -201,7 +201,7 @@ void GoToXY ( double   xTarget ,
 
 			if( dashParameter > 100.0)
 				dashParameter = 100.0;
-			cout<<"Avanza DASH"<<endl;
+			//cout<<"Avanza DASH"<<endl;
 			command->append_dash( dashParameter );
 		}
 	}
@@ -243,7 +243,7 @@ void runWithBall (double   xTarget ,
 
 		Kick.y = entre180(angToPoint);
 
-		cout<<"Adelanto KICK"<<endl;
+		//cout<<"Adelanto KICK"<<endl;
 		command->append_kick(Kick.x,Kick.y);
 	}
 	else

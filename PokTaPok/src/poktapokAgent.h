@@ -37,11 +37,17 @@ private:
     BallIntercept		* ball_intercept;
     FreezeBall			* freeze_ball;
 
+    bool	on_incercept;
+
     void update();
 
     void onInitial();
     void onPrep();
     void onPlay();
+
+    void playDefault();
+    void play2();
+    void play3();
 
 };
 
