@@ -179,19 +179,33 @@ PokTaPokAgentV1::play2()
 					Vector2D ball_vel = world->bitacoraBalon.begin()->vel;
 					if( ball_vel.x == NDEF_NUM )
 						ball_vel = 0;
-					//if( ball_vel.normita() > 0.5 )
-					//{
-					//	freeze_ball->call( command );
-					//	return;
-					//}
+					if( ball_vel.normita() > 0.3 )
+					{
+						freeze_ball->call( command );
+						return;
+					}
 					//else
 					//{
 						if( isZoneShoot(agent_pos.x, agent_pos.y, world->me.angleDeg()) )
 						{
-							double kick_ang =
-									shootAtGoal(agent_pos.x, agent_pos.y,
-												world->me.angleDeg(),
-												& visual.flags);
+							Vector2D poste_arriba(52.5, -5);
+							Vector2D poste_abajo(52.5, -5);
+							Vector2D poste_ar_agente = poste_arriba - agent_pos;
+							Vector2D poste_ab_agente = poste_abajo - agent_pos;
+							double 	 d1 = poste_ar_agente.normita();
+							double	 d2 = poste_ab_agente.normita();
+							double alpha1 = Rad2Deg( poste_ar_agente.angle() );
+							double alpha2 = Rad2Deg( poste_ab_agente.angle() );
+							double kick_ang;
+							if( d1<d2 )
+								kick_ang = entre180( alpha1 - world->me.angleDeg() );
+							else
+								kick_ang = entre180( alpha2 - world->me.angleDeg() );
+
+
+							//		shootAtGoal(agent_pos.x, agent_pos.y,
+							//					world->me.angleDeg(),
+							//					& visual.flags);
 							command->append_kick( 100, kick_ang );
 							std::cout << "kick done " << world->time << std::endl;
 						}
@@ -266,7 +280,7 @@ PokTaPokAgentV1::play3()
 
 			if( dis_to_mate<30 )
 			{
-				command->append_kick( 90, 0 );
+				command->append_kick( 70, 0 );
 			}
 			else
 			{
@@ -365,7 +379,7 @@ BallIntercept::call( AgentCommand * command )
 	Vector2D bn;
 	Vector2D v;
 
-	if( (visual->ballIsVisible() && visual->ball.dis<1.0)
+	if( (visual->ballIsVisible() && visual->ball.dis<1.0 )
 			 )
 	{
 

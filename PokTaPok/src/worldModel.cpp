@@ -402,8 +402,8 @@ WorldModelV1::predictVel( deque <objetoBitacora> const & fila )
 	objetoBitacora ultimoElemento, pUltimoElemento;
 	Vector2D velocidad;
 
-    ultimoElemento  = fila[ fila.size() -1 ];
-    pUltimoElemento = fila[ fila.size() -2 ];
+    ultimoElemento  = fila[ 0 ]; // #gil_mark
+    pUltimoElemento = fila[ 1 ];
 
     if( ultimoElemento.name == "ball" )
 	   {
@@ -430,7 +430,7 @@ WorldModelV1::predictPose( deque <objetoBitacora> const & fila )
 
 	velocidad = predictVel(fila);
 
-	ultimoElemento = fila[ fila.size()-1 ]; // obtenemos el ultimo elemento (el más reciente)
+	ultimoElemento = fila[ 0 ]; // obtenemos el ultimo elemento (el más reciente) // #gil_mark
 
 	coorx = ultimoElemento.pos.x;           // obtenemos coordenada x del balón
 	coory = ultimoElemento.pos.y;           // obtenemos coordenada y del balón
@@ -452,7 +452,7 @@ WorldModelV1::predictCycles( deque <objetoBitacora> const & fila , double distan
 	int n;
 
 	velocidad = predictVel(fila);
-    if( fila.back().name == "ball" )
+    if( fila.front().name == "ball" ) // cambiado #gil_mark
 	   n = log( 1.0 - ( distanciaObjetivo * ( 1.0 - (decay_b) ) / velocidad.normita() ) ) / log(decay_b);
 	else
 	   n = log( 1.0 - ( distanciaObjetivo * ( 1.0 - (decay_p) ) / velocidad.normita() ) ) / log(decay_p);

@@ -1893,7 +1893,7 @@ void Parser::parse_server_param(char *message)
             game_data->game_parameter.server_param.kick_rand_factor_r=int_value;}
         subcadena=strstr(message,"kick_margin");
         if (subcadena){
-            sscanf(subcadena,"kick_margin %lf",&init_value);
+            sscanf(subcadena,"kickable_margin %lf",&init_value);
             game_data->game_parameter.server_param.kickable_margin=init_value;}
         subcadena=strstr(message,"landmark_file");
         if (subcadena){
