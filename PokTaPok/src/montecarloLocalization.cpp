@@ -2,7 +2,7 @@
 #include "localizationMethods.h"
 #include "utilities.h"
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 #include <time.h>
 #include <stdio.h>
 MontecarloLocalization::MontecarloLocalization(GameData *game_data )
@@ -41,7 +41,9 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
     double body_dis_vel     = game_data->sensor_handler.last_sense.speed_amount;
     double body_dir_vel     = game_data->sensor_handler.last_sense.speed_direction;
     double neck_dir         = game_data->sensor_handler.last_sense.head_angle;
-    double speed_max		= game_data->game_parameter.server_param.player_speed_max;
+    
+    double speed_max        = game_data->game_parameter.server_param.player_speed_max;                   /// Agregado por gomez
+
     double act_ang = 0.0;
     double r1, r2, rmax, r_angle;
     
@@ -140,7 +142,7 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
             if( body_dis_vel == 0.0 )  // dash_power distinto a cero,  turn y body_dis_vel igual a cero.
             {   
 				aceleracion = modelo_aceleracion( U.dash_power,
-                                                  0.0,
+                                                  U.dash_dir,
                                                   stamina,
                                                   effort,
                                                   Deg2Rad( particula.theta ) );
@@ -254,20 +256,24 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
                                                   )
 {
     int     i,j,k,banderas_vistas;
-    int     time;
     double  pesoMax, aumentoX, aumentoY, Xmin,Xmax,Ymin,Ymax;
     double  orientacion, xmin,ymin,xmax,ymax;
     double  finalOrientation;
     double  sumaCos,sumaSin;
-    int     posicion_peso_max;
-    char   id_linea;
+    int     elementosX, elementosY;
+    int time;
+    //char   id_linea;
+    
+
+    double  neck_dir;
+    neck_dir = game_data->sensor_handler.last_sense.head_angle;
+
     static double  grid[2][(tamGrid+1)*(tamGrid+1)];
     static double  peso[(tamGrid+1)*(tamGrid+1)];
+    
     Vector2D coorb1,coorb2,posicion;
     vector<Flag>   *banderas = &vision->flags;
         
-    double neck_dir = game_data->sensor_handler.last_sense.head_angle;
-
     pesoMax = 0.0;
     banderas_vistas = banderas->size();
     orientacion = 0.0;
@@ -284,35 +290,43 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
     Xmax = particulas[3].x;
     Ymax = particulas[3].y;
     
-    aumentoX = (Xmax - Xmin) / tamGrid ;   
-	aumentoY = (Ymax - Ymin) / tamGrid ;   
+    // aumentoX = (Xmax - Xmin) / tamGrid ;   
+	// aumentoY = (Ymax - Ymin) / tamGrid ;   
 	
-	k=0;	   
+	aumentoX = distanciaEntreParticulas;
+	aumentoY = distanciaEntreParticulas;
+	
+	elementosX = ceil((Xmax - Xmin) / distanciaEntreParticulas);  //techo
+	elementosY = ceil((Ymax - Ymin) / distanciaEntreParticulas);  //techo
+	
+	k=0;	   /// k es el número de particulas que es posible calcular con 
+	           /// con una diferencia entre ellas de distanciaEntreParticulas 
+	 
+	
     /// Generamos el Grid con sus coordenadas    
-    for (i=0; i < tamGrid+1; i++)
+    for (i = 0; i < elementosY+1 ; i++)
 	 {
-	   for (j = 0; j < tamGrid+1; j++)
-		 {
-		  grid[0][k] =  Xmin + (aumentoX*j);
-	      grid[1][k] =	Ymin + (aumentoY*i);	  	           	   
-	      peso[k] = 0.0;
-	      k++;
-		 }		  
-	 }
-	
+		for ( j = 0; j < elementosX+1 ; j++)
+		       {
+					grid[0][k] =  Xmin + (aumentoX*j);
+	                grid[1][k] =  Ymin + (aumentoY*i);	  	           	   
+	                peso[k] = 0.0;
+	                k++;
+	           }	    	  
+	 }	
 	/// el arreglo grid contiene las posibles coordenadas.	
    
-   /// Elegimos la particula con mayor peso, o el promedio de las más pesadas
-   for( i=0; i<(tamGrid+1)*(tamGrid+1); i++ )
+   
+    /// Elegimos la particula con mayor peso, o el promedio de las más pesadas
+   for( i = 0 ; i < k ; i++ )
     {    
      for( j=0; j<banderas_vistas; j++)
-        {           
-          peso[i] = peso[i] + Landmark_Model_Known_Corresponce( banderas->at(j), grid[0][i], grid[1][i]);  
+        {
+    	 peso[i] = peso[i] + Landmark_Model_Known_Corresponce( banderas->at(j), grid[0][i], grid[1][i], particulas[i].theta,neck_dir);
         }
              
      if(peso[i]>pesoMax)
           {
-		   posicion_peso_max = i;
 		   pesoMax = peso[i];		   		   
 		  }	        
     } 
@@ -367,17 +381,17 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 		          posicion = ubicacionBanderaBandera(banderas->at(0).dis, banderas->at(0).dir, coorb1,
 				    								 banderas->at(1).dis, banderas->at(1).dir, coorb2);
 		        
-		          xmin = particulas[0].x = posicion.x - 5.0;
-				  ymin = particulas[0].y = posicion.y - 5.0;      
+		          xmin = particulas[0].x = posicion.x - 3.0;
+				  ymin = particulas[0].y = posicion.y - 3.0;      
                   
-				  particulas[1].x = posicion.x + 5.0;
-				  particulas[1].y = posicion.y - 5.0;
+				  particulas[1].x = posicion.x + 3.0;
+				  particulas[1].y = posicion.y - 3.0;
     
-				  particulas[2].x = posicion.x - 5.0;
-				  particulas[2].y = posicion.y + 5.0;
+				  particulas[2].x = posicion.x - 3.0;
+				  particulas[2].y = posicion.y + 3.0;
     
-				  xmax = particulas[3].x = posicion.x + 5.0;
-				  ymax = particulas[3].y = posicion.y + 5.0;
+				  xmax = particulas[3].x = posicion.x + 3.0;
+				  ymax = particulas[3].y = posicion.y + 3.0;
 				  
 	     	      montecarlo_correction( particulas, vision , particulas_nuevas );   ///Correccion, encontramos particula con mas peso
     				  
@@ -390,7 +404,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
        }
     else   // Utilizamos el Grid para localizar al agente
        {
-	    for( i = 0; i < (tamGrid+1)*(tamGrid+1); i++ )
+	    for( i = 0; i < k; i++ )
 	       {
 	        if( peso[i]==pesoMax )
 	           {
@@ -433,6 +447,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 	        }
 	   } //termina el else  del grid   
 	    
+	
 	/// Método para calcular la orientación del agente///    
 	finalOrientation = orientacion = sumaSin = sumaCos = 0.0;
 	for( i = 0; i <banderas_vistas ;i++)
@@ -454,13 +469,14 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 	
 	for (i = 0; i < NUM_PARTICULAS; i++)
 	    {
-		 particulas_nuevas[i].theta = entre180( Rad2Deg(finalOrientation+neck_dir));
+		 particulas_nuevas[i].theta = entre180( Rad2Deg(finalOrientation)- neck_dir);
 	/*	 printf(" %lf %lf %lf p[%d] +\n",particulas_nuevas[i].x,
 									   particulas_nuevas[i].y,
 									   particulas_nuevas[i].theta,
 									   i);	 	*/
 	    }
     /// Terminamos asignando la orientacion final  ///
+    
 	time = game_data->sensor_handler.last_see.time;     
 	
 	
@@ -471,7 +487,9 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 ///  Inicia la ponderacion de cada particula del grid, es donde se da peso a cada particula del grid ///
 double MontecarloLocalization::Landmark_Model_Known_Corresponce    (    Flag   & bandera,
                                                                              double x,
-                                                                             double y
+                                                                             double y,
+                                                                             double theta,
+                                                                             double neck_dir
                                                                    )
 {
     double  r_aprox;
@@ -505,32 +523,33 @@ double MontecarloLocalization::Landmark_Model_Known_Corresponce    (    Flag   &
       {
        variable_momentanea1 = 0.0;   
       }     
-        
+  /*
     numerador   = bandera.get_global_coord().y - y;
     denominador = bandera.get_global_coord().x - x;
 
-    phi_aprox_rad = atan2( numerador, denominador );
+    phi_aprox_rad = atan2( numerador, denominador ) - Deg2Rad(theta + neck_dir);
 
     phi_min = (rint( bandera.dir / 1.0) - 0.5) * 1.0;   // Grados
     phi_max = (rint( bandera.dir / 1.0) + 0.5) * 1.0;   // Grados
     
     ///Si el angulo sensado se encuentra entre el maximo y minimo posible se pondera esa particula ///
     if(Rad2Deg(phi_aprox_rad) >= phi_min && Rad2Deg(phi_aprox_rad) <= phi_max)
-      {
-	   variable_momentanea2 = 1.0; // / (phi_max -  phi_min); 
-      }
+    {
+        variable_momentanea2 = 1.0; // / (phi_max -  phi_min);
+    }
     else
-      {
-       variable_momentanea2 = 0.0;          
-      } 
-     
-    probabilidad = variable_momentanea1 + variable_momentanea2;
+    {
+        variable_momentanea2 = 0.0;
+    }
 
+    probabilidad = variable_momentanea1 + variable_momentanea2;
+*/
+
+    probabilidad = variable_momentanea1;
     return probabilidad;    
 }
 
 /// Modelo de aceleracion tomando las formulas directamente del servidor ///
-
 Vector2D MontecarloLocalization::modelo_aceleracion( double power,
                                                      double dir,
                                                      double stamina,
@@ -551,8 +570,9 @@ Vector2D MontecarloLocalization::modelo_aceleracion( double power,
     double extraStamina     = param.extra_stamina;
     double sideDashRate     = param.side_dash_rate;
     double backDashRate     = param.back_dash_rate;
-    double dashPowerRate    = param.dash_power_rate;
-    double speed_max		= param.player_speed_max;
+    double dashPowerRate    = param.dash_power_rate;    
+    double speed_max        = param.player_speed_max;                   /// Agregado por gomez
+    
     //double slownessOnTopForLeft = param.slowness_on_top_for_left_team;
     //double slownessOnTopForRight = param.slowness_on_top_for_right_team;
 
@@ -578,6 +598,7 @@ Vector2D MontecarloLocalization::modelo_aceleracion( double power,
                           ? power * -2.0
                           : power );
     power_need = std::min( power_need, stamina + extraStamina );
+    //M_stamina = std::max( 0.0, stamina() - power_need );
 
     power = ( back_dash
               ? power_need / -2.0
@@ -612,7 +633,7 @@ Vector2D MontecarloLocalization::modelo_aceleracion( double power,
     aceleracion = Vector2D::fromPolar( effective_dash_power,
                               normalize_angle( body_angle + Deg2Rad( dir ) ) );
 
-    // Normalizamos, la aceleración max es un parámetro del servidor, igual a 1.
+    // Normalizamos, la aceleración max es un parámetro del servidor, igual a 1.05
 
     magnitud = aceleracion.normita();
     if( magnitud > speed_max )

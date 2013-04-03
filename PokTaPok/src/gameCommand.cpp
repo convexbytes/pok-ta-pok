@@ -37,17 +37,23 @@ void AgentCommand::reset()
 
 void AgentCommand::append_dash(double power)
 {
-    turn_set = false; /* exclusion de comandos en el mismo ciclo */
-    catch_set = false;
-    kick_set = false;
-    move_set = false;
+    append_dash( power, 0.0 );
+}
+void AgentCommand::append_dash( double power, double direction )
+{
+	turn_set  = false; // exclusion de comandos en el mismo ciclo
+	catch_set = false;
+	kick_set  = false;
+	move_set  = false;
 
-    dash_set = true;
-    dash_power = power;
+	dash_set = true;
+
+	dash_power 		= power;
+	dash_direction  = direction;
 }
 void AgentCommand::append_turn(double angle)
 {
-    dash_set = false; /* exclusion de comandos en el mismo ciclo */
+    dash_set = false; // exclusion de comandos en el mismo ciclo
     catch_set = false;
     move_set = false;
     kick_set = false;
@@ -61,7 +67,7 @@ void AgentCommand::append_attentionto( AttentionTeam team, int number )
     attention_uniform_number = number;
     attention_team = team;
 }
-void AgentCommand::append_turn_neck(int angle)
+void AgentCommand::append_turn_neck(double angle)
 {
     turn_neck_set = true;
     turn_neck_angle = angle;
@@ -83,7 +89,7 @@ void AgentCommand::append_say( string message )
     say_message = message;
 }
 
-void AgentCommand::append_catch( int direction )
+void AgentCommand::append_catch( double direction )
 {
     dash_set = false;
     turn_set = false;

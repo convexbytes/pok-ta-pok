@@ -2,7 +2,8 @@
 #define MONTECARLOLOCALIZATION_H
 
 #define NUM_PARTICULAS 4     
-#define tamGrid        15    
+#define tamGrid        100   
+#define distanciaEntreParticulas .1
 
 //#define MONT_PI 3.141592653589793
 #include "gameObject.h"
@@ -21,6 +22,7 @@ class Control
 {    
 public:
     double dash_power;
+    double dash_dir;
     double turn_angle;
 };
 
@@ -54,7 +56,9 @@ private:
 
     double  Landmark_Model_Known_Corresponce( Flag & bandera,
                                               double x,
-                                              double y
+                                              double y,
+                                              double theta,
+                                              double neck_dir
                                             );                                             
     
     double  prob_normal_distribution     ( double x,

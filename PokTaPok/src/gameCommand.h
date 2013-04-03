@@ -13,12 +13,13 @@ public:
     AgentCommand();
     void reset();
     void append_dash        ( double power );
+    void append_dash		( double power, double direction );
     void append_turn        ( double angle );
-    void append_turn_neck   ( int angle );
+    void append_turn_neck   ( double angle );
     void append_say         ( std::string message );
     void append_say         ( const char *message );
     void append_kick        ( double power, double direction );
-    void append_catch       ( int direction );
+    void append_catch       ( double direction );
     void append_change_view ( ViewModeQuality quality, ViewModeWidth width );
     void append_attentionto ( AttentionTeam attention_team, int uniform_number );
     void append_move        ( double x, double y );
@@ -37,22 +38,33 @@ public:
     bool move_is_set()          const { return move_set; }
     bool score_is_set()         const { return score_set; }
 
-    int get_move_x          () const { return move_x; }
-    int get_move_y          () const { return move_y; }
-    int get_catch_direction () const { return catch_direction; }
-    int get_kick_power      () const { return kick_power; }
-    int get_dash_power      () const { return dash_power; }
-    double move_x, move_y;
-    int catch_direction;
-    double kick_power, kick_direction;
+    double get_move_x          () const { return move_x; }
+    double get_move_y          () const { return move_y; }
+    double get_catch_direction () const { return catch_direction; }
+    double get_kick_power      () const { return kick_power; }
+    double get_dash_power      () const { return dash_power; }
+
+    double move_x;
+    double move_y;
+
+    double catch_direction;
+
+    double kick_power;
+    double kick_direction;
+
     double dash_power;
+    double dash_direction;
+
     double turn_angle;
-    int turn_neck_angle;
-    int attention_uniform_number;
-    AttentionTeam attention_team;
-    std::string say_message;
+    double turn_neck_angle;
+
+    int 			attention_uniform_number;
+    AttentionTeam   attention_team;
+
+    std::string 	say_message;
+
     ViewModeQuality change_view_quality;
-    ViewModeWidth change_view_width;
+    ViewModeWidth   change_view_width;
 
 private:
     //Las siguientes variables indican si realizaron petición a algún comando.

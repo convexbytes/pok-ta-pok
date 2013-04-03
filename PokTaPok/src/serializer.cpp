@@ -15,7 +15,10 @@ void Serializer::generate_command( char * output, AgentCommand &game_command )
     // Genera el commando listo para enviarlo al servidor //
     if( game_command.dash_is_set() )
     {
-        sprintf(command_aux2, "(dash %lf)", game_command.dash_power );
+    	if( game_command.dash_direction == 0.0 )
+    		sprintf(command_aux2, "(dash %lf)", game_command.dash_power );
+    	else
+    		sprintf(command_aux2, "(dash %lf $lf)", game_command.dash_power, game_command.dash_direction );
         strcat(command_aux, command_aux2);
     }
 
@@ -26,7 +29,7 @@ void Serializer::generate_command( char * output, AgentCommand &game_command )
     }
     else if ( game_command.catch_is_set() )
     {
-        sprintf(command_aux2, "(catch %d)", game_command.catch_direction );
+        sprintf(command_aux2, "(catch %lf)", game_command.catch_direction );
         strcat(command_aux, command_aux2);
     }
     else if ( game_command.move_is_set() )
@@ -41,7 +44,7 @@ void Serializer::generate_command( char * output, AgentCommand &game_command )
     }
     if( game_command.turn_neck_is_set() )
     {
-        sprintf(command_aux2, "(turn_neck %d)", game_command.turn_neck_angle );
+        sprintf(command_aux2, "(turn_neck %lf)", game_command.turn_neck_angle );
         strcat(command_aux, command_aux2);
     }
     if( game_command.say_is_set() )
@@ -109,10 +112,12 @@ void Serializer::serializeAgentCommands(const AgentCommand &command, vector<stri
     /* Genera el commando listo para enviarlo al servidor */
     if( command.dash_is_set() )
     {
-        sprintf(command_aux2, "(dash %lf)", command.dash_power );
+    	if( command.dash_direction == 0 )
+    		sprintf(command_aux2, "(dash %lf)", command.dash_power );
+    	else
+    		sprintf(command_aux2, "(dash %lf %lf)", command.dash_power, command.dash_direction );
         new_command.assign( command_aux2 );
         container->push_back( new_command );
-
     }
 
     else if ( command.turn_is_set() )
@@ -123,7 +128,7 @@ void Serializer::serializeAgentCommands(const AgentCommand &command, vector<stri
     }
     else if ( command.catch_is_set() )
     {
-        sprintf(command_aux2, "(catch %d)", command.catch_direction );
+        sprintf(command_aux2, "(catch %lf)", command.catch_direction );
         new_command.assign( command_aux2 );
         container->push_back( new_command );
     }
@@ -141,7 +146,7 @@ void Serializer::serializeAgentCommands(const AgentCommand &command, vector<stri
     }
     if( command.turn_neck_is_set() )
     {
-        sprintf(command_aux2, "(turn_neck %d)", command.turn_neck_angle );
+        sprintf(command_aux2, "(turn_neck %lf)", command.turn_neck_angle );
         new_command.assign( command_aux2 );
         container->push_back( new_command );
     }

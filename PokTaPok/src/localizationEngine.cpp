@@ -17,7 +17,6 @@ LocalizationEngine::LocalizationEngine( GameData * game_data )
 
    // angulo_inicial = 0;
     srand( time(NULL) );
-
     
     //inicializamos particulas.
     for( i=0; i<NUM_PARTICULAS; i++ )
@@ -41,17 +40,21 @@ void LocalizationEngine::updatePos(  )
     Control            U;
     Particula        * p_aux;
     SeeSensor        * vision; 
-    static int         pasada; 
-    static int         mensaje;     
-    int                time;
+    //static int         pasada;
+    //static int         mensaje;
+    //int                time;
     banderas = & game_data->sensor_handler.last_see.flags;
     vision = & game_data->sensor_handler.last_see;
     sensor_type = game_data->sensor_handler.last_sensor_type;
     controles = command_commited; // El último comando que se envió al servidor
+
+
+    //double  neck_dir;
+    //neck_dir = game_data->sensor_handler.last_sense.head_angle;
         
-	time = game_data->sensor_handler.last_sense.time;     
+	//time = game_data->sensor_handler.last_sense.time;
     
-    int i;
+    //int i;
     
     
     if( sensor_type == SENSOR_BODY )
@@ -66,16 +69,19 @@ void LocalizationEngine::updatePos(  )
         if( controles->dash_is_set() )
         {
             U.dash_power = controles->dash_power;
+            U.dash_dir   = controles->dash_direction;
             U.turn_angle = 0.0;
         }
         else if( controles->turn_is_set() )
         {
             U.dash_power = 0.0;
+            U.dash_dir   = 0.0;
             U.turn_angle = controles->turn_angle;
         }
         else
         {
             U.dash_power = 0.0;
+            U.dash_dir   = 0.0;
             U.turn_angle = 0.0;            
         }
 		
@@ -85,7 +91,7 @@ void LocalizationEngine::updatePos(  )
         y          = (p_nuevas[0].y + p_nuevas[3].y)/2.0 ;
         angle      =  p_nuevas[0].theta;                
         
-        //printf("%d %lf %lf %lf\n",time,x,y,angle);
+        //printf("%d %lf %lf %lf %lf\n",time,x,y,angle,neck_dir);
                
     }
     else if( sensor_type == SENSOR_SEE && banderas->size() > 0 ) // No tiene caso hacer correción con 0 banderas
@@ -101,7 +107,7 @@ void LocalizationEngine::updatePos(  )
         y          = (p_nuevas[0].y + p_nuevas[3].y)/2.0 ;
         angle      =  p_nuevas[0].theta;                
         
-        //printf("%d %lf %lf %lf +\n",time,x,y,angle);
+        //printf("%d %lf %lf %lf %lf +\n",time,x,y,angle,neck_dir);
     }
 
     if( command_commited->move_is_set() )  ///Si aplicamos comando Move() colocamos la particula en esa posicion
