@@ -46,10 +46,6 @@ private:
     void onPrep();
     void onPlay();
 
-    void playDefault();
-    void play2();
-    void play3();
-
 };
 
 #endif // POKTAPOK_AGENT_H
