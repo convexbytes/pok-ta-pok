@@ -5,7 +5,7 @@
 #include <string>
 
 #ifndef NDEF_NUM
-#define NDEF_NUM -999999.0 // El rango de cualquier información provista por el servidor no es tan pequeño
+#define NDEF_NUM -999999.0 // Fuera  del rango de cualquier información provista por el servidor.
 #endif
 
 using namespace std;

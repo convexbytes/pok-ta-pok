@@ -201,33 +201,6 @@ void WorldModelV1::updateOnCommandSent()
 }
 
 
-Vector2D
-WorldModelV1::fromChgToVel(  Vector2D const & player_pos, // Posición del jugador, absoluta.
-						Vector2D const & player_vel, // Velocidad del jugador, absoluta.
-						Vector2D const & obj_pos, // Posición del objeto que ve, absoluta.
-						double obj_dist,
-						double dist_chg,
-						double dir_chg
-						)
-{
-	Vector2D etmp = obj_pos - player_pos;
-	Vector2D vtmp (0.0);
-
-	if( obj_dist == 0 )
-	{
-		std::cerr << "Warning. fromChgToVel(): zero division." << std::endl;
-		return vtmp;
-	}
-	etmp /= obj_dist;
-
-	vtmp.x = dist_chg*etmp.x - obj_dist*dir_chg*etmp.y*DEG2RAD;
-	vtmp.y = dist_chg*etmp.y + obj_dist*dir_chg*etmp.x*DEG2RAD;
-
-	vtmp += player_vel;
-
-	return vtmp;
-}
-
 void WorldModelV1::actualizarBitacora()
 {
 	SeeSensor        * vision;
@@ -574,5 +547,32 @@ WorldModelV1::predictBallCurrentVel( Vector2D * v )
 
 		return true;
 	}
+}
 
+
+Vector2D
+fromChgToVel(  Vector2D const & player_pos, // Posición del jugador, absoluta.
+						Vector2D const & player_vel, // Velocidad del jugador, absoluta.
+						Vector2D const & obj_pos, // Posición del objeto que ve, absoluta.
+						double obj_dist,
+						double dist_chg,
+						double dir_chg
+						)
+{
+	Vector2D etmp = obj_pos - player_pos;
+	Vector2D vtmp (0.0);
+
+	if( obj_dist == 0 )
+	{
+		std::cerr << "Warning. fromChgToVel(): zero division." << std::endl;
+		return vtmp;
+	}
+	etmp /= obj_dist;
+
+	vtmp.x = dist_chg*etmp.x - obj_dist*dir_chg*etmp.y*DEG2RAD;
+	vtmp.y = dist_chg*etmp.y + obj_dist*dir_chg*etmp.x*DEG2RAD;
+
+	vtmp += player_vel;
+
+	return vtmp;
 }

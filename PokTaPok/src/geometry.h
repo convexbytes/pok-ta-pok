@@ -43,9 +43,9 @@ public:
     	this->x = x;
     	this->y = y;
     }
-    Vector2D & operator+(const Vector2D & v1) const
+    Vector2D  operator+(const Vector2D & v1) const
     {
-        static Vector2D v;
+        Vector2D v;
         v.x = v1.x + this->x;
         v.y = v1.y + this->y;
         return v;
@@ -57,17 +57,17 @@ public:
         this->y += v1.y;
     }
 
-    Vector2D & operator-( const Vector2D & v ) const
+    Vector2D operator-( const Vector2D & v ) const
     {
-        static Vector2D v1;
+        Vector2D v1;
         v1.x = x - v.x;
         v1.y = y - v.y;
         return v1;
     }
 
-    Vector2D & operator/( double r ) const
+    Vector2D operator/( double r ) const
     {
-        static Vector2D v;
+        Vector2D v;
         if( r == 0 )
         {
         	std::cerr << "Warning. Vector2D::operator/(): zero division." << std::endl;
@@ -86,9 +86,9 @@ public:
         this->y /= r;
     }
 
-    Vector2D & operator *( double r) const
+    Vector2D operator *( double r) const
     {
-    	static Vector2D v;
+    	Vector2D v;
     	v.x = this->x*r;
     	v.y = this->y*r;
     	return v;

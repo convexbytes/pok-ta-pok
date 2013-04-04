@@ -98,16 +98,16 @@ private:
 
 
 
-    Vector2D fromChgToVel(  Vector2D const & player_pos, // Posición del jugador, absoluta.
-			Vector2D const & player_vel, // Velocidad del jugador, absoluta.
-			Vector2D const & obj_pos, // Posición del objeto que ve, absoluta.
-			double obj_dist,
-			double dist_chg,
-			double dir_chg
-			);
 
 };
 
 
-
+Vector2D
+fromChgToVel(  Vector2D const & player_pos, // Posición del jugador, absoluta.
+						Vector2D const & player_vel, // Velocidad del jugador, absoluta.
+						Vector2D const & obj_pos, // Posición del objeto que ve, absoluta.
+						double obj_dist,
+						double dist_chg,
+						double dir_chg
+						);
 #endif // WORLD_MODEL_H
