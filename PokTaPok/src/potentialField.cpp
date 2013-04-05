@@ -1,8 +1,6 @@
 #include "utilities.h"
 #include "potentialField.h"
 
-using namespace potentialField;
-
 PotentialField::PotentialField()
 {
 	int i;
@@ -10,25 +8,32 @@ PotentialField::PotentialField()
 	pos = 0.0;
 	for( i=0; i<11; ++i )
 	{
-		vec_ally[i] = 0;
-		vec_foe[i] = 0;
+		ally_vec[i] = 0;
+		ally_on [i] = false;
+
+		foe_vec[i]  = 0;
+		foe_on [i]  = false;
+
 	}
 }
 
-Vector2D & PotentialField::resultante()
+
+
+Vector2D PotentialField::resultante()
 {
-	static Vector2D res;
+	Vector2D res;
 	int i;
 
 	res = 0.0;
 
-	res += dest;
+	res += ( dest - pos );
 
 	for( i=0; i < 11; ++i)
 	{
 		// Sumamos cada vector con distancia de nuestra posición a cada contrario
 		// en dirección a nuestra posición
-		res += ( pos - this->vec_foe[i] );
+		if( foe_on[i] )
+			res += ( pos - this->foe_vec[i] );
 	}
 
 	return res;
@@ -49,20 +54,20 @@ void PotentialField::addRepulsor( Vector2D const & v )
 	this->extra_repulsor.push_back( v );
 }
 
-void PotentialField::setAlly( Vector2D const & v, int unum )
+void PotentialField::setTeammate( Vector2D const & v, int unum )
 {
 	if( unum < 1 || unum>10 )
 		return;
 	unum--;
-	this->vec_ally[unum] = v;
+	this->ally_vec[unum] = v;
 }
 
-void PotentialField::setFoe( Vector2D const & v, int unum )
+void PotentialField::setOpponent( Vector2D const & v, int unum )
 {
-	if( unum < 1 || unum>10 )
+	if( unum < 1 || unum > 10 )
 		return;
 	unum--;
-	this->vec_foe[unum] = v;
+	this->foe_vec[unum] = v;
 }
 
 void PotentialField::setDest( Vector2D const & v)
@@ -70,6 +75,36 @@ void PotentialField::setDest( Vector2D const & v)
 	this->dest = v;
 }
 
+void PotentialField::turnOnOpponent( int unum )
+{
+	if( unum < 1 || unum > 10)
+		return;
+	--unum;
+	foe_on[ unum ] = true;
+}
+
+void PotentialField::turnOffOpponent( int unum )
+{
+	if( unum < 1 || unum > 10)
+		return;
+	--unum;
+	foe_on[ unum ] = false;
+}
+void PotentialField::turnOnTeammate( int unum )
+{
+	if( unum < 1 || unum > 10)
+		return;
+	--unum;
+	ally_on[ unum ] = true;
+}
+
+void PotentialField::turnOffTeammate( int unum )
+{
+	if( unum < 1 || unum > 10)
+		return;
+	--unum;
+	ally_on[ unum ] = false;
+}
 
 /* Para probar
 int main()

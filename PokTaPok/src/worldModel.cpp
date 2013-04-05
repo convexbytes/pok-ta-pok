@@ -212,8 +212,8 @@ void WorldModelV1::actualizarBitacora()
 
     vision = & game_data->sensor_handler.last_see;
 
-	objetoBitacora  balonAux;
-	objetoBitacora  playerAux;
+	ObjetoBitacora  balonAux;
+	ObjetoBitacora  playerAux;
 	Vector2D  coordenadas;
 	Vector2D vel;
 	Vector2D obj_vel;
@@ -249,7 +249,7 @@ void WorldModelV1::actualizarBitacora()
 		     else
 		    	 obj_vel = NDEF_NUM;
 		     balonAux.vel = obj_vel;
-		     if( bitacoraBalon.size() <= tamBitacora )     // si el tamaño de la bitácora es menor a 10 ciclos atras
+		     if( bitacoraBalon.size() <= TAM_BITACORA )     // si el tamaño de la bitácora es menor a 10 ciclos atras
 			     bitacoraBalon.push_front(balonAux);		   // introducimos los datos en la Fila.
 		     else                                 // si es más de 10
 	         	{
@@ -297,7 +297,7 @@ void WorldModelV1::actualizarBitacora()
 							else
 								obj_vel = NDEF_NUM;
 							playerAux.vel = obj_vel;
-							if( bitacoraAmigos[playerAux.num].size() <= tamBitacora )   // si el tamaño de la bitácora es menor a 10 ciclos atras
+							if( bitacoraAmigos[playerAux.num].size() <= TAM_BITACORA )   // si el tamaño de la bitácora es menor a 10 ciclos atras
 			                    bitacoraAmigos[playerAux.num].push_front( playerAux );   // introducimos los datos en la Fila.
 		                    else                                 // si es más de 10
 	         	               {
@@ -346,7 +346,7 @@ void WorldModelV1::actualizarBitacora()
 								obj_vel = NDEF_NUM;
 							playerAux.vel = obj_vel;
 
-							if( bitacoraRivales[playerAux.num].size() <= tamBitacora )   // si el tamaño de la bitácora es menor a 10 ciclos atras
+							if( bitacoraRivales[playerAux.num].size() <= TAM_BITACORA )   // si el tamaño de la bitácora es menor a 10 ciclos atras
 			                    bitacoraRivales[playerAux.num].push_front( playerAux );   // introducimos los datos en la Fila.
 		                    else                                 // si es más de 10
 	         	               {
@@ -368,11 +368,11 @@ void WorldModelV1::actualizarBitacora()
 
 // predice la velocidad del balón
 Vector2D
-WorldModelV1::predictVel( deque <objetoBitacora> const & fila )
+WorldModelV1::predictVel( deque <ObjetoBitacora> const & fila )
 {
 	double decay_b = game_data->game_parameter.server_param.ball_decay;
 	double decay_p = game_data->game_parameter.server_param.player_decay;
-	objetoBitacora ultimoElemento, pUltimoElemento;
+	ObjetoBitacora ultimoElemento, pUltimoElemento;
 	Vector2D velocidad;
 
     ultimoElemento  = fila[ 0 ]; // #gil_mark
@@ -395,11 +395,11 @@ WorldModelV1::predictVel( deque <objetoBitacora> const & fila )
 /// predice la la posición de la pelota
 /// después del último ciclo de sensado
 Vector2D
-WorldModelV1::predictPose( deque <objetoBitacora> const & fila )
+WorldModelV1::predictPose( deque <ObjetoBitacora> const & fila )
 {
 	double         coorx,coory;
 	Vector2D       velocidad,futurePose;
-	objetoBitacora ultimoElemento;
+	ObjetoBitacora ultimoElemento;
 
 	velocidad = predictVel(fila);
 
@@ -417,7 +417,7 @@ WorldModelV1::predictPose( deque <objetoBitacora> const & fila )
 /// predice el número de ciclos que
 /// tarda el balón en recorrer cierta distancia
 int
-WorldModelV1::predictCycles( deque <objetoBitacora> const & fila , double distanciaObjetivo )
+WorldModelV1::predictCycles( deque <ObjetoBitacora> const & fila , double distanciaObjetivo )
 {
 	double decay_b = game_data->game_parameter.server_param.ball_decay;
 	double decay_p = game_data->game_parameter.server_param.player_decay;
@@ -436,7 +436,7 @@ WorldModelV1::predictCycles( deque <objetoBitacora> const & fila , double distan
 /// predice la distancia que recorrera con cierta velocidad
 /// en determinado numero de ciclos
 double
-WorldModelV1::predictDistance( deque <objetoBitacora> const & fila , int n )
+WorldModelV1::predictDistance( deque <ObjetoBitacora> const & fila , int n )
 {
 	double decay_b =  game_data->game_parameter.server_param.ball_decay;
 	double decay_p =  game_data->game_parameter.server_param.player_decay;
@@ -487,8 +487,8 @@ WorldModelV1::predictBallCurrentVel( Vector2D * v )
 	}
 	else // ( bitacoraBalon.size() > 1)
 	{	// Aproximamos la velocidad con las dos anteriores
-		deque<objetoBitacora>::const_iterator it = bitacoraBalon.begin();
-		deque<objetoBitacora>::const_iterator it_2 = it+1;
+		deque<ObjetoBitacora>::const_iterator it = bitacoraBalon.begin();
+		deque<ObjetoBitacora>::const_iterator it_2 = it+1;
 		vtmp = 0.0;
 
 		if(    it->vel.x != NDEF_NUM && it->vel.y != NDEF_NUM )

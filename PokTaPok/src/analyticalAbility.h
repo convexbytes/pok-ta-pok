@@ -3,7 +3,7 @@
 #include "utilities.h"
 #include "geometry.h"
 #include "gameCommand.h"
-
+#include "worldModel.h"
 
 #include <cstdio>
 #include <cmath>
@@ -162,6 +162,20 @@ private:
 	WorldModelV1 * world;
 	AgentCommand * command;
 };
+
+PossessionBall whoHasTheBall(bool   ballVisible,
+                             double ballDis,
+                             double ballDir,
+                             double x ,
+                             double y ,
+                             double angle ,
+                             double neck_dir,
+                             vector<Player> *agentes);
+
+void searchBall(double lastDirection,
+               int idCono,
+               AgentCommand * command );
+
 
 #endif //ANALYTICAL_ABILITY_H
 

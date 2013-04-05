@@ -1232,7 +1232,7 @@ void Parser::parse_see(char *message)
                 break;
             case 6: // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD>)" : space = 6
             	sscanf( subcadena,
-            			"%lf %lf %lf %lf %lf",
+            			"%lf %lf %lf %lf %lf %n",
             			&dist, &dir, &distch, &dirch, &body, &head, &n_readed );
                 subcadena += n_readed;
                 break;

@@ -714,3 +714,97 @@ FreezeBall::call( AgentCommand * command )
 	command->append_kick( pow_needed, angle_needed );
 
 }
+
+PossessionBall whoHasTheBall(bool   ballVisible,
+                             double ballDis,
+                             double ballDir,
+                             double x ,
+                             double y ,
+                             double angle ,
+                             double neck_dir,
+                             vector<Player> *agentes)
+{
+    int            i;
+    bool           posesion;
+    double         disToBall;
+    double         disPermisible;
+    Vector2D       balon;
+    Vector2D       posesAgentes[22];
+    PossessionBall regreso;
+    posesion      = false;
+    disPermisible = 1.0;
+    if( ballVisible )
+    {
+        if( ballDis <= disPermisible )
+            regreso = PROPIA;
+        else
+        {
+            //Obtenemos las coordenadas del balon
+            balon = Vector2D::fromPolar(ballDis,Deg2Rad(ballDir + angle + neck_dir));
+            balon.x += x;
+            balon.y += y;
+            //Obtenemos las coordenadas de todos los agentes visibles
+            for( i=0; i< agentes->size();i++ )
+            {
+                posesAgentes[i] = Vector2D::fromPolar(agentes->at(i).dis,
+                                                      Deg2Rad(agentes->at(i).dir
+                                                              +angle
+                                                              +neck_dir)
+                                                      );
+                posesAgentes[i].x += x;
+                posesAgentes[i].y += y;
+                disToBall = sqrt((balon.x-posesAgentes[i].x)*(balon.x-posesAgentes[i].x) +
+                                 (balon.y-posesAgentes[i].y)*(balon.y-posesAgentes[i].y)
+                                 );
+                if( agentes->at(i).team.compare("PokTaPok")==0 && disToBall<=disPermisible)
+                {
+                    regreso =  EQUIPO;
+                    i = agentes->size();
+                    posesion = true;
+                }
+                else
+                    if( agentes->at(i).team.compare("PokTaPok")!=0 && disToBall<=disPermisible)
+                    {
+                        regreso = RIVAL;
+                        i = agentes->size();
+                        posesion = true;
+                    }
+                    else
+                        if( agentes->at(i).team.compare("")==0 && disToBall<=disPermisible)
+                        {
+                            regreso =  DESCONOCIDA;
+                            posesion = true;
+                            i = agentes->size();
+                        }
+            }
+            if( posesion == false )
+                regreso = SUELTA;
+        }
+    }
+    else
+    {
+        regreso = PERDIDA;
+    }
+   return regreso;
+}
+
+void searchBall(double lastDirection,
+               int idCono,
+               AgentCommand * command )
+{
+   double cono;
+
+   switch(idCono)
+   {
+   case NARROW: cono = 60.0;  break;
+   case NORMAL: cono = 120.0; break;
+   case WIDE:   cono = 180.0; break;
+   default:     cono = 0.0;   break; // incorrecto, error
+   }
+
+   if( lastDirection < 0.0 )
+       command->append_turn(-cono);
+   else
+       command->append_turn(cono);
+}
+
