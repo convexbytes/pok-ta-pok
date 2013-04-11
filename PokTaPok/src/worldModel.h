@@ -68,6 +68,7 @@ public:
 	double   dir;
 	int      ciclo;
 	Vector2D vel;
+	bool     goalie;
 };
 
 class WorldModelV1

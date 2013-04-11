@@ -828,21 +828,21 @@ void Parser::parse_see(char *message)
 
         //lineas
 
-                subcadena2=strstr(message,"l t");
+                subcadena2=strstr(message,"(l t)");
         if (subcadena2 != NULL){
             lipar( subcadena2, LINE_TOP);
 
         }
-                subcadena2=strstr(message,"l r");
+                subcadena2=strstr(message,"(l r)");
         if (subcadena2 != NULL){
             lipar( subcadena2, LINE_RIGHT);
         }
-               subcadena2=strstr(message,"l b");
+               subcadena2=strstr(message,"(l b)");
         if (subcadena2 != NULL){
             lipar( subcadena2, LINE_BOTTOM);
 
         }
-            subcadena2=strstr(message,"l l");
+            subcadena2=strstr(message,"(l l)");
         if (subcadena2 != NULL){
 
             lipar( subcadena2, LINE_LEFT);
@@ -965,7 +965,8 @@ void Parser::parse_see(char *message)
             tackle   	= false;
             kick	    = false;
             n_readed	= 0;
-
+            name_ndata  = 0;
+            player_ndata = 0;
         	aux_cad = subcadena; // Usamos aux_cad para contar los parámetros
 
         	// Saltamos "(p"
@@ -1232,7 +1233,7 @@ void Parser::parse_see(char *message)
                 break;
             case 6: // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD>)" : space = 6
             	sscanf( subcadena,
-            			"%lf %lf %lf %lf %lf %n",
+            			"%lf %lf %lf %lf %lf %lf %n",
             			&dist, &dir, &distch, &dirch, &body, &head, &n_readed );
                 subcadena += n_readed;
                 break;

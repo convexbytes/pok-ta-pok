@@ -261,8 +261,8 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
     double  finalOrientation;
     double  sumaCos,sumaSin;
     int     elementosX, elementosY;
-    int time;
-    //char   id_linea;
+    //int time;
+    char   id_linea;
     
 
     double  neck_dir;
@@ -333,7 +333,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
     
    if( pesoMax == 0.0 )  // AGENTE PERDIDO, ninguna particula del grid tiene peso
        {
-		/*  COMENTADO POR QUE NO ESTAMOS SEGUROS DE QUE FUNCIONE CORRECTAMENTE el metodo de linea y bandera
+
 		    if(vision->lines.size() >= 1 && banderas->size() >= 1)  // SI VE LINEA Y UNA BANDERA
 		       {		        	
 	            coorb1.x = banderas->at(0).get_global_coord().x;
@@ -341,35 +341,35 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 		          
 				  switch (vision->lines.at(0).id)
 				  {
-					case 1: id_linea = 	't'; break;    // LINE_TOP
-					case 2:	id_linea =	'r'; break;    // LINE_RIGHT
-					case 3:	id_linea =	'b'; break;    // LINE_BOTTOM
-					case 4:	id_linea =	'l'; break;    // LINE_LEFT
+					case LINE_TOP: id_linea = 	't'; break;    // LINE_TOP
+					case LINE_RIGHT:	id_linea =	'r'; break;    // LINE_RIGHT
+					case LINE_BOTTOM:	id_linea =	'b'; break;    // LINE_BOTTOM
+					case LINE_LEFT:	id_linea =	'l'; break;    // LINE_LEFT
 					default: break;
 						
 				  }  
 		          	 
-				  posicion = ubicacionLineaBandera(vision->lines.at(0).direction, id_linea, 
-												   banderas->at(0).distance, banderas->at(0).direction, 	
+				  posicion = ubicacionLineaBandera(vision->lines.at(0).dir, id_linea,
+												   banderas->at(0).dis, banderas->at(0).dir,
 												   coorb1);
-		          
-				  particulas[0].x = posicion.x - 5.0;
-				  particulas[0].y = posicion.y - 5.0;      
+
+				  particulas[0].x = posicion.x - 2.0;
+				  particulas[0].y = posicion.y - 2.0;
                   
-				  particulas[1].x = posicion.x + 5.0;
-				  particulas[1].y = posicion.y - 5.0;
+				  particulas[1].x = posicion.x + 2.0;
+				  particulas[1].y = posicion.y - 2.0;
     
-				  particulas[2].x = posicion.x - 5.0;
-				  particulas[2].y = posicion.y + 5.0;
+				  particulas[2].x = posicion.x - 2.0;
+				  particulas[2].y = posicion.y + 2.0;
     
-				  particulas[3].x = posicion.x + 5.0;
-				  particulas[3].y = posicion.y + 5.0;
+				  particulas[3].x = posicion.x + 2.0;
+				  particulas[3].y = posicion.y + 2.0;
 				  
     		  montecarlo_correction( particulas, vision , particulas_nuevas );   ///Correccion, encontramos particula con mas peso
     
 		        } 
           else
-          */  /// Método de bandera bandera para localizar al agente si se pierde
+
 		    if( banderas->size() >= 2)   // SI VEN DOS BANDERAS
 	          {					 
 		          coorb1.x = banderas->at(0).get_global_coord().x;
@@ -377,10 +377,10 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 		       
 		          coorb2.x = banderas->at(1).get_global_coord().x;
 		          coorb2.y = banderas->at(1).get_global_coord().y;
-		    
+
 		          posicion = ubicacionBanderaBandera(banderas->at(0).dis, banderas->at(0).dir, coorb1,
 				    								 banderas->at(1).dis, banderas->at(1).dir, coorb2);
-		        
+
 		          xmin = particulas[0].x = posicion.x - 3.0;
 				  ymin = particulas[0].y = posicion.y - 3.0;      
                   
@@ -477,7 +477,7 @@ void MontecarloLocalization::montecarlo_correction( Particula   *particulas,
 	    }
     /// Terminamos asignando la orientacion final  ///
     
-	time = game_data->sensor_handler.last_see.time;     
+	//time = game_data->sensor_handler.last_see.time;
 	
 	
 }

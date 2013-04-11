@@ -20,7 +20,8 @@ OBJS = 	$(BIN_DIR)gameCommand.o \
 	$(BIN_DIR)worldModel.o \
 	$(BIN_DIR)state.o \
 	$(BIN_DIR)montecarloLocalization.o \
-	$(BIN_DIR)analyticalAbility.o
+	$(BIN_DIR)analyticalAbility.o \
+	$(BIN_DIR)potentialField.o
 
 
 $(BIN_DIR)poktapok : $(OBJS) $(BIN_DIR)poktapokAgent.o $(BIN_DIR)client.o 
@@ -118,5 +119,8 @@ $(BIN_DIR)state.o:
 
 $(BIN_DIR)analyticalAbility.o:
 	g++ $(FLAGS) $(SOURCE_DIR)analyticalAbility.cpp -o $@
+
+$(BIN_DIR)potentialField.o: 
+	g++ $(FLAGS) $(SOURCE_DIR)potentialField.cpp -o $@
 
 

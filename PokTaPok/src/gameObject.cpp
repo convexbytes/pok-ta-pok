@@ -73,17 +73,17 @@ Vector2D Flag::get_global_coord() const
 
 void Player::print()
 {
-    cout << "team " << this->team << endl;
-    cout << "unum " << this->unum <<  endl;
-    cout << "isgoalie " << this->is_goalie << endl;
-    cout << "dis " << this->dis << endl;
-    cout << "dir " << this->dir << endl;
-    cout << "dis_chg " << this->dis_chg << endl;
-    cout << "dir_chg " << this->dir_chg << endl;
-    cout << "body_dir " << this->body_dir << endl;
-    cout << "neck_dir " << this->head_dir << endl;
-    cout << "on_kick " << this->on_kick << endl;
-    cout << "on_tackle " << this->on_tackle << endl;
+    cout << "Player. team " << this->team;
+    cout << " unum " << this->unum;
+    cout << " isgoalie " << this->is_goalie;
+    cout << " dis " << this->dis;
+    cout << " dir " << this->dir;
+    cout << " dis_chg " << this->dis_chg;
+    cout << " dir_chg " << this->dir_chg;
+    cout << " body_dir " << this->body_dir ;
+    cout << " neck_dir " << this->head_dir ;
+    cout << " on_kick " << this->on_kick ;
+    cout << " on_tackle " << this->on_tackle << endl;
 }
 
 void Flag::print()

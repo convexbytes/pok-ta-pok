@@ -226,7 +226,7 @@ void WorldModelV1::actualizarBitacora()
 			 balonAux.num    = 0;
 			 balonAux.pos    = // No incluimos el ángulo del cuello
 			     Vector2D::fromPolar( ball.dis ,
-						 	 	 	  Deg2Rad( ball.dir + me.angle ) );
+						 	 	 	  Deg2Rad( ball.dir + me.angle + me.headAngleDeg() ) );
 		     balonAux.pos.x += me.pos.x;                 // coordenada global x del balón
 		     balonAux.pos.y += me.pos.y;                // coordenada global y del balón
 		     balonAux.dis    = ball.dis;            // distancia al balón
@@ -234,10 +234,10 @@ void WorldModelV1::actualizarBitacora()
 		     balonAux.ciclo  = game_data->sensor_handler.last_see.time;		 // ciclo del sensado
 		     if( ball.dis_chg != NDEF_NUM && ball.dir_chg != NDEF_NUM )
 		     {   // Actualizamos la velocidad global en base a dir_chg y dis_chg
-		    	 // No incluimos el ángulo del cuello
+
 		    	 vel = Vector2D::fromPolar(
 		    			 body.speed_amount,
-		    			 Deg2Rad(body.speed_direction + me.angle /*+ me.head_angle*/ ) );
+		    			 Deg2Rad(body.speed_direction + me.angle + me.head_angle ) );
 
 		    	 obj_vel = fromChgToVel( me.pos,
 		    			 vel,
@@ -260,7 +260,7 @@ void WorldModelV1::actualizarBitacora()
 
 		if ( player.size() > 0)    // Existe al menos un agente visible
 		    {
-			 for ( unsigned int i = 0; i < player.size() -1 ; i++)  // recorremos todos los jugadores visibles
+			 for ( unsigned int i = 0; i < player.size(); i++)  // recorremos todos los jugadores visibles
 			     {
 				   if( player[i].isMyMate( TEAM_NAME ) )  // si es de mi equipo
 			          {
@@ -272,12 +272,13 @@ void WorldModelV1::actualizarBitacora()
 							coordenadas     =
 							Vector2D::fromPolar(
 									player[i].dis,
-									Deg2Rad( player[i].dir + me.angle /*+ me.head_angle*/) );
+									Deg2Rad( player[i].dir + me.angle + me.head_angle) );
 							playerAux.pos.x = coordenadas.x + me.pos.x;
 							playerAux.pos.y = coordenadas.y + me.pos.y;
 							playerAux.dis   = player[i].dis;
 							playerAux.dir   = player[i].dir;
 							playerAux.ciclo = game_data->sensor_handler.last_see.time;
+							playerAux.goalie= player[i].is_goalie;
 
 							if( player[i].dis_chg != NDEF_NUM )
 							{   // Actualizamos la velocidad global en base a dir_chg y dis_chg
@@ -285,7 +286,7 @@ void WorldModelV1::actualizarBitacora()
 
 								vel = Vector2D::fromPolar(
 									  body.speed_amount,
-									  Deg2Rad(body.speed_direction + me.angle /*+ me.head_angle*/ ) );
+									  Deg2Rad(body.speed_direction + me.angle + me.head_angle ) );
 
 								obj_vel = fromChgToVel( me.pos,
 													  vel,
@@ -297,12 +298,14 @@ void WorldModelV1::actualizarBitacora()
 							else
 								obj_vel = NDEF_NUM;
 							playerAux.vel = obj_vel;
-							if( bitacoraAmigos[playerAux.num].size() <= TAM_BITACORA )   // si el tamaño de la bitácora es menor a 10 ciclos atras
-			                    bitacoraAmigos[playerAux.num].push_front( playerAux );   // introducimos los datos en la Fila.
+
+							//std::cout << "pushed teammate" << playerAux.num << " " << player[i].team << std::endl;
+							if( bitacoraAmigos[playerAux.num-1].size() <= TAM_BITACORA )   // si el tamaño de la bitácora es menor a 10 ciclos atras
+			                    bitacoraAmigos[playerAux.num-1].push_front( playerAux );   // introducimos los datos en la Fila.
 		                    else                                 // si es más de 10
 	         	               {
-			                    bitacoraAmigos[playerAux.num].pop_back();              // eliminamos el primer elemento que entro en la Fila (el más viejo)
-			                    bitacoraAmigos[playerAux.num].push_front( playerAux );   // y luego ya introducimos los nuevos datos del jugador al final
+			                    bitacoraAmigos[playerAux.num-1].pop_back();              // eliminamos el primer elemento que entro en la Fila (el más viejo)
+			                    bitacoraAmigos[playerAux.num-1].push_front( playerAux );   // y luego ya introducimos los nuevos datos del jugador al final
 		                       }
 					       }
 					    else
@@ -321,19 +324,22 @@ void WorldModelV1::actualizarBitacora()
 							coordenadas     =
 							Vector2D::fromPolar(
 									  player[i].dis,
-									  Deg2Rad( player[i].dir + me.angle /*+ me.head_angle*/ ) );
+									  Deg2Rad( player[i].dir + me.angle + me.head_angle ) );
 							playerAux.pos.x = coordenadas.x + me.pos.x;
 							playerAux.pos.y = coordenadas.y + me.pos.y;
 							playerAux.dis   = player[i].dis;
 							playerAux.dir   = player[i].dir;
 							playerAux.ciclo = game_data->sensor_handler.last_see.time;
+							playerAux.goalie= player[i].is_goalie;
+
+
 							if( player[i].dis_chg != NDEF_NUM )
 							{   // Actualizamos la velocidad global en base a dir_chg y dis_chg
 
 
 								vel = Vector2D::fromPolar(
 									  body.speed_amount,
-									  Deg2Rad(body.speed_direction + me.angle/* + me.head_angle*/ ) );
+									  Deg2Rad(body.speed_direction + me.angle + me.head_angle ) );
 
 								obj_vel = fromChgToVel( me.pos,
 													  vel,
@@ -345,13 +351,13 @@ void WorldModelV1::actualizarBitacora()
 							else
 								obj_vel = NDEF_NUM;
 							playerAux.vel = obj_vel;
-
-							if( bitacoraRivales[playerAux.num].size() <= TAM_BITACORA )   // si el tamaño de la bitácora es menor a 10 ciclos atras
-			                    bitacoraRivales[playerAux.num].push_front( playerAux );   // introducimos los datos en la Fila.
+							//std::cout << "pushed rival" << playerAux.num << " " << player[i].team << std::endl;
+							if( bitacoraRivales[playerAux.num-1].size() <= TAM_BITACORA )   // si el tamaño de la bitácora es menor a 10 ciclos atras
+			                    bitacoraRivales[playerAux.num-1].push_front( playerAux );   // introducimos los datos en la Fila.
 		                    else                                 // si es más de 10
 	         	               {
-			                    bitacoraRivales[playerAux.num].pop_back();              // eliminamos el primer elemento que entro en la Fila (el más viejo)
-			                    bitacoraRivales[playerAux.num].push_front( playerAux );   // y luego ya introducimos los nuevos datos del jugador al final
+			                    bitacoraRivales[playerAux.num-1].pop_back();              // eliminamos el primer elemento que entro en la Fila (el más viejo)
+			                    bitacoraRivales[playerAux.num-1].push_front( playerAux );   // y luego ya introducimos los nuevos datos del jugador al final
 		                       }
 					       }
 					    else
