@@ -1,5 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
+#define SERVER_MAX_DELAY_SECS 3
+
 #include "udpSocket.h"
 #include "gameData.h"
 #include "parser.h"
@@ -58,10 +60,8 @@ private:
     //Synchronizer        synchronizer; //Decidimos que el sincronizador no era necesario usando tres hilos
     MP_MessageType      last_msg_type;
 
-
     void initialize     ( );
     void pre_filter     ( char *server_msg );
-    bool server_is_alive( );
     void set_sending_wait_time(char *message);
 
 };

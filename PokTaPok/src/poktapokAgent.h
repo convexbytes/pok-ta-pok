@@ -4,7 +4,6 @@
 #include "sensorHandler.h"
 #include "worldModel.h"
 #include "state.h"
-#include "potentialField.h"
 #ifndef TEAM_NAME
 #define TEAM_NAME "PokTaPok"
 #endif // TEAM_NAME
@@ -63,6 +62,8 @@ private:
     void onPlay();
 
     void irAlBalon();
+
+    void voronoiPositioning();
 
     void balonPropio();
     void balonEquipo();

@@ -224,7 +224,7 @@ void WorldModelV1::actualizarBitacora()
 		    {
 			 balonAux.name   = "ball";
 			 balonAux.num    = 0;
-			 balonAux.pos    = // No incluimos el ángulo del cuello
+			 balonAux.pos    =
 			     Vector2D::fromPolar( ball.dis ,
 						 	 	 	  Deg2Rad( ball.dir + me.angle + me.headAngleDeg() ) );
 		     balonAux.pos.x += me.pos.x;                 // coordenada global x del balón
