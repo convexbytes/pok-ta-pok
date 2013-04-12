@@ -37,7 +37,6 @@ void Client::initialize() {
 	int process_thread_error; // Para capturar el error a la hora de crear el hilo de proceso
 	int sending_thread_error; // Para capturar el error a la hora de crear el hilo de envío
 
-
 	game_data   = 0;
 	parser      = 0;
 	agent       = 0;
@@ -100,8 +99,6 @@ void Client::initialize() {
 				<< std::endl;
 		exit(1);
 	}
-
-
 }
 
 Client::~Client()
@@ -150,7 +147,7 @@ void Client::main_loop( bool goalie )
 	}
 
 
-	while( server_is_alive() )
+	while( true )
 	{
 
 		USock::instance().Receive( buffer_in );
@@ -176,23 +173,30 @@ void Client::main_loop( bool goalie )
 
 void * Client::Client::process_thread_function(void *parameter)
 {
+	int  seconds_since_last_message;
 	char server_message_aux[4096];
 	bool stack_empty;
 	timespec wait_check_time;
 	timespec rem_check_time;
+	timespec start, end; // Para analizar si el servidor ha muerto
 	wait_check_time.tv_nsec = 100000; // .1 milisegundo
 	wait_check_time.tv_sec = 0;
 	//AgentCommand * comm_aux;
-	while (1) {
+	clock_gettime( CLOCK_MONOTONIC, &start );
+	clock_gettime( CLOCK_MONOTONIC, &end );
+	while ( true ) {
 		pthread_mutex_lock( & Client::instance().message_stack_mutex );
 		stack_empty = Client::instance().messages.empty();
 		pthread_mutex_unlock( & Client::instance().message_stack_mutex );
+		
 		if (stack_empty) //Si la pila tiene mensajes, leemos; si no tiene, dormimos.
 		{
 			nanosleep( &wait_check_time, &rem_check_time); //Duerme un milisegundo mientras se llena el stack de mensajes
 		}
 		else
 		{
+			clock_gettime( CLOCK_MONOTONIC, &start );
+			
 			pthread_mutex_lock( & Client::instance().message_stack_mutex);
 
 			strcpy( server_message_aux,
@@ -213,6 +217,16 @@ void * Client::Client::process_thread_function(void *parameter)
 			pthread_mutex_unlock( &Client::instance().command_mutex );
 
 		}
+		clock_gettime( CLOCK_MONOTONIC, &end );
+		
+		seconds_since_last_message = end.tv_sec - start.tv_sec;
+		
+		if( seconds_since_last_message > SERVER_MAX_DELAY_SECS )
+		{
+			std::cout << "Server not available, exiting..." << std::endl;
+			raise( SIGINT );
+		}
+			
 	}
 	return NULL;
 }
@@ -228,7 +242,7 @@ void* Client::Client::sending_thread_function(void *parameter)
 	wait_time.tv_nsec = 80000000; // 60 milisegundos
 	wait_time.tv_sec = 0;
 
-	while (1)
+	while ( true )
 	{
 
 			pthread_mutex_lock( &Client::instance().sending_thread_cond_mutex );
@@ -260,12 +274,6 @@ void* Client::Client::sending_thread_function(void *parameter)
 
 	}
 	return NULL;
-}
-
-bool Client::server_is_alive()
-{
-	// Reservado para un análisis de detección de conexión con el servidor.
-	return true;
 }
 
 

@@ -3,7 +3,7 @@
 #include "utilities.h"
 #include "geometry.h"
 #include "gameCommand.h"
-
+#include "worldModel.h"
 
 #include <cstdio>
 #include <cmath>
@@ -58,23 +58,25 @@ void GoToXY ( double   xTarget ,
 		double   x,
 		double   y,
 		double   angle,
+		double 	 neck_dir,
 		double   radio,
 		Vector2D velocidad,
 		AgentCommand * command
 );
 
 void runWithBall (double   xTarget ,
-		double   yTarget ,
-		double   x,
-		double   y,
-		double   angle,
-		double   xBall,
-		double   yBall,
-		double   disBall,
-		Vector2D velocidad,
-		double   radio,
-		AgentCommand * command
-);
+                  double   yTarget ,
+                  double   x,
+                  double   y,
+                  double   angle,
+                  double   xBall,
+                  double   yBall,
+                  double   disBall,
+                  Vector2D velocidad,
+                  double   neck_dir,
+                  double   radio,
+                  AgentCommand * command
+                  );
 
 //*Define una zona de tiro como un circulo*//
 bool  isZoneShoot( double x, double y , double radio);
@@ -162,6 +164,40 @@ private:
 	WorldModelV1 * world;
 	AgentCommand * command;
 };
+
+PossessionBall whoHasTheBall(bool   ballVisible,
+                             double ballDis,
+                             double ballDir,
+                             double x ,
+                             double y ,
+                             double angle ,
+                             double neck_dir,
+                             vector<Player> *agentes);
+
+void searchBall(double lastDirection,
+               int idCono,
+               AgentCommand * command );
+
+void align(double neckDir,
+            AgentCommand *command);
+
+void centerBall(bool   ballVisible,
+                double ballDir,
+                double lastAngleBall,
+                double neckDir,
+                ViewModeWidth cono,
+                AgentCommand * command);
+
+bool amTheClosest( double ballDis,
+                   double ballDir,
+                   double x ,
+                   double y ,
+                   double angle ,
+                   double neck_dir,
+                   vector<Player> *agentes);
+
+void radar( double neck_dir,
+		    AgentCommand *command );
 
 #endif //ANALYTICAL_ABILITY_H
 

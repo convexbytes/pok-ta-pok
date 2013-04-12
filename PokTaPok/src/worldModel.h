@@ -9,10 +9,22 @@
 
 #include <deque>
 
-#define  tamBitacora 10
+#define  TAM_BITACORA 10
+
 #ifndef TEAM_NAME
 #define TEAM_NAME "PokTaPok"
 #endif
+
+enum PossessionBall
+{
+
+    PROPIA = 0,     // balón en poder del agente
+    EQUIPO,         // balón en poder del equipo propio
+    RIVAL,          // balón en poder del rival
+    DESCONOCIDA,    // balón en poder desconocida
+    SUELTA,         // balón suelto
+    PERDIDA         // balón sin ver
+};
 
 class AgentStateV1
 {
@@ -38,10 +50,25 @@ public:
     ViewModeQuality	last_recv_visual_q;
     ViewModeWidth	last_recv_visual_w;
 
+    PossessionBall  possession_ball;
+
     // Acerca del cuerpo
     double stamina;
     double effort;
 
+};
+
+class ObjetoBitacora
+{
+public:
+	string   name;
+	int      num;
+	Vector2D pos;
+	double   dis;
+	double   dir;
+	int      ciclo;
+	Vector2D vel;
+	bool     goalie;
 };
 
 class WorldModelV1
@@ -63,25 +90,14 @@ public:
     int                  time;
 
     // Guardamos info de los objetos
-    class objetoBitacora
-    {
-    public:
-    	string   name;
-    	int      num;
-    	Vector2D pos;
-    	double   dis;
-    	double   dir;
-    	int      ciclo;
-    	Vector2D vel;
-    };
-    deque <objetoBitacora>  bitacoraRivales[11]; // 11 rivales
-    deque <objetoBitacora>  bitacoraAmigos[11];  // 10 amgios, el lugar nuestro se queda vacío
-    deque <objetoBitacora>  bitacoraBalon;       // balon
+    deque <ObjetoBitacora>  bitacoraRivales[11]; // 11 rivales
+    deque <ObjetoBitacora>  bitacoraAmigos[11];  // 10 amgios, el lugar nuestro se queda vacío
+    deque <ObjetoBitacora>  bitacoraBalon;       // balon
     void 	 actualizarBitacora();
-    Vector2D predictVel      ( deque <objetoBitacora> const & fila );
-    Vector2D predictPose     ( deque <objetoBitacora> const & fila );
-    double   predictDistance ( deque <objetoBitacora> const & fila , int n );
-    int      predictCycles   ( deque <objetoBitacora> const & fila , double distanciaObjetivo );
+    Vector2D predictVel      ( deque <ObjetoBitacora> const & fila );
+    Vector2D predictPose     ( deque <ObjetoBitacora> const & fila );
+    double   predictDistance ( deque <ObjetoBitacora> const & fila , int n );
+    int      predictCycles   ( deque <ObjetoBitacora> const & fila , double distanciaObjetivo );
 
     bool 	predictBallCurrentVel( Vector2D * v );
 

@@ -17,7 +17,9 @@ namespace Formation
         static Vector2D const P9(-9.0, -22.0);
         static Vector2D const P10(-9.0, 0.0);
         static Vector2D const P11(-9.0, 22.0);
+
     }
+
 
 }
 
