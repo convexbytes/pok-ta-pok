@@ -48,12 +48,6 @@ private:
     Vector2D  	 	 	goal_l;
     Vector2D  			goal_r;
     Vector2D			goal_pos;
-    void init_pot_field();
-    void update_pot_field();
-
-    Vector2D	running_pot_field[11];
-    bool		running_pot_field_on[11];
-
 
     void update();
 
@@ -63,14 +57,18 @@ private:
 
     void irAlBalon();
 
-    void voronoiPositioning();
-
     void balonPropio();
     void balonEquipo();
     void balonRival();
     void balonDesconocido();
     void balonSuelto();
     void balonPerdido();
+
+    void voronoiPositioning();
+
+    void goalieBehavior();
+
+    void defence();
 };
 
 enum ActionType

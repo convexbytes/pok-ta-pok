@@ -42,52 +42,6 @@ double KickPowerForSpeed(double speed,double actkpr);
 //     KickSpeedToTravel(distancia Player-Objetivo , Vel final Deseada)
 double KickSpeedToTravel(double d,double e);
 
-
-Vector2D PasePunto( double xTarget,    // punto final
-		double yTarget,
-		double x,          // coordenadas agente
-		double y,
-		int    angle,      // angulo del cuerpo
-		double velDes,     // velocidad final
-		double xBall,      // coordenadas de la pelota
-		double yBall);
-
-
-void GoToXY ( double   xTarget ,
-		double   yTarget ,
-		double   x,
-		double   y,
-		double   angle,
-		double 	 neck_dir,
-		double   radio,
-		Vector2D velocidad,
-		AgentCommand * command
-);
-
-void runWithBall (double   xTarget ,
-                  double   yTarget ,
-                  double   x,
-                  double   y,
-                  double   angle,
-                  double   xBall,
-                  double   yBall,
-                  double   disBall,
-                  Vector2D velocidad,
-                  double   neck_dir,
-                  double   radio,
-                  AgentCommand * command
-                  );
-
-//*Define una zona de tiro como un circulo*//
-bool  isZoneShoot( double x, double y , double radio);
-
-//* Verdadero si ve un poste al menos *//
-bool posteVisible ( vector<Flag> *banderas );
-
-//*Nos regresa un angulo para tirar junto al poste más cercano*//
-double shootAtGoal(double x, double y, double angle, vector<Flag> *banderas );
-
-
 class BallInterception
 {
 public:
@@ -165,18 +119,64 @@ private:
 	AgentCommand * command;
 };
 
-PossessionBall whoHasTheBall(bool   ballVisible,
-                             double ballDis,
-                             double ballDir,
-                             double x ,
-                             double y ,
-                             double angle ,
-                             double neck_dir,
-                             vector<Player> *agentes);
+Vector2D PasePunto( double xTarget,    // punto final
+		double yTarget,
+		double x,          // coordenadas agente
+		double y,
+		int    angle,      // angulo del cuerpo
+		double velDes,     // velocidad final
+		double xBall,      // coordenadas de la pelota
+		double yBall);
 
-void searchBall(double lastDirection,
-               int idCono,
-               AgentCommand * command );
+
+void GoToXY ( double   xTarget ,
+		double   yTarget ,
+		double   x,
+		double   y,
+		double   angle,
+		double 	 neck_dir,
+		double   radio,
+		Vector2D velocidad,
+		AgentCommand * command
+);
+
+void GoToXYSlow( double   xTarget ,
+		double   yTarget ,
+		double   x,
+		double   y,
+		double   angle,
+		double 	 neck_dir,
+		double   radio,
+		Vector2D velocidad,
+		AgentCommand * command
+);
+
+void runWithBall (double   xTarget ,
+                  double   yTarget ,
+                  double   xBall,
+                  double   yBall,
+                  double   disBall,
+                  Vector2D velocidad,
+                  double   radio,
+                  WorldModelV1 * world,
+                  AgentCommand * command
+                  );
+
+//*Define una zona de tiro como un circulo*//
+bool  isZoneShoot( double x, double y , double radio);
+
+//* Verdadero si ve un poste al menos *//
+bool posteVisible ( vector<Flag> *banderas );
+
+//*Nos regresa un angulo para tirar junto al poste más cercano*//
+double shootAtGoal(double x, double y, double angle, vector<Flag> *banderas );
+
+
+PossessionBall whoHasTheBall(WorldModelV1 *world);
+
+void searchBall( AgentCommand * command,
+                 WorldModelV1 * world,
+                 SensorType sensor_type);
 
 void align(double neckDir,
             AgentCommand *command);
@@ -188,16 +188,34 @@ void centerBall(bool   ballVisible,
                 ViewModeWidth cono,
                 AgentCommand * command);
 
-bool amTheClosest( double ballDis,
-                   double ballDir,
-                   double x ,
-                   double y ,
-                   double angle ,
-                   double neck_dir,
-                   vector<Player> *agentes);
+bool amTheClosest( WorldModelV1 *world);
 
 void radar( double neck_dir,
-		    AgentCommand *command );
+		    AgentCommand *command,
+		    SensorType sensor_type);
+
+void GoToXY2 (   double   xTarget ,
+                 double   yTarget ,
+                 double   radio,
+                 Vector2D velocidad,
+                 AgentCommand * command,
+                 WorldModelV1 * world
+                 );
+
+void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModelV1 *world,AgentCommand *command);
+
+int aQuienPasar(WorldModelV1 *world);
+
+void centerBall( WorldModelV1 *world,
+                 AgentCommand * command);
+
+void GoToXY (   double   xTarget ,
+		double   yTarget ,
+		double   radio,
+		Vector2D velocidad,
+                AgentCommand * command,
+                WorldModelV1 * world
+                );
 
 #endif //ANALYTICAL_ABILITY_H
 

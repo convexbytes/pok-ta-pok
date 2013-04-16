@@ -21,7 +21,6 @@ enum PossessionBall
     PROPIA = 0,     // balón en poder del agente
     EQUIPO,         // balón en poder del equipo propio
     RIVAL,          // balón en poder del rival
-    DESCONOCIDA,    // balón en poder desconocida
     SUELTA,         // balón suelto
     PERDIDA         // balón sin ver
 };

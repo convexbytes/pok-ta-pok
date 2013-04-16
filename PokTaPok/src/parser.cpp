@@ -2648,52 +2648,53 @@ PlayModeHearable Parser::parse_play_mode(char *char_play_mode, int & num )
     else if (strcmp(char_play_mode, "penalty_draw")==0)
         return PENALTY_DRAW;
     //Aquí inician los que tienen incrustado algún número.
-    /*y aqui lacagamos en algo
+    /*y aqui lacagamos en algo, por el momento ignoramos los número incrustados
+     * */
     else
 
-        if( strstr(char_play_mode, "goal_l_") )
+        if( strstr(char_play_mode, "goal_l") )
         {
-            char_play_mode = strstr(char_play_mode, "goal_l_");
-            sscanf(char_play_mode, "goal_l_%d", &aux_num );
-            num = aux_num;
+            //char_play_mode = strstr(char_play_mode, "goal_l_");
+            //sscanf(char_play_mode, "goal_l_%d", &aux_num );
+            //num = aux_num;
             return GOAL_L;
         }
-        else if( strstr( char_play_mode, "goal_r_"))
+        else if( strstr( char_play_mode, "goal_r"))
         {
-            char_play_mode = strstr(char_play_mode, "goal_l_");
-            sscanf(char_play_mode, "goal_r_%d", &aux_num );
-            num = aux_num;
+            //char_play_mode = strstr(char_play_mode, "goal_l_");
+            //sscanf(char_play_mode, "goal_r_%d", &aux_num );
+            //num = aux_num;
             return GOAL_R;
         }
-        else if( strstr( char_play_mode, "yellow_card_l_"))
+        else if( strstr( char_play_mode, "yellow_card_l"))
         {
-            char_play_mode = strstr(char_play_mode, "yellow_card_l_");
-            sscanf(char_play_mode, "yellow_card_l_%d", &aux_num );
-            num = aux_num;
+            //char_play_mode = strstr(char_play_mode, "yellow_card_l_");
+            //sscanf(char_play_mode, "yellow_card_l_%d", &aux_num );
+            //num = aux_num;
             return YELLOW_CARD_L;
         }
         else if( strstr( char_play_mode, "yellow_card_r"))
         {
-            char_play_mode = strstr(char_play_mode, "yellow_card_r");
-            sscanf(char_play_mode, "yellow_card_r%d", &aux_num );
-            num = aux_num;
+            //char_play_mode = strstr(char_play_mode, "yellow_card_r");
+            //sscanf(char_play_mode, "yellow_card_r%d", &aux_num );
+            //num = aux_num;
             return YELLOW_CARD_R;
         }
         else if( strstr( char_play_mode, "red_card_l"))
         {
-            char_play_mode = strstr(char_play_mode, "red_card_l");
-            sscanf(char_play_mode, "red_card_l%d", &aux_num );
-            num = aux_num;
+            //char_play_mode = strstr(char_play_mode, "red_card_l");
+            //sscanf(char_play_mode, "red_card_l%d", &aux_num );
+            //num = aux_num;
             return RED_CARD_L;
         }
         else if( strstr( char_play_mode, "red_card_r"))
         {
-            char_play_mode = strstr(char_play_mode, "red_card_r");
-            sscanf(char_play_mode, "red_card_r%d", &aux_num );
-            num = aux_num;
+            //char_play_mode = strstr(char_play_mode, "red_card_r");
+            //sscanf(char_play_mode, "red_card_r%d", &aux_num );
+            //num = aux_num;
             return RED_CARD_R;
         }
-        */
+
     else
             return (PlayModeHearable)0; //Regresamos cero en caso de algún error
 }

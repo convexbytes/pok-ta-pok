@@ -146,7 +146,7 @@ void GoToXY (   double   xTarget ,
 		double   x,
 		double   y,
 		double   angle,
-                double   neck_dir,
+        double   neck_dir,
 		double   radio,
 		Vector2D velocidad,
 		AgentCommand * command
@@ -174,7 +174,7 @@ void GoToXY (   double   xTarget ,
         /*neck_dir?*/   turnParameter = dirToPoint - angle;// - neck_dir;
         turnParameter = entre180( turnParameter );
 
-        if( angPermisible < turnParameter * 0.1  &&  disToPoint > 15.0 )
+        if( angPermisible < turnParameter * 0.1  ||  disToPoint > 25.0 )
             angPermisible = 25.0;
 
         if( fabs(turnParameter) > angPermisible )  // el agente no esta bien alineado al punto
@@ -206,24 +206,26 @@ void GoToXY (   double   xTarget ,
 
 }
 
-
 void runWithBall (double   xTarget ,
                   double   yTarget ,
-                  double   x,
-                  double   y,
-                  double   angle,
                   double   xBall,
                   double   yBall,
                   double   disBall,
                   Vector2D velocidad,
-                  double   neck_dir,
                   double   radio,
+                  WorldModelV1 * world,
                   AgentCommand * command
                   )
 {
     double angToPoint;
     double auxX,auxY;
+    double x,y,angle,neck_dir;
     Vector2D Kick;
+
+    x=world->me.pos.x;
+    y=world->me.pos.y;
+    angle=world->me.angle;
+    neck_dir = world->me.head_angle;
 
 
     if (disBall <= radio)
@@ -236,11 +238,11 @@ void runWithBall (double   xTarget ,
         auxX = 2.0 * cos( Deg2Rad( angToPoint ) );
         auxY = 2.0 * sin( Deg2Rad( angToPoint ) );
 
-        Kick = PasePunto(x+auxX,y+auxY,x,y,angle,0.0, xBall , yBall );
+        Kick = PasePunto(x+auxX,y+auxY,x,y,angle,0.0, xBall , yBall);
 
         Kick.y = entre180(angToPoint);
 
-        //cout<<"Adelanto KICK"<<endl;
+        //// cout<<"Adelanto KICK"<<endl;
         command->append_kick(Kick.x,Kick.y);
     }
     else
@@ -533,7 +535,7 @@ BallInterception::go()
 	{
 		freeze();
 	}
-	else if(    (world->time - start_time_s-2 > time_to_reach_s)
+	else if(    (world->time - start_time_s) > time_to_reach_s
 			 || point_reached )
 	{
 
@@ -635,111 +637,127 @@ FreezeBall::call( AgentCommand * command )
 
 }
 
-PossessionBall whoHasTheBall(bool   ballVisible,
-		double ballDis,
-		double ballDir,
-		double x ,
-		double y ,
-		double angle ,
-		double neck_dir,
-		vector<Player> *agentes)
+PossessionBall whoHasTheBall(WorldModelV1 *world)
 {
-	int            i;
-	bool           posesion;
-	double         disToBall;
-	double         disPermisible;
-	Vector2D       balon;
-	Vector2D       poseAgente;
+    int            i;
+    bool           posesion=false;
+    double         x,y,angle,neck_dir;
+    double         disToBall;
+    double         disPermisible;
 
-	PossessionBall regreso;
+    Vector2D       poseAgente,balon;
 
-	posesion      = false;
-	disPermisible = 1.0;
+    PossessionBall regreso;
 
-	if( ballVisible )
-	{
-		if( ballDis <= disPermisible )
-		{
-			// cout<<"PROPIA....*****"<<endl;
-			regreso = PROPIA;
-		}
-		else
-		{
-			//Obtenemos las coordenadas del balon
-			balon = Vector2D::fromPolar(ballDis,Deg2Rad(ballDir + angle + neck_dir));
+    x = world->me.pos.x;
+    y = world->me.pos.y;
+    angle = world->me.angle;
+    neck_dir = world->me.head_angle;
 
-			balon.x += x;
-			balon.y += y;
+    disPermisible = 1.0;
 
-			//Obtenemos las coordenadas de todos los agentes visibles
-			for( i=0; i< agentes->size();i++ )
-			{
-				poseAgente = Vector2D::fromPolar(agentes->at(i).dis,
-						Deg2Rad(agentes->at(i).dir
-								+angle
-								+neck_dir)
-				);
-				poseAgente.x += x;
-				poseAgente.y += y;
+    if( world->bitacoraBalon.size() != 0         &&
+            (world->time - world->bitacoraBalon.begin()->ciclo) <= 5 )
+    {
+        balon.x = world->bitacoraBalon.begin()->pos.x;
+        balon.y = world->bitacoraBalon.begin()->pos.y;
 
-				disToBall = sqrt((balon.x-poseAgente.x)*(balon.x-poseAgente.x) +
-						(balon.y-poseAgente.y)*(balon.y-poseAgente.y)
-				);
+        if(  world->bitacoraBalon.begin()->dis <= disPermisible )
+        {
+            regreso = PROPIA;
+            posesion = true;
+            //cout<<world->time<<" PROPIA"<<endl;
+        }
 
-				if( agentes->at(i).team.compare("PokTaPok")==0 && disToBall<=disPermisible)
-				{   // cout<<"EQUIPO"<<endl;
-				regreso =  EQUIPO;
-				i = agentes->size();
-				posesion = true;
-				}
-				else
-					if( agentes->at(i).team.compare("")==0 && disToBall<=disPermisible)
-					{   // cout<<"DESCONOCIDA"<<endl;
-					regreso =  DESCONOCIDA;
-					posesion = true;
-					i = agentes->size();
-					}
-					else
-						if( agentes->at(i).team.compare("PokTaPok")!=0 && disToBall<=disPermisible)
-						{   // cout<<"RIVAL"<<endl;
-							regreso = RIVAL;
-							i = agentes->size();
-							posesion = true;
-						}
-			}
+        //pruebo para los amigos
+        for( i=0 ; i<11 && posesion == false ; i++ )
+        {
+            if( world->bitacoraAmigos[i].size()!= 0 )
+            {
+                poseAgente.x = world->bitacoraAmigos[i].begin()->pos.x;
+                poseAgente.y = world->bitacoraAmigos[i].begin()->pos.y;
 
-			if( posesion == false )
-			{// cout<<"SUELTA"<<endl;
-				regreso = SUELTA;
-			}
-		}
-	}
-	else
-	{   // cout<<"PERDIDA"<<endl;
-		regreso = PERDIDA;
-	}
+                disToBall = sqrt((balon.x-poseAgente.x)*(balon.x-poseAgente.x) +
+                                 (balon.y-poseAgente.y)*(balon.y-poseAgente.y)
+                                 );
 
-	return regreso;
+                if( disToBall <= disPermisible )
+                {
+                    regreso = EQUIPO;
+                    posesion = true;
+                    //cout<<world->time<<" EQUIPO "<<endl;
+                    i=11;
+                }
+            }
+        }
+
+        //pruebo para los rivales
+        for( i=0 ; i<11 && posesion == false; i++ )
+        {
+            if( world->bitacoraRivales[i].size()!= 0)
+            {
+                poseAgente.x = world->bitacoraRivales[i].begin()->pos.x;
+                poseAgente.y = world->bitacoraRivales[i].begin()->pos.y;
+
+                disToBall = sqrt((balon.x-poseAgente.x)*(balon.x-poseAgente.x) +
+                                 (balon.y-poseAgente.y)*(balon.y-poseAgente.y)
+                                 );
+
+                if( disToBall <= disPermisible )
+                {
+                    regreso = RIVAL;
+                    posesion = true;
+                    //cout<<world->time<<" RIVAL "<<endl;
+                    i=11;
+                }
+            }
+        }
+
+        if( posesion == false )
+        {
+            regreso = SUELTA;
+            //cout<<world->time<<" SUELTA "<<endl;
+        }
+    }
+    else
+    {
+        regreso = PERDIDA;
+        //cout<<world->time<<" PERDIDA "<<endl;
+    }
+    return regreso;
 }
 
-void searchBall(double lastDirection,
-               int idCono,
-               AgentCommand * command )
+
+void searchBall( AgentCommand * command,
+                 WorldModelV1 * world,
+                 SensorType sensor_type)
 {
-   double cono;
+    double lastDirection = world->bitacoraBalon.begin()->dir;
+    int    idCono        = world->me.view_mode_w;
 
-   switch(idCono)
-   {
-   case NARROW: cono = 60.0;  break;
-   case NORMAL: cono = 90.0; break;
-   case WIDE:   cono = 180.0; break;
-   default:     cono = 0.0;   break; // incorrecto, error
-   }
+    double cono;
 
-   if( lastDirection < 0.0 )
-       command->append_turn(-cono);
-   else
-       command->append_turn(cono);
+    switch(idCono)
+    {
+    case NARROW: cono = 60.0;  break;
+    case NORMAL: cono = 120.0; break;
+    case WIDE:   cono = 180.0; break;
+    default:     cono = 0.0;   break; // incorrecto, error
+    }
+
+    if( sensor_type== SENSOR_SEE)
+    {
+        if( lastDirection < 0.0  )
+        {
+            command->append_turn(-cono);
+            //command->append_turn(-15);
+        }
+        else
+        {
+            //command->append_turn(cono);
+            command->append_turn(15);
+        }
+    }
 }
 
 
@@ -773,13 +791,8 @@ void centerBall(bool   ballVisible,
 
 }
 
-bool amTheClosest( double ballDis,
-                   double ballDir,
-                   double x ,
-                   double y ,
-                   double angle ,
-                   double neck_dir,
-                   vector<Player> *agentes)
+bool amTheClosest( WorldModelV1 *world )
+
 {
     int      i,k,friends;
     bool     regreso;
@@ -787,67 +800,454 @@ bool amTheClosest( double ballDis,
     Vector2D balon;
     Vector2D poseAgente;
 
+    double x =  world->me.pos.x;
+    double y =  world->me.pos.y;
+    double angle =  world->me.angle;
+    double neck_dir =  world->me.head_angle;
 
-    balon = Vector2D::fromPolar(ballDis,Deg2Rad(ballDir + angle + neck_dir));
-
-    balon.x += x;
-    balon.y += y;
+    balon.x = world->bitacoraBalon.begin()->pos.x;
+    balon.y = world->bitacoraBalon.begin()->pos.y;
 
     k=0;
-    friends =0;
+    friends = 0;
 
-    for( i=0;i < agentes->size();i++ )
-           if( agentes->at(i).team.compare("PokTaPok")==0 )
-              friends++;
-
-    for( i=0;i < agentes->size();i++ )
+    for( i = 0; i<11; i++ )
+    {
+        if( world->bitacoraAmigos[i].size() != 0 )
         {
-         poseAgente = Vector2D::fromPolar(agentes->at(i).dis,
-                                          Deg2Rad(agentes->at(i).dir
-                                                  +angle
-                                                  +neck_dir)
-                                          );
-         poseAgente.x += x;
-         poseAgente.y += y;
+            friends++;
 
-         disToBall = sqrt((balon.x-poseAgente.x)*(balon.x-poseAgente.x) +
-                          (balon.y-poseAgente.y)*(balon.y-poseAgente.y)
-                         );
+            poseAgente.x = world->bitacoraAmigos[i].begin()->pos.x;
+            poseAgente.y = world->bitacoraAmigos[i].begin()->pos.y;
 
-         if( agentes->at(i).team.compare("PokTaPok")==0 )
-         {
-        	 if( disToBall < ballDis )
-        		 i=agentes->size();
-        	 else
-        		 k++;
-         }
+            disToBall = sqrt((poseAgente.x-balon.x)*(poseAgente.x-balon.x) +
+                             (poseAgente.y-balon.y)*(poseAgente.y-balon.y)
+                             );
 
+            if( (world->time - world->bitacoraAmigos[i].begin()->ciclo) >= 10 ||
+                    world->bitacoraBalon.begin()->dis < disToBall)
+                k++;
         }
+    }
 
-    if( agentes->size() == 0 || friends == 0 || k == friends )
-         regreso = true;
-      else
-         regreso = false;
+    if( friends == 0 || ( friends!=0 && friends==k  )  )
+    {
+        regreso = true;
+    }
+    else
+        regreso = false;
 
     return regreso;
 }
 
-void radar( double neck_dir,
-		    AgentCommand *command )
+void radar(double neck_dir,
+           AgentCommand * command,
+           SensorType sensor_type)
 {
-	static bool aux;
-	double      aumento = 45.0;
+    static bool aux;
+    double aumento = 40.0;
 
-	if( neck_dir + aumento > 90.0 )
-	   aux = true;
+    if( neck_dir == 90  || (neck_dir + aumento) >= 90.0 )
+        aux=true;
 
-	if( neck_dir - aumento < -90.0 )
-	   aux = false;
+    if( neck_dir == -90 || (neck_dir - aumento) <= -90.0 )
+        aux=false;
 
-	if( neck_dir < 90.0 && aux == false )
-       command->append_turn_neck(aumento);
 
-	if( neck_dir >-90.0 && aux == true)
-	   command->append_turn_neck(-aumento);
+    if( neck_dir < 90.0 && aux == false && sensor_type== SENSOR_SEE )
+    {
+        command->append_turn_neck( aumento );
+    }
+
+    if( neck_dir >-90.0 && aux == true && sensor_type== SENSOR_SEE )
+    {
+        command->append_turn_neck( -aumento );
+    }
 }
 
+
+int aQuienPasar(WorldModelV1 *world)
+{
+    int i;
+    int indice;
+    double min = 9999.9999;
+
+    indice = -1;
+
+    for(i=0;i<11;i++)
+    {
+        if( world->bitacoraAmigos[i].size()!=0 &&
+           (world->time - world->bitacoraAmigos[i].begin()->ciclo) < 5 &&
+           (world->me.unum - 1) != i
+          )
+        {
+            if( world->bitacoraAmigos[i].begin()->dis < min )
+            {
+                cout<<"distancia amigo "<<i<<": "<<world->bitacoraAmigos[i].begin()->dis<<endl;
+                indice = i;
+            }
+        }
+    }
+
+    return indice;
+}
+
+
+void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModelV1 *world,AgentCommand *command)
+{
+    Vector2D puntoReferencia;  //Coordenadas de la bandera del centro de la porteria
+    double yTarget;
+
+    puntoReferencia.x =-52.5;   // coordenadas de la bandera del centro de la porteria
+    puntoReferencia.y = 0.0;
+
+    if(  (world->time - world->bitacoraBalon.begin()->ciclo) < 3 ) // si esta reciente los datos del balon
+    {
+
+        //xTarget = -48.0; // Linea donde quieres que se desplace el portero
+
+        if(world->bitacoraBalon.begin()->pos.x != puntoReferencia.x)
+            yTarget = ( (world->bitacoraBalon.begin()->pos.y - puntoReferencia.y) /
+                        (world->bitacoraBalon.begin()->pos.x - puntoReferencia.x)
+                        ) * (xTarget - puntoReferencia.x);
+        else
+            if(world->bitacoraBalon.begin()->pos.y <0.0)
+                yTarget = -7.0;
+            else
+                yTarget = 7.0;
+
+
+        if(yTarget >= 7.0 )
+            yTarget = 7.0;
+
+        if(yTarget <= -7.0)
+            yTarget = -7.0;
+
+        if( (world->me.pos.y > (yTarget - 0.5)) && (world->me.pos.y < (yTarget + 0.5)) )
+            centerBall(world,command);
+        else
+            GoToXY2(xTarget, yTarget,0.5,velocidad,command,world); // utiliza dash() negativo
+    }
+
+    else  // no tengo datos recientes del balon, entonces lo busco
+    {
+        searchBall(command,world,sensor_type);
+    }
+}
+
+
+void GoToXY2 (   double   xTarget ,
+                 double   yTarget ,
+                 double   radio,
+                 Vector2D velocidad,
+                 AgentCommand * command,
+                 WorldModelV1 * world
+                 )
+{
+
+    double  disToPoint;
+    double  dirToPoint;
+    double  dashParameter;
+    double const dash_power_rate = 0.006, effort = 0.8;
+    //double const inertia_moment = 5.0;
+
+    double   x = world->me.pos.x;
+    double   y = world->me.pos.y;
+    double   angle = world->me.angle;
+    //double   neck_dir = world->me.head_angle;
+
+    //anguloCuerpo =  angle + angleCuelloCuerpo; // angleCuelloCuerpo se obtiene del sense_body
+    //consideramos el angle como el angulo del cuerpo
+
+    disToPoint = sqrt( (xTarget - x)*(xTarget - x)  + (yTarget - y)*(yTarget - y) );
+    dirToPoint = Rad2Deg(atan2( yTarget - y , xTarget - x));
+
+
+    if( disToPoint > radio )  // el agente no ha llegado al punto
+    {
+
+        if( angle >= 0.0)
+        {
+            if( yTarget >= 0.0 )
+            {
+                if( angle < 100.0 && angle > 80.0 ) // orientacion correcta
+                {
+                    velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y - angle) );
+                    dashParameter = (disToPoint - velocidad.x)  / ( dash_power_rate * effort );
+
+                    if( dashParameter > 100.0)
+                        dashParameter = 100.0;
+
+                    if( y - yTarget < 0.0 )
+                    {
+                        command->append_dash( dashParameter );    // caso 1
+
+                    }
+                    else // yTarget < y
+                    {
+                        command->append_dash( -dashParameter );   // caso 2
+
+                    }
+                }
+                else
+                {
+                    command->append_turn( 90 - angle  );
+                    command->append_turn_neck( angle - 90);
+                }
+            }
+            else  // yTarget < 0.0
+            {
+                if( angle > -100.0 && angle < -80.0 ) // orientacion correcta
+                {
+                    velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y - angle) );
+                    dashParameter = (disToPoint - velocidad.x)  / ( dash_power_rate * effort );
+
+                    if( dashParameter > 100.0)
+                        dashParameter = 100.0;
+
+                    if( y - yTarget < 0.0 )
+                    {    command->append_dash( dashParameter );    // caso 3
+
+                    }
+                    else // yTarget < y
+                    {
+                        command->append_dash( -dashParameter );   // caso 4
+
+                    }
+
+                }
+                else
+                {
+                    command->append_turn( -90 - angle );
+                    command->append_turn_neck( 90 + angle );
+                }
+            }
+        }
+        else   // angle < 0.0
+        {
+            if( yTarget >= 0.0 )
+            {
+                if( angle < 100.0 && angle > 80.0 ) // orientacion correcta
+                {
+                    velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y - angle) );
+                    dashParameter = (disToPoint - velocidad.x)  / ( dash_power_rate * effort );
+
+                    if( dashParameter > 100.0)
+                        dashParameter = 100.0;
+
+                    if( y - yTarget > 0.0 )
+                    {
+                        command->append_dash( dashParameter );    // caso 5
+
+                    }
+                    else // yTarget < y
+                    {
+                        command->append_dash( -dashParameter );   // caso 6
+
+                    }
+                }
+                else  // mal orientado
+                {
+                    command->append_turn( 90 - angle  );
+                    command->append_turn_neck( angle - 90 );
+                }
+            }
+            else  // yTarget < 0.0
+            {
+                if( angle > -100.0 && angle < -80.0 ) // orientacion correcta
+                {
+                    velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y - angle) );
+                    dashParameter = (disToPoint - velocidad.x)  / ( dash_power_rate * effort );
+
+                    if( dashParameter > 100.0)
+                        dashParameter = 100.0;
+
+                    if( y-yTarget > 0.0  )
+                    {
+                        command->append_dash( dashParameter );    // caso 7
+                        //cout<<"caso 7"<<endl;
+                    }
+                    else // yTarget < y
+                    {
+                        command->append_dash( -dashParameter );   // caso 8
+                        //cout<<"caso 8"<<endl;
+                    }
+                }
+                else  // mal orientado
+                {
+                    command->append_turn( -90 - angle );
+                    command->append_turn_neck( 90 + angle );
+                }
+            }
+        }
+    }
+    else
+    {
+        // el agente llego al punto
+    }
+
+}
+
+void centerBall( WorldModelV1 *world,
+                 AgentCommand * command)
+{
+    double precision = 10.0;
+
+    if( world->bitacoraBalon.begin()->dir <=  precision &&
+            world->bitacoraBalon.begin()->dir >= -precision  )
+    {
+        // Balon centrado en direccion al cuerpo
+    }
+    else
+    {   // Si neck_dir es menor al maximo-ball.dir, puede girar el cuello o
+        // si neck_dir es mayor al minimo-ball.dir, puede girar el cuello
+        if( world->me.head_angle <  90.0 - world->bitacoraBalon.begin()->dir &&
+                world->me.head_angle > -90.0 - world->bitacoraBalon.begin()->dir
+                )
+            command->append_turn_neck(world->bitacoraBalon.begin()->dir);
+        else
+        {
+            // Si no, alineamos el cuello con el cuerpo y
+            // luego giramos el cuerpo en ball.dir+neck_dir
+            align(world->me.head_angle,command);
+            command->append_turn(world->bitacoraBalon.begin()->dir +
+                                 world->me.head_angle);
+        }
+
+    }
+}
+
+
+void GoToXY (   double   xTarget ,
+		double   yTarget ,
+		double   radio,
+		Vector2D velocidad,
+                AgentCommand * command,
+                WorldModelV1 * world
+                )
+{
+
+    double  disToPoint;
+    double  dirToPoint;
+    double  angPermisible;
+    double  turnParameter;
+    double  dashParameter;
+    double const dash_power_rate = 0.006, effort = 0.8;
+    double const inertia_moment = 5.0;
+
+    double   x = world->me.pos.x;
+    double   y = world->me.pos.y;
+    double   angle = world->me.angle;
+    double   neck_dir = world->me.head_angle;
+
+    //anguloCuerpo =  angle + angleCuelloCuerpo; // angleCuelloCuerpo se obtiene del sense_body
+    //consideramos el angle como el angulo del cuerpo
+
+    disToPoint = sqrt( (xTarget - x)*(xTarget - x)  + (yTarget - y)*(yTarget - y) );
+    dirToPoint = Rad2Deg(atan2( yTarget - y , xTarget - x));
+
+    if( disToPoint > radio )  // el agente no ha llegado al punto
+    {
+
+        angPermisible = Rad2Deg( atan2( radio , disToPoint ) );
+        /*neck_dir?*/   turnParameter = dirToPoint - angle;// - neck_dir;
+        turnParameter = entre180( turnParameter );
+
+        if( angPermisible < turnParameter * 0.1  ||  disToPoint > 25.0 )
+            angPermisible = 25.0;
+
+        if( fabs(turnParameter) > angPermisible )  // el agente no esta bien alineado al punto
+        {
+
+            velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y) );
+            turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.normita()));
+            turnParameter = entre180(turnParameter);
+            //// cout<<"Giro TURN"<<endl;
+            command->append_turn(turnParameter);
+
+        }
+        else
+        {
+
+            velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y - angle) );
+            dashParameter = (disToPoint - velocidad.x)  / ( dash_power_rate * effort );
+
+            if( dashParameter > 100.0)
+                dashParameter = 100.0;
+            //// cout<<"Avanza DASH"<<endl;
+            command->append_dash( dashParameter );
+        }
+    }
+    else
+    {
+        // el agente llego al punto
+    }
+
+}
+
+
+
+void GoToXYSlow (   double   xTarget ,
+		double   yTarget ,
+		double   x,
+		double   y,
+		double   angle,
+        double   neck_dir,
+		double   radio,
+		Vector2D velocidad,
+		AgentCommand * command
+                )
+{
+
+    double  disToPoint;
+    double  dirToPoint;
+    double  angPermisible;
+    double  turnParameter;
+    double  dashParameter;
+    double const dash_power_rate = 0.006, effort = 0.8;
+    double const inertia_moment = 5.0;
+
+    //anguloCuerpo =  angle + angleCuelloCuerpo; // angleCuelloCuerpo se obtiene del sense_body
+    //consideramos el angle como el angulo del cuerpo
+
+    disToPoint = sqrt( (xTarget - x)*(xTarget - x)  + (yTarget - y)*(yTarget - y) );
+    dirToPoint = Rad2Deg(atan2( yTarget - y , xTarget - x));
+
+    if( disToPoint > radio )  // el agente no ha llegado al punto
+    {
+
+        angPermisible = Rad2Deg( atan2( radio , disToPoint ) );
+        /*neck_dir?*/   turnParameter = dirToPoint - angle;// - neck_dir;
+        turnParameter = entre180( turnParameter );
+
+        if( angPermisible < turnParameter * 0.1  ||  disToPoint > 25.0 )
+            angPermisible = 25.0;
+
+        if( fabs(turnParameter) > angPermisible )  // el agente no esta bien alineado al punto
+        {
+
+            velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y) );
+            turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.normita()));
+            turnParameter = entre180(turnParameter);
+            //cout<<"Giro TURN"<<endl;
+            command->append_turn(turnParameter);
+
+        }
+        else
+        {
+
+            velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y - angle) );
+            dashParameter = (disToPoint - velocidad.x)  / ( dash_power_rate * effort );
+
+            if( dashParameter > 100.0)
+                dashParameter = 100.0;
+            //cout<<"Avanza DASH"<<endl;
+            command->append_dash( 80 );
+        }
+    }
+    else
+    {
+        // el agente llego al punto
+    }
+
+}
