@@ -744,7 +744,7 @@ intersectLinePolygon(   std::vector<Point2D> const & polygon,
 }
 
 
-Vector2D
+Vector2D // Regresa el punto en el segmento p1p2 que es más cercano a q
 closestPointInSegment( Vector2D const & q,
 					   Vector2D const & p1, // primer punto que define el segmento
 					   Vector2D const & p2 // segundo punto que define el segmento

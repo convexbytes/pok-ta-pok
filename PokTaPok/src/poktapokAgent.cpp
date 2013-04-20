@@ -106,10 +106,11 @@ void PokTaPokAgentV1::onPrep()
         case KICK_OFF_L :
         case KICK_IN_L  :
         case FREE_KICK_L:
+        case INDIRECT_FREE_KICK_L:
         case CORNER_KICK_L: ballStaticBehaviorSideL();
             break;
 
-        case INDIRECT_FREE_KICK_L: break;
+
         case BACK_PASS_L: break;
 
         case OFFSIDE_L: break;
@@ -117,10 +118,11 @@ void PokTaPokAgentV1::onPrep()
         case KICK_OFF_R :
         case KICK_IN_R  :
         case FREE_KICK_R:
+        case INDIRECT_FREE_KICK_R:
         case CORNER_KICK_R: ballStaticBehaviorSideR();
             break;
 
-        case INDIRECT_FREE_KICK_R: break;
+
         case BACK_PASS_R: break;
         case OFFSIDE_R: break;
         }
@@ -186,28 +188,12 @@ void PokTaPokAgentV1::ataque()
 	else if( amTheClosest(world) )
 	{
 
-		//if( world->bitacoraBalon.begin()->vel.normita() < BALL_NULL_VEL )
-
-		//{
-		//	GoToXY( world->bitacoraBalon.begin()->pos.x, world->bitacoraBalon.begin()->pos.y,
-		//			world->me.pos.x, world->me.pos.y,
-		//			world->me.angleDeg(),
-		//			world->me.headAngleDeg(),
-		//			1.0,
-		//			agent_vel,
-		//			command);
-
-		//}
-		//else
-		//{
-			ball_interception->call( command );
-			radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
-		//}
+		ball_interception->call( command );
+		radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
 	}
 	else
 	{
 		attackPositioning(); // ataque pasivo
-		//radar world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
 	}
 }
 
@@ -231,28 +217,14 @@ void PokTaPokAgentV1::defensa()
 	}
 	else if( amTheClosest(world) )
 	{
-		//if( world->bitacoraBalon.begin()->vel.normita() < BALL_NULL_VEL )
 
-		//{
-		//	GoToXY( world->bitacoraBalon.begin()->pos.x, world->bitacoraBalon.begin()->pos.y,
-		//			world->me.pos.x, world->me.pos.y,
-		//			world->me.angleDeg(),
-		//			world->me.headAngleDeg(),
-		//			1.0,
-		//			agent_vel,
-		//			command);
+		ball_interception->call( command );
+		radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
 
-		//}
-		//else
-		//{
-			ball_interception->call( command );
-			radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
-		//}
 	}
 	else
 	{
 		defencePositioning(); // defensa
-		//radar world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
 	}
 }
 
@@ -543,8 +515,8 @@ void PokTaPokAgentV1::balonPropio()
 
 	// Calculamos para la acción shoot
 	p = world->me.pos;
-	Vector2D shoot_target_up  ( 52.5, -7 );
-	Vector2D shoot_target_down( 52.5, 7  );
+	Vector2D shoot_target_up  ( 52.5, -5 );
+	Vector2D shoot_target_down( 52.5, 5  );
 	if( world->me.side == 'r' )
 	{
 		p.x = -p.x;
@@ -698,16 +670,17 @@ void PokTaPokAgentV1::balonPropio()
 		command->append_kick( kick_vec.x, kick_vec.y );
 		break;
 	case SHOOT:
-		kick_vec =
-				PasePunto( choosen_action.target.x,
-						choosen_action.target.y,
-						world->me.pos.x,
-						world->me.pos.y,
-						world->me.angleDeg(),
-						3.0,     // velocidad final
-						world->bitacoraBalon.begin()->pos.x,
-						world->bitacoraBalon.begin()->pos.y);
-		command->append_kick( kick_vec.x, kick_vec.y );
+		//kick_vec =
+		//		PasePunto( choosen_action.target.x,
+		//				choosen_action.target.y,
+		//				world->me.pos.x,
+		//				world->me.pos.y,
+		//				world->me.angleDeg(),
+		//				100.0,     // velocidad final
+		//				world->bitacoraBalon.begin()->pos.x,
+		//				world->bitacoraBalon.begin()->pos.y);
+		//command->append_kick( kick_vec.x, kick_vec.y );
+		shootAction();
 		break;
 	}
 
@@ -1696,5 +1669,84 @@ PokTaPokAgentV1::passAction()
 void
 PokTaPokAgentV1::shootAction()
 {
+	double const GOALIE_INFO_EXPIRE_TIME = 6;
+
+	static int last_call = -1;
+
+	SeeSensor      & visual = sensor_h->last_see;
+
+	vector<Player>::const_iterator player_it;
+	vector<ObjetoBitacora>::const_iterator opp_it;
+
+	Vector2D post_top	( 52.5, -5);
+	Vector2D post_bottom( 52.5, 5);
+
+	Vector2D target;
+
+	Vector2D closest_point_top;
+	Vector2D closest_point_bot;
+	double 	 dist_top;
+	double 	 dist_bottom;
+
+	Vector2D goalie_pos;
+
+	Vector2D ball_pos = world->bitacoraBalon.begin()->pos;
+
+	Vector2D kick_vector;
+
+	bool 	 there_is_goalie;
+
+	if( world->me.side == 'r' )
+	{
+		post_top.x 	  = -post_top.x;
+		post_bottom.x = -post_bottom.x;
+	}
+
+	// buscamos al portero
+	there_is_goalie = false;
+	for( int i=0; i<11; ++i )
+		if( world->bitacoraRivales[i].empty() == false )
+			if( world->bitacoraRivales[i].begin()->goalie
+				&& world->time - world->bitacoraRivales[i].begin()->ciclo < GOALIE_INFO_EXPIRE_TIME
+				)
+			{
+				there_is_goalie = true;
+				goalie_pos = world->bitacoraRivales[i].begin()-> pos;
+			}
+
+
+	if( there_is_goalie )
+	{
+		closest_point_top = closestPointInSegment( goalie_pos, ball_pos, post_top );
+		closest_point_bot = closestPointInSegment( goalie_pos, ball_pos, post_bottom);
+		dist_top    = (closest_point_top - goalie_pos).normita();
+		dist_bottom = (closest_point_top - goalie_pos).normita();
+
+		if( dist_top > dist_bottom )
+			target = post_top;
+		else
+			target = post_bottom;
+	}
+	else
+	{
+		if(   (world->me.pos - post_top).normita()
+			< (world->me.pos - post_bottom).normita() )
+			target = post_top;
+		else
+			target = post_bottom;
+	}
+
+	kick_vector =
+			PasePunto( target.x,
+					target.y,
+					world->me.pos.x,
+					world->me.pos.y,
+					world->me.angleDeg(),
+					3.0,     // velocidad final
+					world->bitacoraBalon.begin()->pos.x,
+					world->bitacoraBalon.begin()->pos.y);
+
+
+	command->append_kick( 100, kick_vector.y );
 
 }

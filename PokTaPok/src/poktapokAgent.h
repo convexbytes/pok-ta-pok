@@ -90,7 +90,10 @@ private:
 
     void shootAction();
 
-    double passProb( Vector2D const & target_pos );
+
+    double 		 passProb( Vector2D const & target_pos );
+
+    ActionOption chooseAction( std::vector<ActionOption> const & actions );
 };
 
 
