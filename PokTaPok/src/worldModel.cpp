@@ -351,7 +351,7 @@ void WorldModelV1::actualizarBitacora()
 							else
 								obj_vel = NDEF_NUM;
 							playerAux.vel = obj_vel;
-							//std::cout << "pushed rival" << playerAux.num << " " << player[i].team << std::endl;
+
 							if( bitacoraRivales[playerAux.num-1].size() <= TAM_BITACORA )   // si el tamaño de la bitácora es menor a 10 ciclos atras
 			                    bitacoraRivales[playerAux.num-1].push_front( playerAux );   // introducimos los datos en la Fila.
 		                    else                                 // si es más de 10
@@ -570,7 +570,7 @@ fromChgToVel(  Vector2D const & player_pos, // Posición del jugador, absoluta.
 
 	if( obj_dist == 0 )
 	{
-		std::cerr << "Warning. fromChgToVel(): zero division." << std::endl;
+		//std::cerr << "Warning. fromChgToVel(): zero division." << std::endl;
 		return vtmp;
 	}
 	etmp /= obj_dist;

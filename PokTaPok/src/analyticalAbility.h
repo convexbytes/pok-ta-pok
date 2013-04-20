@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cmath>
 #include <iostream>
+#include <cstring>
 
 class BallInterception;
 class FreezeBall;
@@ -216,6 +217,27 @@ void GoToXY (   double   xTarget ,
                 AgentCommand * command,
                 WorldModelV1 * world
                 );
+
+bool compararObjetivo( GameData * game_data,
+		               Vector2D miPunto,
+		               float miProb,
+		               WorldModelV1 *world);
+
+bool escucharObjetivo ( GameData 	   * game_data,
+                       Vector2D pointTarget,
+                       WorldModelV1 *world,
+                       AgentCommand *command);
+
+void comunicarObjetivo(Vector2D pointTarget,
+                       float   prob,
+                       WorldModelV1 *world,
+                       AgentCommand *command );
+
+int chooseFriendToHear(Vector2D pointTarget,WorldModelV1 * world);
+
+string convertToString(Vector2D pointTarget , float prob);
+
+float * convertToDouble( string mensaje );
 
 #endif //ANALYTICAL_ABILITY_H
 

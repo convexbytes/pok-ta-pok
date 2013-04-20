@@ -113,36 +113,46 @@ void Parser::parse_hear( char *message )
     char  * subcad = NULL;
     int 	time;
     int 	aux_num;
-    //int 	angle;
-    char 	aux_str[256];
+    int 	angle;
+    char 	aux_str[256];  // ERROR, cuando se cambia el tamaño a 512
+
     PlayModeHearable play_mode; // "playmode" que podemos escuchar del referee
     
     subcad = strstr( message,"(hear" ); //Buscamos el inicio del hear
     if( subcad == NULL ) return; //Si no encuentra algún hear, salimos
-    subcad = move_to_next_word( subcad );
+    subcad = move_to_next_word( subcad ); //El apuntador se mueve a la siguiente palabra
     sscanf(subcad, "%d", &time );
 
     subcad = move_to_next_word( subcad );
+
     if( isdigit( *subcad ) || *subcad == '-' )
     {
         // Aquí hay un problema de parseo, segmentation fault
         //Si nos metemos aquí, quiere decir que recibimos un ángulo y el sender es: our | opp
-        /*
+
         sscanf( subcad, "%d", &angle );
         subcad = move_to_next_word( subcad );
-        strncpy(aux_str, subcad, 3);
-        if( strcmp( aux_str, "our" ) )
+
+
+        strncpy(aux_str, subcad, 3);  // copia en aux_str los 3 siguientes caracteres de subcad
+
+        aux_str[3] = '\0';
+
+        if( strcmp( aux_str, "our" ) == 0 )
         {
             subcad = move_to_next_word( subcad );
             sscanf( subcad, "%d", &aux_num ); //obtenemos el unum
             subcad = move_to_next_word( subcad );
-            sscanf( subcad, "%s", aux_str );	//extraemos el mensaje antes del paréntesis que cierra, incluyendo las comillas
-            aux_str[ strlen( aux_str) -1 ] = '\0'; //quitamos el paréntesis
+
+
+            //extraemos el mensaje antes del paréntesis que cierra, incluyendo las comillas
+            sscanf( subcad, " \"%[-0-9a-zA-Z ().+*/?<>_]\" ", aux_str );
+
             game_data->sensor_handler.hear_our(time, angle, aux_num, aux_str);
 
         }
         else if( strcmp( aux_str, "opp" ) )
-        {*/
+        {
             /*
             subcad = move_to_next_word( subcad );
             sscanf( subcad, "%d", &aux_num ); //obtenemos el unum
@@ -151,7 +161,7 @@ void Parser::parse_hear( char *message )
             aux_str[ strlen( aux_str) -1 ] = '\0'; //quitamos el paréntesis
             game_data->sensor_handler.hear_opp(time, angle, aux_num, aux_str);
             */
-        //}
+        }
         //else
 //            return;
     }
@@ -191,7 +201,6 @@ void Parser::parse_hear( char *message )
     }
 
 }
-
 void Parser::parse_init( char *message )
 {
     char * subcad;
@@ -844,7 +853,6 @@ void Parser::parse_see(char *message)
         }
             subcadena2=strstr(message,"(l l)");
         if (subcadena2 != NULL){
-
             lipar( subcadena2, LINE_LEFT);
         }
 
@@ -955,6 +963,7 @@ void Parser::parse_see(char *message)
         	has_goalie	 = false;
 
             player_ndata= 0; // Número de datos del jugador (distancia, dirección, ...)
+            name_ndata 	= 0;
             dist 		= NDEF_NUM;
             dir			= NDEF_NUM;
             distch   	= NDEF_NUM;
@@ -965,8 +974,7 @@ void Parser::parse_see(char *message)
             tackle   	= false;
             kick	    = false;
             n_readed	= 0;
-            name_ndata  = 0;
-            player_ndata = 0;
+
         	aux_cad = subcadena; // Usamos aux_cad para contar los parámetros
 
         	// Saltamos "(p"
@@ -975,12 +983,13 @@ void Parser::parse_see(char *message)
         	// Contamos cuántos datos del nombre tenemos
             while( *aux_cad != ')' )
             {
-                if( *aux_cad == ' ' )
+            	// El nombre podría contener espacios, saltamos todo el nombre
+            	// es decir, lo que está dentro de las comillas.
+            	if( *aux_cad == '\"')
+            		do aux_cad++; while( *aux_cad != '\"' );
+
+            	if( isspace( *aux_cad ) )
                     name_ndata++;
-                // El nombre podría contener espacios, saltamos todo el nombre
-                // es decir, lo que está dentro de las comillas.
-                if( *aux_cad == '\"')
-                    do aux_cad++; while( *aux_cad != '\"' );
 
                 aux_cad++;
             }
@@ -1233,7 +1242,7 @@ void Parser::parse_see(char *message)
                 break;
             case 6: // " <DIST> <DIR> <DISTCH> <DIRCH> <BODY> <HEAD>)" : space = 6
             	sscanf( subcadena,
-            			"%lf %lf %lf %lf %lf %lf %n",
+            			"%lf %lf %lf %lf %lf",
             			&dist, &dir, &distch, &dirch, &body, &head, &n_readed );
                 subcadena += n_readed;
                 break;
@@ -2648,25 +2657,24 @@ PlayModeHearable Parser::parse_play_mode(char *char_play_mode, int & num )
     else if (strcmp(char_play_mode, "penalty_draw")==0)
         return PENALTY_DRAW;
     //Aquí inician los que tienen incrustado algún número.
-    /*y aqui lacagamos en algo, por el momento ignoramos los número incrustados
-     * */
+    //y aqui lacagamos en algo
     else
 
-        if( strstr(char_play_mode, "goal_l") )
+        if( strstr(char_play_mode, "goal_l_") )
         {
             //char_play_mode = strstr(char_play_mode, "goal_l_");
             //sscanf(char_play_mode, "goal_l_%d", &aux_num );
             //num = aux_num;
             return GOAL_L;
         }
-        else if( strstr( char_play_mode, "goal_r"))
+        else if( strstr( char_play_mode, "goal_r_"))
         {
             //char_play_mode = strstr(char_play_mode, "goal_l_");
             //sscanf(char_play_mode, "goal_r_%d", &aux_num );
             //num = aux_num;
             return GOAL_R;
         }
-        else if( strstr( char_play_mode, "yellow_card_l"))
+        else if( strstr( char_play_mode, "yellow_card_l_"))
         {
             //char_play_mode = strstr(char_play_mode, "yellow_card_l_");
             //sscanf(char_play_mode, "yellow_card_l_%d", &aux_num );
@@ -2694,7 +2702,6 @@ PlayModeHearable Parser::parse_play_mode(char *char_play_mode, int & num )
             //num = aux_num;
             return RED_CARD_R;
         }
-
     else
             return (PlayModeHearable)0; //Regresamos cero en caso de algún error
 }

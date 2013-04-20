@@ -15,6 +15,12 @@
 #define TEAM_NAME "PokTaPok"
 #endif
 
+enum MasterStatus
+{
+  DEFENSA = 0,
+  ATAQUE
+};
+
 enum PossessionBall
 {
 
@@ -50,6 +56,7 @@ public:
     ViewModeWidth	last_recv_visual_w;
 
     PossessionBall  possession_ball;
+    MasterStatus    master_status;
 
     // Acerca del cuerpo
     double stamina;

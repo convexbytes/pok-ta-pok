@@ -351,7 +351,7 @@ public:
 class HearOppSensor : public HearSensor
 {
 public:
-    HearOppSensor() { sender = OUR; }
+    HearOppSensor() { sender = OPP; }
     int unum;
     string message;
     double dir;

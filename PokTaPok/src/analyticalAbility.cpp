@@ -2,6 +2,8 @@
 #include "gameData.h"
 #include "worldModel.h"
 
+#include <cstring>
+
 #ifndef NDEF_NUM
 #define NDEF_NUM -999999.0 // Fuera del rango de cualquier información provista por el servidor.
 #endif
@@ -432,7 +434,9 @@ BallInterception::computePointTurn()
 {
 	state = COMPUTE_POINT_TURN;
 	double const PERMISIVE_ANGLE = 10;
+
 	double angle_deg, angle_min_deg, angle_max_deg;
+
 
 	if(   game_data->command_commited.turn_is_set()
 			&& game_data->command_commited.turn_angle == turn_param
@@ -530,7 +534,8 @@ BallInterception::go()
 {
 	state = GO;
 	bool point_reached =
-			(world->me.pos - p_mid_s).normita() <= 0.7;
+			(world->me.pos - p_mid_s).normita() <= 1.0;
+	double const DIR_CHANGE_THRESHOLD = 5;
 	if( visual->ball_is_visible && visual->ball.dis < 1)
 	{
 		freeze();
@@ -654,7 +659,7 @@ PossessionBall whoHasTheBall(WorldModelV1 *world)
     angle = world->me.angle;
     neck_dir = world->me.head_angle;
 
-    disPermisible = 1.0;
+    disPermisible = 2.0;
 
     if( world->bitacoraBalon.size() != 0         &&
             (world->time - world->bitacoraBalon.begin()->ciclo) <= 5 )
@@ -755,7 +760,7 @@ void searchBall( AgentCommand * command,
         else
         {
             //command->append_turn(cono);
-            command->append_turn(15);
+            command->append_turn( 60 );
         }
     }
 }
@@ -883,7 +888,7 @@ int aQuienPasar(WorldModelV1 *world)
         {
             if( world->bitacoraAmigos[i].begin()->dis < min )
             {
-                cout<<"distancia amigo "<<i<<": "<<world->bitacoraAmigos[i].begin()->dis<<endl;
+                //cout<<"distancia amigo "<<i<<": "<<world->bitacoraAmigos[i].begin()->dis<<endl;
                 indice = i;
             }
         }
@@ -1242,7 +1247,7 @@ void GoToXYSlow (   double   xTarget ,
             if( dashParameter > 100.0)
                 dashParameter = 100.0;
             //cout<<"Avanza DASH"<<endl;
-            command->append_dash( 80 );
+            command->append_dash( 70 );
         }
     }
     else
@@ -1250,4 +1255,494 @@ void GoToXYSlow (   double   xTarget ,
         // el agente llego al punto
     }
 
+}
+
+
+
+// Convierte a numeros dobles el mensaje recibido, es decir mensaje = x,y,prob
+float * convertToDouble( string mensaje )
+{
+    const char   *subcadena;
+    int x,y;
+    float prob;
+    bool error;
+
+    static float arreglo[3];
+
+    subcadena = mensaje.c_str();
+
+    if( *subcadena == '+' )
+    {
+        subcadena++;
+        sscanf(subcadena,"%d",&x);   //obtenemos el 1er dato (+,x)
+
+        if( isdigit(*(subcadena+1) ) )
+            subcadena+=2;
+        else
+            subcadena++;
+
+        if( *subcadena == '+' )
+        {
+            subcadena++;
+            sscanf(subcadena,"%d",&y);   //obtenemos el 2do dato (+,y)
+
+            if( isdigit(*(subcadena+1) ) )
+                subcadena+=2;
+            else
+                subcadena++;
+
+            if(*subcadena == '.')
+               sscanf(subcadena,"%f",&prob);  //obtenemos el 3er dato (prob)
+            else
+                error = true;
+        }
+        else
+        {
+            if( *subcadena == '-')
+            {
+                sscanf(subcadena,"%d",&y); //obtenemos el 2do dato (-,y)
+                subcadena++;  // brinco el signo
+
+                if( isdigit(*(subcadena+1) ) )
+                    subcadena+=2;
+                else
+                    subcadena++;
+
+                if(*subcadena == '.')
+                    sscanf(subcadena,"%f",&prob);  //obtenemos el 3er dato (prob)
+                else
+                    error = true;
+            }
+            else
+            {
+                // ERROR, mensaje fuera de formato
+                error = true;
+            }
+        }
+    }
+    else  // el primer dato no fue positivo
+    {
+        if( *subcadena == '-')
+        {
+            sscanf(subcadena,"%d",&x);         //obtenemos el 1er dato (-,x)
+
+            subcadena++;  // me brinco el signo
+
+            if( isdigit(*(subcadena+1) ) )
+                subcadena+=2;
+            else
+                subcadena++;
+
+            if( *subcadena == '+' )
+            {
+                subcadena++;
+                sscanf(subcadena,"%d",&y);   //obtenemos el 2do dato (+,y)
+
+                if( isdigit(*(subcadena+1) ) )
+                    subcadena+=2;
+                else
+                    subcadena++;
+
+                if(*subcadena == '.')
+                    sscanf(subcadena,"%f",&prob);  //obtenemos el 3er dato (prob)
+                else
+                    error = true;
+            }
+            else
+            {
+                if( *subcadena == '-')
+                {
+                    sscanf(subcadena,"%d",&y); //obtenemos el 2do dato (-,y)
+
+                    subcadena++;  // me brinco el signo
+
+                    if( isdigit(*(subcadena+1) ) )
+                        subcadena+=2;
+                    else
+                        subcadena++;
+
+                    if(*subcadena == '.')
+                        sscanf(subcadena,"%f",&prob);  //obtenemos el 3er dato (prob)
+                    else
+                        error = true;
+                }
+                else
+                {
+                    // ERROR, mensaje fuera de formato
+                    error = true;
+                }
+            }
+        }
+        else
+        {
+            // ERROR, mensaje fuera de formato
+            error = true;
+        }
+    }
+
+    if(error != true )
+    {
+        arreglo[0] = x;
+        arreglo[1] = y;
+        arreglo[2] = prob;
+        cout<<"Convertimos a valores: "<<x<<" "<<y<<" "<<prob<<endl;
+        cout<<"Enviados en el arreglo: "<<arreglo[0]<<" "<<arreglo[1]<<" "<<arreglo[2]<<endl;
+    }
+
+    return arreglo;
+}
+
+// Convierte las coordenadas del punto objetivo y la probabilidad en cadena
+string convertToString(Vector2D pointTarget , float prob)
+{
+    int x,y;
+    char cad1[5],cad2[5],cad3[5],cad4[5],cad5[5];
+    char mensaje[10];
+
+    for(int i=0 ; i<10 ; i++)
+    {
+        mensaje[i]='\0';
+    }
+
+    x= (int)pointTarget.x;
+    y= (int)pointTarget.y;
+
+    if( x<0 )
+    {
+        sprintf(cad1,"%d",x);  // obtengo el primer dato negativo
+
+        if( isdigit(cad1[2]) )  // veo si es de uno o dos digitos
+            cad1[3]='\0';
+        else
+            cad1[2]='\0';
+
+        if( y<0 )  // Y negativo
+        {
+            sprintf(cad2,"%d",y);  // obtengo el segundo dato
+
+            if( isdigit(cad2[2]) )  // veo si es de uno o dos digitos
+                cad2[3]='\0';
+            else
+                cad2[2]='\0';
+
+            sprintf(cad3,"%f",prob);   // obtengo la probabilidad
+
+            cad3[0]=cad3[1];
+            cad3[1]=cad3[2];
+            cad3[2]=cad3[3];
+            cad3[3]=cad3[4];
+            cad3[4]='\0';                // quito el caracter 0.
+
+            strcat(mensaje,cad1);
+            strcat(mensaje,cad2);
+            strncat(mensaje,cad3,10);
+        }  // termina el if del segundo dato negativo
+        else
+        {
+            if( y < 0 )
+            {
+                cad2[0]='+';
+                cad2[1]='\0';
+                sprintf(cad3,"%d",y);
+
+                if( isdigit(cad3[2]) )
+                    cad3[3]='\0';
+                else
+                    cad3[2]='\0';
+
+                sprintf(cad4,"%f",prob);
+
+                cad4[0]=cad4[1];
+                cad4[1]=cad4[2];
+                cad4[2]=cad4[3];
+                cad4[3]=cad4[4];
+                cad4[4]='\0';
+
+                strcat(mensaje,cad1);
+                strcat(mensaje,cad2);
+                strcat(mensaje,cad3);
+                strncat(mensaje,cad4,10);
+            }  // termina else del segundo dato positivo
+            else  // Y = 0
+            {
+                strcpy(cad2,"+00");
+                sprintf(cad3,"%f",prob);
+
+                cad3[0]=cad3[1];
+                cad3[1]=cad3[2];
+                cad3[2]=cad3[3];
+                cad3[3]=cad3[4];
+                cad3[4]='\0';
+
+                strcat(mensaje,cad1);
+                strcat(mensaje,cad2);
+                strcat(mensaje,cad3);
+            }  // termina else del segundo dato = 0
+        }
+    }// termina el if del primer dato positivo
+    else  // X > 0   o   X = 0
+    {
+        if( x>0 )
+        {
+            cad1[0] ='+';
+            cad1[1] ='\0';
+
+            sprintf(cad2,"%d",x);
+
+            if( isdigit(cad2[1]) )
+                cad2[2]='\0';
+            else
+                cad2[1]='\0';
+
+            if( y < 0 )
+            {
+                sprintf(cad3,"%d",y);
+
+                if( isdigit(cad3[2]) )
+                    cad3[3]='\0';
+                else
+                    cad3[2]='\0';
+
+                sprintf(cad4,"%f",prob);
+
+                cad4[0]=cad4[1];
+                cad4[1]=cad4[2];
+                cad4[2]=cad4[3];
+                cad4[3]=cad4[4];
+                cad4[4]='\0';
+
+                strcat(mensaje,cad1);
+                strcat(mensaje,cad2);
+                strcat(mensaje,cad3);
+                strncat(mensaje,cad4,10);
+            }
+            else  // Y > 0
+            {
+                if( y > 0)
+                {
+                    cad3[0]='+';
+                    cad3[1]='\0';
+
+                    sprintf(cad4,"%d",y);
+
+                    if( isdigit(cad4[1]) )
+                        cad4[2]='\0';
+                    else
+                        cad4[1]='\0';
+
+                    sprintf(cad5,"%f",prob);
+
+                    cad5[0]=cad5[1];
+                    cad5[1]=cad5[2];
+                    cad5[2]=cad5[3];
+                    cad5[3]=cad5[4];
+                    cad5[4]='\0';
+
+                    strcat(mensaje,cad1);
+                    strcat(mensaje,cad2);
+                    strcat(mensaje,cad3);
+                    strcat(mensaje,cad4);
+                    strncat(mensaje,cad5,10);
+                }
+                else // Y = 0
+                {
+                    strcpy(cad3,"+00");
+                    sprintf(cad4,"%f",prob);
+
+                    cad4[0]=cad4[1];
+                    cad4[1]=cad4[2];
+                    cad4[2]=cad4[3];
+                    cad4[3]=cad4[4];
+                    cad4[4]='\0';
+
+                    strcat(mensaje,cad1);
+                    strcat(mensaje,cad2);
+                    strcat(mensaje,cad3);
+                    strncat(mensaje,cad4,10);
+
+                }
+            }
+        }
+        else  // X = 0
+        {
+            strcpy(cad1,"+00");
+            if( y<0 )
+            {
+                sprintf(cad2,"%d",y);
+
+                if( isdigit(cad2[2]) )
+                    cad2[3]='\0';
+                else
+                    cad2[2]='\0';
+
+                sprintf(cad3,"%f",prob);
+
+                cad3[0]=cad3[1];
+                cad3[1]=cad3[2];
+                cad3[2]=cad3[3];
+                cad3[3]=cad3[4];
+                cad3[4]='\0';
+
+                strcat(mensaje,cad1);
+                strcat(mensaje,cad2);
+                strncat(mensaje,cad3,10);
+
+            }
+            else
+            {
+                if( y>0 )
+                {
+                    cad2[0]='+';
+                    cad2[1]='\0';
+
+                    sprintf(cad3,"%d",y);
+
+                    if( isdigit(cad3[1]) )
+                        cad3[2]='\0';
+                    else
+                        cad3[1]='\0';
+
+                    sprintf(cad4,"%f",prob);
+
+                    cad4[0]=cad4[1];
+                    cad4[1]=cad4[2];
+                    cad4[2]=cad4[3];
+                    cad4[3]=cad4[4];
+                    cad4[4]='\0';
+
+                    strcat(mensaje,cad1);
+                    strcat(mensaje,cad2);
+                    strcat(mensaje,cad3);
+                    strncat(mensaje,cad4,10);
+
+                }
+                else // Y = 0
+                {
+                    strcpy(cad2,"+00");
+                    sprintf(cad3,"%f",prob);
+
+                    cad3[0]=cad3[1];
+                    cad3[1]=cad3[2];
+                    cad3[2]=cad3[3];
+                    cad3[3]=cad3[4];
+                    cad3[4]='\0';
+
+                    strcat(mensaje,cad1);
+                    strcat(mensaje,cad2);
+                    strncat(mensaje,cad3,10);
+                }
+            }
+        }
+    }
+
+    cout<<"Mensaje Final: "<<mensaje<<endl;
+    return mensaje;
+}
+
+// Devuelve el unum del agente amigo al cual debe de oir
+// Elige al agente más cercano al objetivo que tiene destinado
+int chooseFriendToHear(Vector2D pointTarget,WorldModelV1 * world)
+{
+    double dist_min;
+    double distToObjetive;
+    int    closestAgent,i;
+
+    closestAgent = -1;
+    dist_min = 9999.9999;
+
+    for( i=0 ; i<11 ; i++ )
+    {
+        if(  world->bitacoraAmigos[i].size()!= 0 &&
+            (world->time - world->bitacoraAmigos[i].begin()->ciclo) < 2 )
+        {
+            distToObjetive = sqrt( (pointTarget.x - world->bitacoraAmigos[i].begin()->pos.x)*(pointTarget.x - world->bitacoraAmigos[i].begin()->pos.x) +
+                                   (pointTarget.y - world->bitacoraAmigos[i].begin()->pos.y)*(pointTarget.y - world->bitacoraAmigos[i].begin()->pos.y)
+                                   );
+
+            if( distToObjetive < dist_min )
+            {
+                closestAgent = i+1;
+                dist_min = distToObjetive;
+            }
+        }
+    }
+
+    return closestAgent;
+}
+
+// Recibe como parametros las coordenadas de su objetivo y la probabilidad de
+// realizarlo, convierte a cadena esos datos y comunica el mansaje con el comando SAY
+void comunicarObjetivo(Vector2D pointTarget,
+                       float   prob,
+                       WorldModelV1 *world,
+                       AgentCommand *command )
+{
+    string mensaje;
+    mensaje = convertToString(pointTarget,prob);
+    command->append_say(mensaje);
+    cout<<"Grito en cadena: "<<mensaje<<endl;
+}
+
+// Elige que agente escuchar, y aplica el comando attentionto para oir el mensaje
+bool escucharObjetivo ( GameData 	   * game_data,
+                       Vector2D pointTarget,
+                       WorldModelV1 *world,
+                       AgentCommand *command)
+{
+    int amigo;
+    bool regreso;
+
+    amigo = chooseFriendToHear(pointTarget,world);
+
+    if( amigo != -1 )
+    {
+        command->append_attentionto( ATTENTION_OUR , amigo );
+        regreso = true;
+        cout<<"Escucho al agente con el numero: "<<amigo<<endl;
+        cout<<"Que envio: "<< game_data->sensor_handler.last_hear_our.message<<endl;
+    }
+    else
+    {
+        cout<<"No ve ningun agente...."<<endl;
+        regreso = false;
+    }
+    return regreso;
+}
+
+// Regresa un false, si el objetivo es similar al del agente amigo y si su probabilidad es menor
+bool compararObjetivo( GameData * game_data,Vector2D miPunto, float miProb, WorldModelV1 *world)
+{
+    float * p;
+    float x,y,prob;
+    bool   regreso;
+
+
+    p = convertToDouble( game_data->sensor_handler.last_hear_our.message );
+
+    x    = p[0];
+    y    = p[1];
+    prob = p[2];
+
+    cout<<"Comparo el objetivo mio con: "<<x<<" "<<y<<" "<<prob<<endl;
+
+    if( (((x + 1.0) <= (miPunto.x + 1.0) && (x + 1.0) >= (miPunto.x - 1.0)) ||
+         ((x - 1.0) <= (miPunto.x + 1.0) && (x - 1.0) >= (miPunto.x - 1.0)) )
+            &&
+            (((y + 1.0) <= (miPunto.y + 1.0) && (y + 1.0) >= (miPunto.y - 1.0)) ||
+             ((y - 1.0) <= (miPunto.y + 1.0) && (y - 1.0) >= (miPunto.y - 1.0)) )
+            &&
+            miProb < prob )
+
+    {
+        // Las zonas son similares y es mas probable que cumpla el objetivo el
+        // agente amigo
+        regreso = false;
+    }
+    else
+    {
+        // miPunto es bueno, eligo realizar objetivo
+        regreso = true;
+    }
+
+    return regreso;
 }

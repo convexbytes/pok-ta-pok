@@ -8,8 +8,8 @@
 #define TEAM_NAME "PokTaPok"
 #endif // TEAM_NAME
 
-#define POT_FIELD_EXPIRE_TIME 10
-#define PASS_OPTION_EXPIRE_TIME 10
+#define POT_FIELD_EXPIRE_TIME 5
+#define PASS_OPTION_EXPIRE_TIME 5
 
 class PokTaPokAgentV1;
 class BallInterception;
@@ -49,6 +49,12 @@ private:
     Vector2D  			goal_r;
     Vector2D			goal_pos;
 
+
+    // Para posicionar
+    Vector2D			 last_voronoi_centroid;
+    std::vector<Point2D> voronoi_cell;
+
+
     void update();
 
     void onInitial();
@@ -60,16 +66,34 @@ private:
     void balonPropio();
     void balonEquipo();
     void balonRival();
-    void balonDesconocido();
     void balonSuelto();
     void balonPerdido();
 
+
+    void ballStaticBehaviorSideL();
+    void ballStaticBehaviorSideR();
+
+
+
+    void constructVoronoi();
     void voronoiPositioning();
+    void attackPositioning(); // Voronoi con campos potenciales
+    void defencePositioning();
 
     void goalieBehavior();
 
-    void defence();
+    void defensa();
+
+    void ataque();
+
+    void passAction();
+
+    void shootAction();
+
+    double passProb( Vector2D const & target_pos );
 };
+
+
 
 enum ActionType
 {
@@ -86,12 +110,11 @@ public:
 	double 	 	prob;
 	ActionType 	action_type;
 
-
-
 	static bool distanceLowerThan( ActionOption i, ActionOption j )
 	{
 		return i.dist_to_goal < j.dist_to_goal;
 	}
 
 };
+
 #endif // POKTAPOK_AGENT_H

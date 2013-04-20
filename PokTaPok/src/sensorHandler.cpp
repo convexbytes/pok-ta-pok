@@ -79,7 +79,6 @@ void SensorHandler::see_player( string team, int unum, bool goalie,
 	player.point_dir = point_dir;
 	player.on_tackle = on_tackle;
 	player.on_kick = on_kick;
-	//player.print();
 	this->last_see.add_player( player );
 }
 
@@ -167,7 +166,7 @@ void SensorHandler::hear_our(int time, int dir, int unum, string msg)
 void SensorHandler::hear_opp(int time, int dir, int unum, string msg)
 {
     last_sensor_type = SENSOR_HEAR;
-    last_hear.time = last_hear_our.time = time;
+    last_hear.time = last_hear_opp.time = time;
     last_hear.sender = OPP;
     last_hear_opp.dir = dir;
     last_hear_opp.unum = unum;
