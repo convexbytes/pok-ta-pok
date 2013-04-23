@@ -72,6 +72,7 @@ public:
 	Vector2D pos;
 	double   dis;
 	double   dir;
+	double	 dir_from_body;
 	int      ciclo;
 	Vector2D vel;
 	bool     goalie;
@@ -106,6 +107,8 @@ public:
     int      predictCycles   ( deque <ObjetoBitacora> const & fila , double distanciaObjetivo );
 
     bool 	predictBallCurrentVel( Vector2D * v );
+
+    Vector2D estimateBallCurrentVel();
 
 private:
 
