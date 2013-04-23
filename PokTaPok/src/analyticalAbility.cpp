@@ -47,6 +47,42 @@ DePrimera( Vector2D const & vt1, // Velocidad deseada en el siguiente ciclo
 }
 
 Vector2D
+dePrimera( Vector2D const & desired_vel,
+		   WorldModelV1 * world,
+		   AgentCommand * command )
+{
+
+	Vector2D ball_vel = world->estimateBallCurrentVel();
+	Vector2D C 		  = desired_vel - ball_vel;
+
+	double dir_diff;
+	double dis_diff;
+	double f;
+
+	double const KICK_POWER_RATE = 0.027;
+	double const KICKABLE_MARGIN = 0.7;
+
+	if( world->bitacoraBalon.empty() )
+	{
+		dir_diff = 0.0;
+		dis_diff = 0.0;
+	}
+	else
+	{
+		dir_diff = world->bitacoraBalon.begin()->dir_from_body;
+		dis_diff = world->bitacoraBalon.begin()->dis;
+	}
+
+	 f = KICK_POWER_RATE * (1 - 0.25*(dir_diff/180.0) -0.25*(dis_diff/KICKABLE_MARGIN) );
+
+	 C /= f;
+
+	 command->append_kick( C.normita(),
+			 	 	 	   entre180( Rad2Deg( C.angle() ) )
+			 	 	 	   );
+
+}
+Vector2D
 velToInterceptBall( Vector2D const & b, // Posición del balón
 		Vector2D const & p, // Posición del jugador
 		Vector2D const & v, // Velocidad del balón

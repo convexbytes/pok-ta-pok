@@ -28,6 +28,10 @@ DePrimera( Vector2D const & vt1, // Velocidad deseada en el siguiente ciclo
 		   );
 
 Vector2D
+dePrimera( Vector2D const & out_vel,
+		   WorldModelV1 * world,
+		   AgentCommand * command );
+Vector2D
 velToInterceptBall( Vector2D const & b, // Posición del balón
 		Vector2D const & p, // Posición del jugador
 		Vector2D const & v, // Velocidad del balón

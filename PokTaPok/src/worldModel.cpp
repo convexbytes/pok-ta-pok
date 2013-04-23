@@ -231,6 +231,7 @@ void WorldModelV1::actualizarBitacora()
 		     balonAux.pos.y += me.pos.y;                // coordenada global y del balón
 		     balonAux.dis    = ball.dis;            // distancia al balón
 		     balonAux.dir    = ball.dir;           // dirección hacia el balón
+		     balonAux.dir_from_body = ball.dir + me.headAngleDeg();
 		     balonAux.ciclo  = game_data->sensor_handler.last_see.time;		 // ciclo del sensado
 		     if( ball.dis_chg != NDEF_NUM && ball.dir_chg != NDEF_NUM )
 		     {   // Actualizamos la velocidad global en base a dir_chg y dis_chg
@@ -277,6 +278,7 @@ void WorldModelV1::actualizarBitacora()
 							playerAux.pos.y = coordenadas.y + me.pos.y;
 							playerAux.dis   = player[i].dis;
 							playerAux.dir   = player[i].dir;
+							playerAux.dir_from_body = player[i].dir + me.headAngleDeg();
 							playerAux.ciclo = game_data->sensor_handler.last_see.time;
 							playerAux.goalie= player[i].is_goalie;
 
@@ -329,6 +331,7 @@ void WorldModelV1::actualizarBitacora()
 							playerAux.pos.y = coordenadas.y + me.pos.y;
 							playerAux.dis   = player[i].dis;
 							playerAux.dir   = player[i].dir;
+							playerAux.dir_from_body = player[i].dir + me.headAngleDeg();
 							playerAux.ciclo = game_data->sensor_handler.last_see.time;
 							playerAux.goalie= player[i].is_goalie;
 
@@ -555,6 +558,84 @@ WorldModelV1::predictBallCurrentVel( Vector2D * v )
 	}
 }
 
+Vector2D
+WorldModelV1::estimateBallCurrentVel()
+{
+	Vector2D ball_vel;
+	Vector2D p1, p2;
+	int  	 t1, t2;
+	int 	 time_diff;
+	double const D = 0.94;
+
+	std::deque<ObjetoBitacora>::const_iterator ball_it;
+	if( bitacoraBalon.empty() )
+	{
+		ball_vel = 0.0;
+		return ball_vel;
+	}
+
+	time_diff = this->time - bitacoraBalon.begin()->ciclo;
+
+	if( time_diff == 0 )
+	{
+		ball_it = bitacoraBalon.begin();
+		if( ball_it->vel.x != NDEF_NUM && ball_it->vel.y != NDEF_NUM )
+		{
+			ball_vel =  ball_it->vel;
+		}
+		else
+		{
+			if( bitacoraBalon.size() >= 2 ) // uso dos posiciones para estimar la velocidad
+			{
+				p1 = ball_it->pos;
+				t1 = ball_it->ciclo;
+
+				ball_it++;
+
+				p2 = ball_it->pos;
+				t2 = ball_it->ciclo;
+
+				ball_vel = (p1-p2) / (double)(t1 - t2);
+			}
+			else
+			{
+				ball_vel = 0.0;
+			}
+		}
+	}
+	else	// no tengo info actual de la velocidad
+	{
+		ball_it = bitacoraBalon.begin();
+		if( ball_it->vel.x != NDEF_NUM && ball_it->vel.y != NDEF_NUM )
+		{
+			ball_vel =  ball_it->vel;
+		}
+		else
+		{
+			if( bitacoraBalon.size() >= 2 ) // uso dos posiciones para estimar la velocidad
+			{
+				p1 = ball_it->pos;
+				t1 = ball_it->ciclo;
+
+				ball_it++;
+
+				p2 = ball_it->pos;
+				t2 = ball_it->ciclo;
+
+				ball_vel = (p1-p2) / (double)(t1 - t2);
+			}
+			else
+			{
+				ball_vel = 0.0;
+			}
+		}
+
+		ball_vel *= std::pow(D, time_diff );
+	}
+
+	return ball_vel;
+
+}
 
 Vector2D
 fromChgToVel(  Vector2D const & player_pos, // Posición del jugador, absoluta.
