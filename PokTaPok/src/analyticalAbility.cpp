@@ -433,7 +433,7 @@ void
 BallInterception::computePointTurn()
 {
 	state = COMPUTE_POINT_TURN;
-	double const PERMISIVE_ANGLE = 10;
+	int const TURN_THRESHOLD = 10;
 
 	double angle_deg, angle_min_deg, angle_max_deg;
 
@@ -523,9 +523,16 @@ BallInterception::computePointTurn()
 				entre180( angle_deg - world->me.angleDeg() /* - world->me.headAngleDeg() */)
 				* (1.0 + param->inertia_moment * body->speed_amount ) ;
 
-		command->append_turn( turn_param );
-
-		turn_requested = true;
+		if( turn_param > TURN_THRESHOLD )
+		{
+			command->append_turn( turn_param );
+			turn_requested = true;
+		}
+		else
+		{
+			time_to_reach_s--;
+			go();
+		}
 	}
 }
 
