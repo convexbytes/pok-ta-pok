@@ -523,6 +523,7 @@ BallInterception::computePointTurn()
 				entre180( angle_deg - world->me.angleDeg() /* - world->me.headAngleDeg() */)
 				* (1.0 + param->inertia_moment * body->speed_amount ) ;
 
+		// if param too slow.....
 		command->append_turn( turn_param );
 
 		turn_requested = true;
@@ -754,13 +755,13 @@ void searchBall( AgentCommand * command,
     {
         if( lastDirection < 0.0  )
         {
-            command->append_turn(-cono);
+            command->append_turn(- (cono-1.0 ));
             //command->append_turn(-15);
         }
         else
         {
-            //command->append_turn(cono);
-            command->append_turn( 60 );
+            command->append_turn(cono - 1.0);
+            //command->append_turn( 60 );
         }
     }
 }
@@ -775,25 +776,6 @@ void align(double neckDir,
         {
          // el cuello esta alineado con el cuerpo
          }
-}
-
-void centerBall(bool   ballVisible,
-                double ballDir,
-                double lastAngleBall,
-                double neckDir,
-                ViewModeWidth cono,
-                AgentCommand * command)
-{
-           if( ballDir >= -10.0 && ballDir <= 10.0 )
-              {
-                  // Balon esta centrado en el cono de vision
-              }
-           else
-              {
-                  align(neckDir,command);
-                  command->append_turn(ballDir);
-              }
-
 }
 
 bool amTheClosest( WorldModelV1 *world )
@@ -816,7 +798,7 @@ bool amTheClosest( WorldModelV1 *world )
     k=0;
     friends = 0;
 
-    for( i = 0; i<11; i++ )
+    for( i = 1; i<11; i++ ) // no toma en cuenta al portero
     {
         if( world->bitacoraAmigos[i].size() != 0 )
         {
@@ -882,7 +864,7 @@ int aQuienPasar(WorldModelV1 *world)
     for(i=0;i<11;i++)
     {
         if( world->bitacoraAmigos[i].size()!=0 &&
-           (world->time - world->bitacoraAmigos[i].begin()->ciclo) < 5 &&
+           (world->time - world->bitacoraAmigos[i].begin()->ciclo) < 3 &&
            (world->me.unum - 1) != i
           )
         {
@@ -898,12 +880,20 @@ int aQuienPasar(WorldModelV1 *world)
 }
 
 
-void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModelV1 *world,AgentCommand *command)
+void porteroLine( double xTarget,
+		          Vector2D velocidad,
+		          SensorType sensor_type,
+		          WorldModelV1 *world,
+		          AgentCommand *command)
 {
     Vector2D puntoReferencia;  //Coordenadas de la bandera del centro de la porteria
     double yTarget;
 
-    puntoReferencia.x =-52.5;   // coordenadas de la bandera del centro de la porteria
+    if( world->me.side == 'l')
+        puntoReferencia.x =-52.5;   // coordenadas de la bandera del centro de la porteria
+    else
+    	puntoReferencia.x = 52.5;
+
     puntoReferencia.y = 0.0;
 
     if(  (world->time - world->bitacoraBalon.begin()->ciclo) < 3 ) // si esta reciente los datos del balon
@@ -911,15 +901,16 @@ void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,W
 
         //xTarget = -48.0; // Linea donde quieres que se desplace el portero
 
-        if(world->bitacoraBalon.begin()->pos.x != puntoReferencia.x)
-            yTarget = ( (world->bitacoraBalon.begin()->pos.y - puntoReferencia.y) /
-                        (world->bitacoraBalon.begin()->pos.x - puntoReferencia.x)
-                        ) * (xTarget - puntoReferencia.x);
+        if( world->bitacoraBalon.begin()->pos.x < puntoReferencia.x + 0.5 &&
+            world->bitacoraBalon.begin()->pos.x > puntoReferencia.x - 0.5 ||
+            world->bitacoraBalon.begin()->pos.x < -53.0 ||
+            world->bitacoraBalon.begin()->pos.x > 53.0 )
+           yTarget=0.0;
         else
-            if(world->bitacoraBalon.begin()->pos.y <0.0)
-                yTarget = -7.0;
-            else
-                yTarget = 7.0;
+        	yTarget = ( (world->bitacoraBalon.begin()->pos.y - puntoReferencia.y) /
+        	                        (world->bitacoraBalon.begin()->pos.x - puntoReferencia.x)
+        	                        ) * (xTarget - puntoReferencia.x);
+
 
 
         if(yTarget >= 7.0 )
@@ -1093,6 +1084,26 @@ void GoToXY2 (   double   xTarget ,
 
 }
 
+// centra el balón en el cono de visión utilizando el turn
+void centerBall(bool   ballVisible,
+                double ballDir,
+                double lastAngleBall,
+                double neckDir,
+                ViewModeWidth cono,
+                AgentCommand * command)
+{
+           if( ballDir >= -10.0 && ballDir <= 10.0 )
+              {
+                  // Balon esta centrado en el cono de vision
+              }
+           else
+              {
+                  align(neckDir,command);
+                  command->append_turn(ballDir);
+              }
+
+}
+// centra el balon en el cono de vision utilizando el turn_neck
 void centerBall( WorldModelV1 *world,
                  AgentCommand * command)
 {
@@ -1680,7 +1691,7 @@ void comunicarObjetivo(Vector2D pointTarget,
     string mensaje;
     mensaje = convertToString(pointTarget,prob);
     command->append_say(mensaje);
-    cout<<"Grito en cadena: "<<mensaje<<endl;
+    cout<<"Grito la cadena: "<<mensaje<<endl;
 }
 
 // Elige que agente escuchar, y aplica el comando attentionto para oir el mensaje
@@ -1710,7 +1721,8 @@ bool escucharObjetivo ( GameData 	   * game_data,
 }
 
 // Regresa un false, si el objetivo es similar al del agente amigo y si su probabilidad es menor
-bool compararObjetivo( GameData * game_data,Vector2D miPunto, float miProb, WorldModelV1 *world)
+bool compararObjetivo( GameData * game_data,
+		               Vector2D miPunto, float miProb, WorldModelV1 *world)
 {
     float * p;
     float x,y,prob;
@@ -1742,6 +1754,65 @@ bool compararObjetivo( GameData * game_data,Vector2D miPunto, float miProb, Worl
     {
         // miPunto es bueno, eligo realizar objetivo
         regreso = true;
+    }
+
+    return regreso;
+}
+
+
+bool amStayInLine( WorldModelV1 * world )
+{
+    bool regreso;
+    double xTarget;
+
+    regreso = false;
+
+    if( world->me.side == 'l' )
+        xTarget = -48.0;
+    else
+        xTarget = 48.0;
+
+    if(world->me.pos.x < xTarget + 1.0 && world->me.pos.x > xTarget - 1.0)
+        regreso = true;
+
+    return regreso;
+}
+
+void alignBodyWithNeck(WorldModelV1 *world,
+                       AgentCommand *command)
+{
+    if( world->me.head_angle != 0.0 )
+       {
+           command->append_turn(world->me.head_angle);
+           command->append_turn_neck(-world->me.head_angle);
+       }
+}
+
+bool balonEnAreaGrande( WorldModelV1 *world )
+{
+    bool regreso;
+
+    regreso = false;
+
+    if( world->me.side == 'l')
+    {
+        if(   world->bitacoraBalon.begin()->pos.x < -36 &&    // area grande del portero
+              world->bitacoraBalon.begin()->pos.y > -20 &&
+              world->bitacoraBalon.begin()->pos.y <  20 &&
+              world->bitacoraBalon.begin()->pos.x > -52.5)
+        {
+            regreso = true;
+        }
+    }
+    else
+    {
+        if(   world->bitacoraBalon.begin()->pos.x > 36  &&    // area grande del portero
+              world->bitacoraBalon.begin()->pos.y > -20 &&
+              world->bitacoraBalon.begin()->pos.y <  20 &&
+              world->bitacoraBalon.begin()->pos.x < 52.5)
+        {
+            regreso = true;
+        }
     }
 
     return regreso;

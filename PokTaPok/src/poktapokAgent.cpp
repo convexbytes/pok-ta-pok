@@ -1291,77 +1291,62 @@ PokTaPokAgentV1::defencePositioning()
 			command);
 
 }	// termina defensa
-
 void PokTaPokAgentV1::goalieBehavior()
 {
 
-    double  xTarget = -48.0;  // Linea donde el portero se va a estar moviendo
-    bool    xEnAreaGrande;
-    int num;
-    static bool atrapada,free_kick;
+    int num,timeCatch;
+    static bool atrapada,free_kick,goal_kick,varCatch;
+    double  xTarget;
     Vector2D kick;
-
-    if( world->me.side == 'r' )
-    {
-    	xTarget = 48.0;
-    	xEnAreaGrande = world->bitacoraBalon.begin()->pos.x > 36 &&    // area grande del portero
-    	             world->bitacoraBalon.begin()->pos.y > -20 &&
-    	             world->bitacoraBalon.begin()->pos.y <  20;
-    }
-    else
-    {
-    	xEnAreaGrande = world->bitacoraBalon.begin()->pos.x < -36 &&    // area grande del portero
-    	    	             world->bitacoraBalon.begin()->pos.y > -20 &&
-    	    	             world->bitacoraBalon.begin()->pos.y <  20;
-    }
     Vector2D velocidad;
+
+    if( world->me.side == 'l' )
+        xTarget = -48.0;
+    else
+        xTarget = 48.0;
 
     velocidad.x = game_data->sensor_handler.last_sense.speed_amount;    // dis
     velocidad.y = game_data->sensor_handler.last_sense.speed_direction; // dir
 
-    if( (world->time - world->bitacoraBalon.begin()->ciclo ) < 10 )
+    switch( game_data->sensor_handler.last_hear_referee.play_mode )
     {
-        if(  xEnAreaGrande  )
-        {
-            if( (world->bitacoraBalon.begin()->dis < 1.0 &&
-                 world->time - world->bitacoraBalon.begin()->ciclo < 2 )
-                    )
-            {   // Puedo atrapar la pelota
+    case GOALIE_CATCH_BALL_L : if(world->me.side == 'l') atrapada=true;
+        break;
+    case GOALIE_CATCH_BALL_R : if(world->me.side == 'r') atrapada=true;
+        break;
+    case FREE_KICK_L:  if( world->me.side == 'l') free_kick = true;
+        break;
+    case FREE_KICK_R:  if( world->me.side == 'r') free_kick = true;
+        break;
+    case  GOAL_KICK_L: if(world->me.side == 'l') goal_kick = true;
+        break;
+    case  GOAL_KICK_R: if(world->me.side == 'r') goal_kick = true;
+        break;
+    }
 
-                //cout<<"Puedo atrapar la pelota: "<<atrapada<<endl;
+    if( (world->time - world->bitacoraBalon.begin()->ciclo ) < 5 )
+    {
+        if(  balonEnAreaGrande( world)  &&   // el balon se encuentra dentro del area grande propia?
+             amTheClosest(world)    )        // y soy el más cercano?
+        {
+            if( game_data->sensor_handler.last_see.ballIsVisible() &&
+                game_data->sensor_handler.last_see.ball.dis < 1.2  )
+            {   // Puedo atrapar la pelota
                 if(atrapada!= true)  // si no la he atrapado hago catch()
                 {
                     command->append_catch( world->bitacoraBalon.begin()->dir );
-                   // cout<<"*** Aplico catch "<<world->time<<" referre dice: "
-                     //  <<game_data->sensor_handler.last_hear_referee.play_mode<<endl;
+                    varCatch = true;
+                    timeCatch = world->time;
                 }
 
-                if( game_data->sensor_handler.last_hear_referee.play_mode ==
-                    GOALIE_CATCH_BALL_L
-                    || game_data->sensor_handler.last_hear_referee.play_mode ==
-                                        GOALIE_CATCH_BALL_R )
-                  {  atrapada = true;
-                     // cout<<"ATRAPADA correcta "<<world->time<<endl;
-                  }
-
-                if( game_data->sensor_handler.last_hear_referee.play_mode ==
-                    FREE_KICK_L
-                    || game_data->sensor_handler.last_hear_referee.play_mode ==
-                            FREE_KICK_R )
-                {
-                    free_kick = true;
-                    //cout<<"PUEDO PASAR "<<world->time<<endl;
-                }
-
-                if( free_kick == true && atrapada == true ) // Atape el balon y puedo pasar
+                if( (free_kick == true && atrapada == true && varCatch ==true )
+                      || goal_kick == true ) // Atrape el balon, o es saque de meta, y puedo pasar
                 {
                     num = aQuienPasar(world);
 
-                   // cout<<"Pasar ahora, numero: "<<num<<endl;
-
                     if(num == -1)   // si regresa -1 no ve ningun agente
                     {
-
+                        cout<<world->time<<" Pase al centro del campo"<<endl;
                         kick = PasePunto( 0.0,
                                           0.0,
                                           world->me.pos.x,
@@ -1370,14 +1355,13 @@ void PokTaPokAgentV1::goalieBehavior()
                                           3.5,
                                           world->bitacoraBalon.begin()->pos.x,
                                           world->bitacoraBalon.begin()->pos.y );
-                        //command->append_turn(170);
-                        ////radarworld->me.head_angle,command,game_data->sensor_handler.last_sensor_type);
 
                         command->append_kick(kick.x,kick.y);
 
                     }
                     else
                     {
+                        cout<<world->time<<" Pase a un amigo"<<endl;
                         kick = PasePunto( world->bitacoraAmigos[num].begin()->pos.x,
                                           world->bitacoraAmigos[num].begin()->pos.y,
                                           world->me.pos.x,
@@ -1390,22 +1374,42 @@ void PokTaPokAgentV1::goalieBehavior()
                         command->append_kick(kick.x,kick.y);
                     }
                 }
+                else
+                {
+                    if( varCatch == true  &&
+                            atrapada == false &&
+                            (world->time - timeCatch) > 1  )  // se realizo catch y no se atrapo el balón
+                    {
+                        cout<<world->time<<" Realice catch mal"<<endl;
+                        kick = PasePunto( 0.0,
+                                          0.0,
+                                          world->me.pos.x,
+                                          world->me.pos.y,
+                                          world->me.angle,
+                                          3.5,
+                                          world->bitacoraBalon.begin()->pos.x,
+                                          world->bitacoraBalon.begin()->pos.y );
 
-
-            }  // balon en el area pero lejos del portero, va por el
+                        command->append_kick(kick.x,kick.y);
+                    }
+                }
+            }  // balon en el area pero lejos del portero
             else
             {
-                //radarworld->me.head_angle,command,game_data->sensor_handler.last_sensor_type);
+                // radar(world->me.head_angle,command,game_data->sensor_handler.last_sensor_type);
                 atrapada = false;
                 free_kick = false;
-                ball_interception->call( command );
-                // irAlBalon();
+                goal_kick = false;
+                varCatch = false;
+                alignBodyWithNeck(world,command);
 
+                ball_interception->call( command );
             }
         }
         else
-        {
-            if( world->me.pos.x < xTarget + 1.0 && world->me.pos.x > xTarget - 1.0 )
+        {   // Balón fuera del área grande
+
+            if( amStayInLine(world) )
             {  // estoy en la linea de defensa
                 porteroLine(xTarget,
                             velocidad,
@@ -1413,8 +1417,8 @@ void PokTaPokAgentV1::goalieBehavior()
                             world,command);
             }
             else
-            {
-                //radarworld->me.head_angle,command,game_data->sensor_handler.last_sensor_type);
+            {  // Regreso al punto clave
+                radar(world->me.head_angle,command,game_data->sensor_handler.last_sensor_type);
                 GoToXY( xTarget,
                         0.0,     //yTarget = 0.0
                         1.0,
@@ -1424,11 +1428,11 @@ void PokTaPokAgentV1::goalieBehavior()
             }
         }
     }
-    else    // No tendo información reciente del balón
+    else    // No tengo información reciente del balón, busco el balón
     {
         searchBall(command, world, game_data->sensor_handler.last_sensor_type);
     }
-}  // Termina el comportamiento del portero
+} // Termina el comportamiento del portero
 
 void
 PokTaPokAgentV1::attackPositioning()
