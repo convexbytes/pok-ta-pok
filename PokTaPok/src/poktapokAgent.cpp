@@ -279,6 +279,7 @@ void PokTaPokAgentV1::ballStaticBehaviorSideL()
 			else
 			{
 				// Posicion ATAQUE no soy el más cercano al balón
+				this->attackPositioning();
 			}
 		}
 		else  // No veo el balón
@@ -289,6 +290,7 @@ void PokTaPokAgentV1::ballStaticBehaviorSideL()
 	else  // No es a mi favor
 	{
 		// posicion de DEFENSA
+		this->defencePositioning();
 	}
 
 }
@@ -343,6 +345,7 @@ void PokTaPokAgentV1::ballStaticBehaviorSideR()
 			else
 			{
 				// Posicion ATAQUE no soy el más cercano al balón
+				this->attackPositioning();
 			}
 		}
 		else  // No veo el balón
@@ -353,6 +356,7 @@ void PokTaPokAgentV1::ballStaticBehaviorSideR()
 	else  // No es a mi favor
 	{
 		// posicion de DEFENSA
+		this->defencePositioning();
 	}
 }
 
