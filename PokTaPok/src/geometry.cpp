@@ -58,9 +58,9 @@ Vector2D Vector2D::operator-( const Vector2D & v ) const
 Vector2D Vector2D::operator/( double r ) const
 {
 	Vector2D v;
-	if( r == 0 )
+	if( r == 0.0 )
 	{
-		std::cerr << "Warning. Vector2D::operator/(): zero division." << std::endl;
+		//std::cerr << "Warning. Vector2D::operator/(): zero division." << std::endl;
 		return v;
 	}
 	v.x = x/r;

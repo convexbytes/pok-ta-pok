@@ -62,6 +62,10 @@ public:
     double stamina;
     double effort;
 
+    // aural
+    int 		  attention_unum;
+    AttentionTeam attention_team;
+
 };
 
 class ObjetoBitacora

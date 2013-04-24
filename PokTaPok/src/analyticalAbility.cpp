@@ -55,7 +55,7 @@ velToInterceptBall( Vector2D const & b, // Posición del balón
 )
 {
 	// Regresa la velocidad en x y en y necesarias para interceptar el baĺón en el tiempo t
-
+	if( t == 0 ) t = 1;
 	Vector2D vel_needed;
 	double ln_decay = log( ball_decay );
 	double decay_ala_t = std::pow(ball_decay, t);
@@ -80,7 +80,10 @@ ActualKickPowerRate(int dir,double dist)
 
 double KickPowerForSpeed(double speed,double actkpr)
 {
-	double kickPower = speed / actkpr;
+	double kickPower = 0.0;
+
+	if( actkpr != 0.0 )
+		kickPower  = speed / actkpr;
 
 	return kickPower;
 }
@@ -91,7 +94,7 @@ double KickSpeedToTravel(double d,double e)
 	{
 		e = 0.01;
 	}
-	double ball_decay = 0.94;
+	double const ball_decay = 0.94;
 	double r = 1.0 / ball_decay;
 	double n = log(d*(r - 1.0)/e + 1.0 ) / log(r);
 	double s = e / pow(ball_decay,n);
@@ -423,7 +426,34 @@ BallInterception::searchBall()
 	}
 	else
 	{
-		command->append_turn( 60 );
+
+		//command->append_turn( 60 );
+		double lastDirection = world->bitacoraBalon.begin()->dir;
+		    int    idCono        = world->me.view_mode_w;
+
+		    double cono;
+
+		    switch(idCono)
+		    {
+		    case NARROW: cono = 60.0;  break;
+		    case NORMAL: cono = 120.0; break;
+		    case WIDE:   cono = 180.0; break;
+		    default:     cono = 0.0;   break; // incorrecto, error
+		    }
+
+		    if( game_data->sensor_handler.last_sensor_type== SENSOR_SEE)
+		    {
+		        if( lastDirection < 0.0  )
+		        {
+		            command->append_turn(-cono);
+		            //command->append_turn(-15);
+		        }
+		        else
+		        {
+		            //command->append_turn(cono);
+		            command->append_turn( 60 );
+		        }
+		    }
 	}
 }
 
@@ -431,7 +461,6 @@ void
 BallInterception::computePointTurn()
 {
 	state = COMPUTE_POINT_TURN;
-	double const PERMISIVE_ANGLE = 10;
 
 	double angle_deg, angle_min_deg, angle_max_deg;
 
@@ -606,7 +635,6 @@ FreezeBall::call( AgentCommand * command )
 	Vector2D vn = world->estimateBallCurrentVel();
 
 	int		tb = world->bitacoraBalon.begin()->ciclo; // tiempo en que se vio el balón
-	int t_diff = t-tb; // Tiempo transcurrido desde que se vio el balón
 	Vector2D pv = Vector2D::fromPolar( body.speed_amount,
 									   Deg2Rad( body.speed_direction  + theta ) );
 

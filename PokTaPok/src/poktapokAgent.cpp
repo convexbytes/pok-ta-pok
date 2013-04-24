@@ -15,7 +15,7 @@ PokTaPokAgentV1::PokTaPokAgentV1( GameData * game_data )
 	goal_l.set( -45.0, 0.0 );
 	goal_r.set( 45.0, 0.0 );
 
-
+	on_reception = false;
 
 }
 PokTaPokAgentV1::~PokTaPokAgentV1()
@@ -133,9 +133,23 @@ void PokTaPokAgentV1::onPrep()
 void PokTaPokAgentV1::onPlay()
 {
 
-	world->me.possession_ball = whoHasTheBall( world );
 
-	//defence();
+	if( sensor_h->last_sensor_type == SENSOR_HEAR )
+		if( sensor_h->last_hear.sender == OUR )
+		{
+			hearOur();
+		}
+
+	if(   this->on_reception == true
+		&& world->time - this->reception_time < 15 )
+	{
+		reception();
+		return;
+	}
+
+	chooseAttention();
+
+	world->me.possession_ball = whoHasTheBall( world );
 
     if(world->me.unum != 1)
     {
@@ -193,7 +207,11 @@ void PokTaPokAgentV1::ataque()
 	}
 	else
 	{
-		attackPositioning(); // ataque pasivo
+#ifdef ATTACK_POSITIONING
+				this->attackPositioning();
+#else
+				voronoiPositioning();
+#endif
 	}
 }
 
@@ -225,6 +243,7 @@ void PokTaPokAgentV1::defensa()
 	else
 	{
 		defencePositioning(); // defensa
+		//std::cout << "def" << std::endl;
 	}
 }
 
@@ -279,7 +298,11 @@ void PokTaPokAgentV1::ballStaticBehaviorSideL()
 			else
 			{
 				// Posicion ATAQUE no soy el más cercano al balón
+#ifdef ATTACK_POSITIONING
 				this->attackPositioning();
+#else
+				voronoiPositioning();
+#endif
 			}
 		}
 		else  // No veo el balón
@@ -345,7 +368,11 @@ void PokTaPokAgentV1::ballStaticBehaviorSideR()
 			else
 			{
 				// Posicion ATAQUE no soy el más cercano al balón
+#ifdef ATTACK_POSITIONING
 				this->attackPositioning();
+#else
+				voronoiPositioning();
+#endif
 			}
 		}
 		else  // No veo el balón
@@ -362,6 +389,8 @@ void PokTaPokAgentV1::ballStaticBehaviorSideR()
 
 void PokTaPokAgentV1::balonPropio()
 {
+	ball_interception->reset();
+
 	BodySensor & body = game_data->sensor_handler.last_sense;
 
 	deque<ObjetoBitacora>::const_iterator opponent_it;
@@ -458,7 +487,8 @@ void PokTaPokAgentV1::balonPropio()
 
 			running_pot_field[ i ] = world->me.pos - opponent_it->pos ;
 			d = running_pot_field[i].normita();
-			running_pot_field[i] *= (k/ (d*d) );
+			if( d != 0 )
+				running_pot_field[i] *= (k/ (d*d) );
 			//std::cout << "added repulsor " << running_pot_field[i] << std::endl;
 			resultant += running_pot_field[i];
 		}
@@ -495,7 +525,7 @@ void PokTaPokAgentV1::balonPropio()
 		}
 	}
 	run_action.prob = p_min*RUN_FACTOR; // Añadido RUN_FACTOR para darle preferencia a los pases y al tiro
-
+	run_action.unum = 0.0;
 
 	// Añadimos la acción al conjunto de acciones posibles
 	actions.push_back( run_action );
@@ -544,7 +574,7 @@ void PokTaPokAgentV1::balonPropio()
 			}
 
 			tmp_action.prob = p_min;
-
+			tmp_action.unum = teammate_it->num;
 			actions.push_back( tmp_action );
 		}
 
@@ -561,7 +591,7 @@ void PokTaPokAgentV1::balonPropio()
 		shoot_target_down.x = -shoot_target_up.x;
 	}
 
-	is_zone_shoot = isZoneShoot( p.x, p.y, 25.0 );
+	is_zone_shoot = isZoneShoot( p.x, p.y, 22.0 );
 
 
 
@@ -610,8 +640,6 @@ void PokTaPokAgentV1::balonPropio()
 		n  =    std::log( 1 - r*(1-1/0.94)/BALL_FINAL_VEL ) // Calculamos el tiempo que tarda en llegar al receptor
 		/ std::log( 1/0.94 );
 
-
-
 		n  = std::ceil(n);
 
 		if( n <= 0 )
@@ -634,6 +662,7 @@ void PokTaPokAgentV1::balonPropio()
 			}
 		}
 		tmp_action.prob = p_min;
+		tmp_action.unum = 12;
 		actions.push_back( tmp_action );
 	}
 
@@ -695,16 +724,7 @@ void PokTaPokAgentV1::balonPropio()
 				     command );
 		break;
 	case PASS:
-		kick_vec =
-				PasePunto( choosen_action.target.x,
-						choosen_action.target.y,
-						world->me.pos.x,
-						world->me.pos.y,
-						world->me.angleDeg(),
-						1.0,     // velocidad final
-						world->bitacoraBalon.begin()->pos.x,
-						world->bitacoraBalon.begin()->pos.y);
-		command->append_kick( kick_vec.x, kick_vec.y );
+		passAction( choosen_action.unum, choosen_action.target );
 		break;
 	case SHOOT:
 		shootAction();
@@ -715,7 +735,12 @@ void PokTaPokAgentV1::balonPropio()
 
 void PokTaPokAgentV1::balonEquipo()
 {
-	attackPositioning();
+
+#ifdef ATTACK_POSITIONING
+				this->attackPositioning();
+#else
+				voronoiPositioning();
+#endif
 }
 void PokTaPokAgentV1::balonRival()
 {
@@ -723,18 +748,16 @@ void PokTaPokAgentV1::balonRival()
 
 	bool aux;
 
-	vector<Player>  &agentes   = sensor_h->last_see.players;
-
 	aux =  amTheClosest(world);
 
 	if( aux  )
 	{
+
 		ball_interception->call( command );
 	}
 	else
 	{
 		defencePositioning();
-
 	}
 
 
@@ -743,29 +766,14 @@ void PokTaPokAgentV1::balonRival()
 
 void PokTaPokAgentV1::balonSuelto()
 {
-	bool   aux;
-	double x        = world->me.pos.x;
-	double y        = world->me.pos.y;
-	double angle    = world->me.angle;
-	double neck_dir = game_data->sensor_handler.last_sense.head_angle;
-	vector<Player>  &agentes   = sensor_h->last_see.players;
-	//  Vector2D balon;
-	Vector2D velocidad;
-
-	velocidad.x = game_data->sensor_handler.last_sense.speed_amount;    // dis
-	velocidad.y = game_data->sensor_handler.last_sense.speed_direction; // dir
-
-	aux = amTheClosest(world);
-
 
 	//cout<<"MAS CERCANO: "<<aux<<endl;
-	if( aux )
+	if( amTheClosest(world) )
 	{
 		//irAlBalon();
 		ball_interception->call( command );
 		////radar game_data->sensor_handler.last_sense.head_angle,
 			//	command );
-
 	}
 	else
 	{
@@ -832,16 +840,6 @@ void PokTaPokAgentV1::irAlBalon()
        searchBall(command,world, game_data->sensor_handler.last_sensor_type);
       }
 	}
-
-	/*
-    // alineo cuello con el cuerpo
-    command->append_turn_neck(-neck_dir);
-    // busco balon
-    searchBall(world->bitacoraBalon.begin()->dir,
-                   world->me.view_mode_w,
-                   command);
-	 */
-
 }
 
 
@@ -855,7 +853,7 @@ void PokTaPokAgentV1::voronoiPositioning()
 
 	this->constructVoronoi();
 
-	GoToXYSlow( last_voronoi_centroid.x, last_voronoi_centroid.y,
+	GoToXY( last_voronoi_centroid.x, last_voronoi_centroid.y,
 			world->me.pos.x, world->me.pos.y,
 			world->me.angleDeg(),
 			world->me.headAngleDeg(),
@@ -913,7 +911,6 @@ PokTaPokAgentV1::defencePositioning()
 	double Di;
 	double r;
 	double n;
-
 	int i, j;
 
 	double area_r;
@@ -975,9 +972,10 @@ PokTaPokAgentV1::defencePositioning()
 
 	g =  goal - b; // El vector hacia nuestra meta
 
-	g /= g.normita();
+	g.normalize();
 
 	resultant 	=  g;
+
 	for( i=0; i < 11; i++ )
 	{
 		team_it = world->bitacoraAmigos[i].begin();
@@ -988,12 +986,9 @@ PokTaPokAgentV1::defencePositioning()
 
 			tmp_v 	= q - team_it->pos ;
 			d 		= tmp_v.normita();
-			if( d == 0 )
-			{
-				//std::cerr << "defence: distancia cero, igualando a 0.0001" << std::endl;
-				d = 0.0001;
-			}
-			tmp_v  *= (k/ (d*d) );
+
+			if( d != 0 )
+				tmp_v  *= (k/ (d*d) );
 
 			resultant += tmp_v;
 		}
@@ -1084,6 +1079,10 @@ PokTaPokAgentV1::defencePositioning()
 		n  =    std::log( 1 - r*(1-1/0.94)/BALL_FINAL_VEL ) // Calculamos el tiempo que tarda en llegar al receptor
 		/ std::log( 1/0.94 );
 		n  = std::ceil(n);
+		if( n <= 0 )
+		{
+			n = 1; // no se puede llegar en cero ciclos
+		}
 		for( j=0; j<11; j++ ) // Calculamos la probabilidad de éxito con cada uno de los rivales y tomamos la mínima
 		{
 			team_it = world->bitacoraAmigos[j].begin();
@@ -1092,10 +1091,7 @@ PokTaPokAgentV1::defencePositioning()
 			{
 				di = ( tmp_action.target - team_it->pos ).normita();
 				Di = di/n;
-				if( n <= 0 )
-				{
-					n = 1; // no se puede llegar en cero ciclos
-				}
+
 				pi = 1 - V/(V+Di);
 
 				if( pi < p_min )	p_min = pi;
@@ -1180,23 +1176,27 @@ PokTaPokAgentV1::defencePositioning()
 	double	 proy_mag;
 	Vector2D proy;
 
-	proy_mag = bp.prodPunto( bm ) / bm_mag ;
-	//std::cout << "PokTaPok_" << world->me.unum << ": ";
-	if( proy_mag < 0 ) // la magnitud es negativa, entonces el punto más cercano es b
+	if( bm_mag != 0.0 )
 	{
+		proy_mag = bp.prodPunto( bm ) / bm_mag ;
+		//std::cout << "PokTaPok_" << world->me.unum << ": ";
+		if( proy_mag < 0 ) // la magnitud es negativa, entonces el punto más cercano es b
+		{
+			tmp_v = b;
+		}
+		else if( proy_mag >= bm.normita() ) // La magnitud es más grande que la que hay a del balón destino, el punto más cercano es el destino
+		{
+			tmp_v = choosen_action.target;
+		}
+		else // la proyección se encuentra dentro de v
+		{
+			proy = bm * (proy_mag / bm_mag );
+			tmp_v = b + proy;
+		}
+		// tmp_v es ahora el punto de obstrucción más cercano
+	}
+	else
 		tmp_v = b;
-	}
-	else if( proy_mag >= bm.normita() ) // La magnitud es más grande que la que hay a del balón destino, el punto más cercano es el destino
-	{
-		tmp_v = choosen_action.target;
-	}
-	else // la proyección se encuentra dentro de v
-	{
-		proy = bm * (proy_mag / bm_mag );
-		tmp_v = b + proy;
-	}
-	// tmp_v es ahora el punto de obstrucción más cercano
-
 	if( posible_actions_in_cell.size() <= 1 )
 	{
 		GoToXY( tmp_v.x, tmp_v.y,
@@ -1257,20 +1257,25 @@ PokTaPokAgentV1::defencePositioning()
 		bm = choosen_action.target - b;; // Vector del balón hacia el resultado del movimiento
 		bp = world->me.pos - b; // Vector del balón hacia mi posición
 		bm_mag = bm.normita();
-		proy_mag = bp.prodPunto( bm ) / bm_mag ;
-		if( proy_mag < 0 ) // la magnitud es negativa, entonces el punto más cercano es b
+		if( bm_mag != 0 )
 		{
+			proy_mag = bp.prodPunto( bm ) / bm_mag ;
+			if( proy_mag < 0 ) // la magnitud es negativa, entonces el punto más cercano es b
+			{
+				tmp_v = b;
+			}
+			else if( proy_mag >= bm.normita() ) // La magnitud es más grande que la que hay a del balón destino, el punto más cercano es el destino
+			{
+				tmp_v = choosen_action.target;
+			}
+			else // la proyección se encuentra dentro de v
+			{
+				proy = bm * (proy_mag / bm_mag );
+				tmp_v = b + proy;
+			}
+		}
+		else
 			tmp_v = b;
-		}
-		else if( proy_mag >= bm.normita() ) // La magnitud es más grande que la que hay a del balón destino, el punto más cercano es el destino
-		{
-			tmp_v = choosen_action.target;
-		}
-		else // la proyección se encuentra dentro de v
-		{
-			proy = bm * (proy_mag / bm_mag );
-			tmp_v = b + proy;
-		}
 	} // someone is closer
 
 
@@ -1337,7 +1342,7 @@ void PokTaPokAgentV1::goalieBehavior()
 
                     if(num == -1)   // si regresa -1 no ve ningun agente
                     {
-                        cout<<world->time<<" Pase al centro del campo"<<endl;
+                        //cout<<world->time<<" Pase al centro del campo"<<endl;
                         kick = PasePunto( 0.0,
                                           0.0,
                                           world->me.pos.x,
@@ -1352,7 +1357,7 @@ void PokTaPokAgentV1::goalieBehavior()
                     }
                     else
                     {
-                        cout<<world->time<<" Pase a un amigo"<<endl;
+                        //cout<<world->time<<" Pase a un amigo"<<endl;
                         kick = PasePunto( world->bitacoraAmigos[num].begin()->pos.x,
                                           world->bitacoraAmigos[num].begin()->pos.y,
                                           world->me.pos.x,
@@ -1371,7 +1376,7 @@ void PokTaPokAgentV1::goalieBehavior()
                             atrapada == false &&
                             (world->time - timeCatch) > 1  )  // se realizo catch y no se atrapo el balón
                     {
-                        cout<<world->time<<" Realice catch mal"<<endl;
+                        //cout<<world->time<<" Realice catch mal"<<endl;
                         kick = PasePunto( 0.0,
                                           0.0,
                                           world->me.pos.x,
@@ -1496,9 +1501,11 @@ PokTaPokAgentV1::attackPositioning()
 			{
 				tmp_v = world->me.pos - opp_it->pos;
 				d = tmp_v.normita();
-				if( d == 0 ) d = 0.00001;
-				tmp_v /= d; // normalizamos
-				tmp_v *= (OPP_THRESHOLD_RADIUS / (d) ); // asignamos magnitud al vector
+				if( d != 0 )
+				{
+					tmp_v /= d; // normalizamos
+					tmp_v *= (OPP_THRESHOLD_RADIUS / (d) ); // asignamos magnitud al vector
+				}
 				resultant += tmp_v;
 			}
 	}
@@ -1513,7 +1520,6 @@ PokTaPokAgentV1::attackPositioning()
 	}
 
 	resultant += tmp_v;
-
 
 	// Vamos en dirección a la resultante
 	// Para adaptarla a la habilidad de correr a un punto, calculamos un punto: hacemos grande el vector resultante
@@ -1541,12 +1547,16 @@ PokTaPokAgentV1::constructVoronoi()
 	double const INITIAL_CELL_WIDTH  = 50;
 	double const INITIAL_CELL_HWIDTH = 25;
 	double const MARGIN = 5.0;
+	double const VORONOI_EXPIRE_TIME = 10;
+
+	static int   last_construct_time = -1;
+
 	double  y_top	 = 30.0;
 	double  y_bottom = -30.0;
 	double  x_left;
 	double 	x_right;
 	Vector2D b;
-
+	Vector2D b_vel;
 	// Para la construcción de la celda voronoi
 	Point2D p ( world->me.pos.x, world->me.pos.y );
 	std::vector<Point2D> sites;
@@ -1557,16 +1567,19 @@ PokTaPokAgentV1::constructVoronoi()
 	Vector2D centroid;
 
 	// general stuff
-	BodySensor & body = game_data->sensor_handler.last_sense;
 	int i, n;
 	Vector2D tmp_v;
 	Point2D  tmp_p;
 
+
 	if( world->bitacoraBalon.empty() )
 	{
-
 		return;
 	}
+
+	if( world->time - last_construct_time < VORONOI_EXPIRE_TIME )
+		return;
+
 
 	b = world->bitacoraBalon.begin()->pos;
 
@@ -1608,7 +1621,7 @@ PokTaPokAgentV1::constructVoronoi()
 	{
 		teammate_it = world->bitacoraAmigos[i].begin();
 		if( world->bitacoraAmigos[i].size() > 0 )
-			if( world->time - teammate_it->ciclo < 10
+			if( world->time - teammate_it->ciclo < VORONOI_EXPIRE_TIME
 					&&  i != (world->me.unum -1) // No nos consideramos a nosotros mismos
 					&&  i != 0	// No consideramos al portero
 			)
@@ -1635,15 +1648,16 @@ PokTaPokAgentV1::constructVoronoi()
 			centroid.x += cell_it->x();
 			centroid.y += cell_it->y();
 		}
+
 		centroid /= (double)n;
 		last_voronoi_centroid = centroid;
 	}
 	else
 	{
-		//std::cerr << "voronoi cell has no vertex" << std::endl;
-
 		centroid = last_voronoi_centroid;
 	}
+
+	//last_construct_time = world->time;
 }
 
 
@@ -1658,6 +1672,26 @@ PokTaPokAgentV1::passProb( Vector2D const & target_pos)
 void
 PokTaPokAgentV1::passAction( int unum, Vector2D const & pos )
 {
+	Vector2D kick_vec;
+	char msg[10];
+
+	sprintf( msg,
+			"p%1x%+03d%+03d",
+			unum, (int)pos.x, (int)pos.y );
+
+	kick_vec =
+			PasePunto( pos.x,
+					   pos.y,
+					world->me.pos.x,
+					world->me.pos.y,
+					world->me.angleDeg(),
+					1.2,     // velocidad final
+					world->bitacoraBalon.begin()->pos.x,
+					world->bitacoraBalon.begin()->pos.y);
+
+
+	command->append_say( msg );
+	command->append_kick( kick_vec.x, kick_vec.y );
 
 }
 
@@ -1665,10 +1699,6 @@ void
 PokTaPokAgentV1::shootAction()
 {
 	double const GOALIE_INFO_EXPIRE_TIME = 6;
-
-	static int last_call = -1;
-
-	SeeSensor      & visual = sensor_h->last_see;
 
 	vector<Player>::const_iterator player_it;
 	vector<ObjetoBitacora>::const_iterator opp_it;
@@ -1741,7 +1771,116 @@ PokTaPokAgentV1::shootAction()
 					world->bitacoraBalon.begin()->pos.x,
 					world->bitacoraBalon.begin()->pos.y);
 
-
 	command->append_kick( 100, kick_vector.y );
 
+}
+
+void
+PokTaPokAgentV1::hearOur()
+{
+	std::string msg  = sensor_h->last_hear_opp.message;
+	const char * cad = msg.c_str();
+
+	if( msg.empty() )
+		return;
+
+	if( *cad == 'p' && msg.length() == 8 ) // pase
+	{
+		int unum, x, y;
+		sscanf( cad, "p%1x%3d%3d", &unum, &x, &y );
+		if( unum == world->me.unum )
+		{
+			on_reception   = true;
+			reception_time = world->time;
+			pass_point.set( x, y );
+		}
+	}
+}
+
+void
+PokTaPokAgentV1::reception()
+{
+	SeeSensor & visual = sensor_h->last_see;
+	BodySensor & body  = sensor_h->last_sense;
+	static bool on_interception = false;
+	static int  last_call_time  = -1;
+
+	if( world->time - last_call_time > 1 )
+		on_interception = false;
+
+	if( visual.ballIsVisible() )
+		on_interception = true;
+
+	if( on_interception )
+	{
+		ball_interception->call( command );
+	}
+	else
+	{
+		Vector2D agent_vel = Vector2D::fromPolar( body.speed_amount,
+				Deg2Rad( body.speed_direction + world->me.angleDeg() + world->me.headAngleDeg() ) );
+
+		GoToXY( pass_point.x, pass_point.y,
+				1.0,
+				agent_vel,
+				command, world );
+	}
+
+	std::cout << "receiving" << std::endl;
+}
+
+void
+PokTaPokAgentV1::chooseAttention()
+{
+	static int attention_unum = 10; // es el delantero central
+
+	std::deque<ObjetoBitacora>::const_iterator team_it;
+
+	int i, unum;
+
+	Vector2D b,p;
+
+	double min_dis;
+	double d;
+	// determinamos cuál teammate es el más cerca al balón
+	if( world->bitacoraBalon.empty() )
+		return;
+
+	b = world->bitacoraBalon.begin()->pos;
+
+	p = world->me.pos;
+
+	unum = world->me.unum;
+
+	min_dis = (p-b).normita();
+
+	for( i=1; i<11; i++ )
+	{
+		team_it = world->bitacoraAmigos[i].begin();
+		if( !world->bitacoraAmigos[i].empty() )
+			if( i != world->me.unum -1 )
+			{
+				d = (b - team_it->pos).normita();
+				if( d < min_dis )
+				{
+					min_dis = d;
+					unum = team_it->num;
+				}
+			}
+	}
+
+	if( unum == world->me.unum )
+	{
+		if( unum == 1 )
+			unum++;
+		else if( unum == 1 )
+			unum--;
+		else
+			unum++;
+	}
+
+	if( unum != world->me.attention_unum )
+	{
+		command->append_attentionto( ATTENTION_OUR, unum );
+	}
 }

@@ -9,13 +9,22 @@
 #endif // TEAM_NAME
 
 #define POT_FIELD_EXPIRE_TIME 5
-#define PASS_OPTION_EXPIRE_TIME 5
+#define PASS_OPTION_EXPIRE_TIME 3
 
 class PokTaPokAgentV1;
 class BallInterception;
 class FreezeBall;
 
 class ActionOption;
+
+enum ActionType
+{
+	RUN,
+	PASS,
+	SHOOT
+};
+
+
 
 class PokTaPokAgentV1 : public Agent
 {
@@ -54,6 +63,11 @@ private:
     Vector2D			 last_voronoi_centroid;
     std::vector<Point2D> voronoi_cell;
 
+
+    bool 	 on_reception;
+    int  	 reception_time;
+    Vector2D pass_point;
+
     void update();
 
     void onInitial();
@@ -89,6 +103,9 @@ private:
 
     void shootAction();
 
+    void hearOur();
+    void reception();
+    void chooseAttention();
 
     double 		 passProb( Vector2D const & target_pos );
 
@@ -97,12 +114,6 @@ private:
 
 
 
-enum ActionType
-{
-	RUN,
-	PASS,
-	SHOOT
-};
 
 class ActionOption
 {
@@ -111,6 +122,7 @@ public:
 	double 	 	dist_to_goal;
 	double 	 	prob;
 	ActionType 	action_type;
+	int			unum; // ball := 0, playres := 1,...,11
 
 	static bool distanceLowerThan( ActionOption i, ActionOption j )
 	{

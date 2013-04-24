@@ -154,7 +154,8 @@ void WorldModelV1::updateOnCommandSent()
 	AgentCommand const & com = game_data->command_commited;
 	if( com.attention_to_is_set() )
 	{
-
+		me.attention_unum = com.attention_uniform_number;
+		me.attention_team = com.attention_team;
 	}
 	if( com.catch_is_set() )
 	{
@@ -651,7 +652,7 @@ fromChgToVel(  Vector2D const & player_pos, // Posición del jugador, absoluta.
 	Vector2D etmp = obj_pos - player_pos;
 	Vector2D vtmp (0.0);
 
-	if( obj_dist == 0 )
+	if( obj_dist == 0.0 )
 	{
 		//std::cerr << "Warning. fromChgToVel(): zero division." << std::endl;
 		return vtmp;
