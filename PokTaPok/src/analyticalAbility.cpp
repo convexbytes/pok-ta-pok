@@ -603,8 +603,8 @@ FreezeBall::call( AgentCommand * command )
 	double theta = world->me.angleDeg();
 	Vector2D b = world->bitacoraBalon.begin()->pos; // posición del balón en el ciclo tb
 
-	Vector2D v;
-	world->predictBallCurrentVel( &v ); // No usar esto...
+	Vector2D vn = world->estimateBallCurrentVel();
+
 	int		tb = world->bitacoraBalon.begin()->ciclo; // tiempo en que se vio el balón
 	int t_diff = t-tb; // Tiempo transcurrido desde que se vio el balón
 	Vector2D pv = Vector2D::fromPolar( body.speed_amount,
@@ -614,13 +614,8 @@ FreezeBall::call( AgentCommand * command )
 	// Predicciones
 	Vector2D pn = p + pv; //Posición del agente en el siguiente ciclo
 
-	Vector2D vn = v*param.ball_decay; // Velocidad del balón en el siguiente ciclo
-	Vector2D bn;
-	// Calculamos la posición del balón
-	bn.x =   v.x*(std::pow( param.ball_decay, t_diff +1 ) - 1 )
-			/ log( param.ball_decay ) + b.x;
-	bn.y =   v.y*(std::pow( param.ball_decay, t_diff +1 ) - 1 )
-			/ log( param.ball_decay ) + b.y;
+	Vector2D bn = world->bitacoraBalon.begin()->pos;
+
 
 	Vector2D zero_vel(0.0, 0.0);
 

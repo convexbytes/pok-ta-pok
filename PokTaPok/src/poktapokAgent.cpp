@@ -405,11 +405,42 @@ void PokTaPokAgentV1::balonPropio()
 	Vector2D agent_vel = Vector2D::fromPolar( body.speed_amount,
 			Deg2Rad( body.speed_direction + world->me.angleDeg() + world->me.headAngleDeg() ) );
 
+	Vector2D ball_vel = world->estimateBallCurrentVel();
+
+	if( ball_vel.normita() > 0.5 )
+	{
+		freeze_ball->call( command );
+		return;
+	}
+
+	Vector2D my_goal;
 	// Actualizamos la meta en base a nuestro lado de la cancha
 	if( world->me.side == 'l' )
+	{
+		my_goal  = goal_l;
 		goal_pos = goal_r;
+	}
 	else
+	{
+		my_goal  = goal_r;
 		goal_pos = goal_l;
+	}
+
+
+	if( std::fabs( my_goal.x - world->me.pos.x) < 15 )
+	{
+		kick_vec =
+				PasePunto( 0,
+						0,
+						world->me.pos.x,
+						world->me.pos.y,
+						world->me.angleDeg(),
+						3.0,     // velocidad final
+						world->bitacoraBalon.begin()->pos.x,
+						world->bitacoraBalon.begin()->pos.y);
+		command->append_kick( kick_vec.x, kick_vec.y );
+		return;
+	}
 
 
 	// Actualizamos el campo potencial y obtenemos la resultante para decidir la dirección de correr
@@ -1625,7 +1656,7 @@ PokTaPokAgentV1::passProb( Vector2D const & target_pos)
 }
 
 void
-PokTaPokAgentV1::passAction()
+PokTaPokAgentV1::passAction( int unum, Vector2D const & pos )
 {
 
 }

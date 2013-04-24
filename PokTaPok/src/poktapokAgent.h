@@ -54,7 +54,6 @@ private:
     Vector2D			 last_voronoi_centroid;
     std::vector<Point2D> voronoi_cell;
 
-
     void update();
 
     void onInitial();
@@ -86,7 +85,7 @@ private:
 
     void ataque();
 
-    void passAction();
+    void passAction( int unum, Vector2D const & pos );
 
     void shootAction();
 
