@@ -232,7 +232,7 @@ void runWithBall (double   xTarget ,
 
     if (disBall <= radio)
     {
-        angToPoint = Rad2Deg( atan2(  yTarget   - y,   xTarget   - x) )- angle;
+        angToPoint = Rad2Deg( atan2(  yTarget   - y,   xTarget   - x) );
 
         /*Este 2.0 es similar a lo que queremos que adelante la pelota
         para valores grandes la adelanta mucho*/
@@ -241,8 +241,6 @@ void runWithBall (double   xTarget ,
         auxY = 2.0 * sin( Deg2Rad( angToPoint ) );
 
         Kick = PasePunto(x+auxX,y+auxY,x,y,angle,0.0, xBall , yBall);
-
-        Kick.y = entre180(angToPoint);
 
         //// cout<<"Adelanto KICK"<<endl;
         command->append_kick(Kick.x,Kick.y);
