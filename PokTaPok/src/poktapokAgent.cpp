@@ -1684,7 +1684,7 @@ PokTaPokAgentV1::shootAction()
 		closest_point_top = closestPointInSegment( goalie_pos, ball_pos, post_top );
 		closest_point_bot = closestPointInSegment( goalie_pos, ball_pos, post_bottom);
 		dist_top    = (closest_point_top - goalie_pos).normita();
-		dist_bottom = (closest_point_top - goalie_pos).normita();
+		dist_bottom = (closest_point_bot - goalie_pos).normita();
 
 		if( dist_top > dist_bottom )
 			target = post_top;
