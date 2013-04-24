@@ -595,6 +595,7 @@ WorldModelV1::estimateBallCurrentVel()
 				p2 = ball_it->pos;
 				t2 = ball_it->ciclo;
 
+				if( t1==t2 ) t1++;
 				ball_vel = (p1-p2) / (double)(t1 - t2);
 			}
 			else
@@ -622,6 +623,7 @@ WorldModelV1::estimateBallCurrentVel()
 				p2 = ball_it->pos;
 				t2 = ball_it->ciclo;
 
+				if( t1==t2 ) t1++;
 				ball_vel = (p1-p2) / (double)(t1 - t2);
 			}
 			else

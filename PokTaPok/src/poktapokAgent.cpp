@@ -410,7 +410,9 @@ void PokTaPokAgentV1::balonPropio()
 
 	// Actualizamos el campo potencial y obtenemos la resultante para decidir la dirección de correr
 	g =  goal_pos - world->me.pos;
-	g /= g.normita(); // aún falta determinar la función para la magnitud de g
+	d = g.normita();
+	if ( d != 0.0 )
+		g /= d; // aún falta determinar la función para la magnitud de g
 	resultant 	=  g;
 	for( i=0; i < 11; i++ )
 	{
@@ -670,16 +672,6 @@ void PokTaPokAgentV1::balonPropio()
 		command->append_kick( kick_vec.x, kick_vec.y );
 		break;
 	case SHOOT:
-		//kick_vec =
-		//		PasePunto( choosen_action.target.x,
-		//				choosen_action.target.y,
-		//				world->me.pos.x,
-		//				world->me.pos.y,
-		//				world->me.angleDeg(),
-		//				100.0,     // velocidad final
-		//				world->bitacoraBalon.begin()->pos.x,
-		//				world->bitacoraBalon.begin()->pos.y);
-		//command->append_kick( kick_vec.x, kick_vec.y );
 		shootAction();
 		break;
 	}
@@ -688,18 +680,7 @@ void PokTaPokAgentV1::balonPropio()
 
 void PokTaPokAgentV1::balonEquipo()
 {
-	// mantener centrado el balón en el cono de visión
-
-	//centerBall(game_data->sensor_handler.last_see.ballIsVisible(),  // es visible el balon?
-	//		sensor_h->last_see.ball.dir,                         // angulo donde se encuentra el balon
-	//		world->bitacoraBalon.begin()->dir,                   // angulo del tiempo t-1
-	//		game_data->sensor_handler.last_sense.head_angle,     // angulo del cuerpo al cuello
-	//		world->me.view_mode_w,                               // modo del cono de vision
-	//		command);                                            // comando
-	//command->reset(); // para probar voronoi
-	//voronoiPositioning();
 	attackPositioning();
-
 }
 void PokTaPokAgentV1::balonRival()
 {
@@ -713,24 +694,11 @@ void PokTaPokAgentV1::balonRival()
 
 	if( aux  )
 	{
-		//irAlBalon();
-		//std::cout << "PokTaPok_" << world->me.unum << " intercepting" << std::endl;;
 		ball_interception->call( command );
-
 	}
 	else
 	{
 		defencePositioning();
-		//centerBall(game_data->sensor_handler.last_see.ballIsVisible(),  // es visible el balon?
-		//		sensor_h->last_see.ball.dir,                         // angulo donde se encuentra el balon
-		//		world->bitacoraBalon.begin()->dir,                   // angulo del tiempo t-1
-		//		game_data->sensor_handler.last_sense.head_angle,     // angulo del cuerpo al cuello
-		//		world->me.view_mode_w,                               // modo del cono de vision
-		//		command);                                     // comando
-		//voronoiPositioning();
-		//attackPositioning();
-		//defence();
-
 
 	}
 
@@ -767,17 +735,6 @@ void PokTaPokAgentV1::balonSuelto()
 	else
 	{
 		defencePositioning();
-		//cout<<"CENTRO EL BALON**"<<endl;
-		//centerBall(game_data->sensor_handler.last_see.ballIsVisible(),  // es visible el balon?
-		//		sensor_h->last_see.ball.dir,                         // angulo donde se encuentra el balon
-		//		world->bitacoraBalon.begin()->dir,                   // angulo del tiempo t-1
-		//		game_data->sensor_handler.last_sense.head_angle,     // angulo del cuerpo al cuello
-		//		world->me.view_mode_w,                               // modo del cono de vision
-		//		command);                                     // comando
-
-		//voronoiPositioning();
-		//this->attackPositioning();
-		//defence();
 	}
 }
 
@@ -793,8 +750,7 @@ void PokTaPokAgentV1::balonPerdido()
 	}
 	else
 	{
-		//voronoiPositioning();
-		//this->attackPositioning();
+
 	}
 
 }
@@ -1547,11 +1503,11 @@ PokTaPokAgentV1::constructVoronoi()
 	// Para la celda inicial
 	std::vector<Point2D> initial_cell;
 	Point2D q;
-	double const INITIAL_CELL_WIDTH  = 60;
-	double const INITIAL_CELL_HWIDTH = 30;
+	double const INITIAL_CELL_WIDTH  = 50;
+	double const INITIAL_CELL_HWIDTH = 25;
 	double const MARGIN = 5.0;
-	double  y_top	 = 35.0;
-	double  y_bottom = -35.0;
+	double  y_top	 = 30.0;
+	double  y_bottom = -30.0;
 	double  x_left;
 	double 	x_right;
 	Vector2D b;

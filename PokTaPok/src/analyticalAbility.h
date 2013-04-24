@@ -28,10 +28,6 @@ DePrimera( Vector2D const & vt1, // Velocidad deseada en el siguiente ciclo
 		   );
 
 Vector2D
-dePrimera( Vector2D const & out_vel,
-		   WorldModelV1 * world,
-		   AgentCommand * command );
-Vector2D
 velToInterceptBall( Vector2D const & b, // Posición del balón
 		Vector2D const & p, // Posición del jugador
 		Vector2D const & v, // Velocidad del balón
@@ -186,6 +182,13 @@ void searchBall( AgentCommand * command,
 void align(double neckDir,
             AgentCommand *command);
 
+void centerBall(bool   ballVisible,
+                double ballDir,
+                double lastAngleBall,
+                double neckDir,
+                ViewModeWidth cono,
+                AgentCommand * command);
+
 bool amTheClosest( WorldModelV1 *world);
 
 void radar( double neck_dir,
@@ -203,13 +206,6 @@ void GoToXY2 (   double   xTarget ,
 void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModelV1 *world,AgentCommand *command);
 
 int aQuienPasar(WorldModelV1 *world);
-
-void centerBall(bool   ballVisible,
-                double ballDir,
-                double lastAngleBall,
-                double neckDir,
-                ViewModeWidth cono,
-                AgentCommand * command);
 
 void centerBall( WorldModelV1 *world,
                  AgentCommand * command);
@@ -237,11 +233,9 @@ void comunicarObjetivo(Vector2D pointTarget,
                        WorldModelV1 *world,
                        AgentCommand *command );
 
-int chooseFriendToHear( Vector2D pointTarget,
-		                WorldModelV1 * world);
+int chooseFriendToHear(Vector2D pointTarget,WorldModelV1 * world);
 
-string convertToString( Vector2D pointTarget ,
-		                float prob);
+string convertToString(Vector2D pointTarget , float prob);
 
 float * convertToDouble( string mensaje );
 
