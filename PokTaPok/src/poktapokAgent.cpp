@@ -183,8 +183,9 @@ void PokTaPokAgentV1::onPlay()
 
 void PokTaPokAgentV1::ataque()
 {
-
 	int const BALL_INFO_EXPIRE_TIME = 6;
+
+	Vector2D ball_vel = world->estimateBallCurrentVel();
 
 	if( world->bitacoraBalon.empty() )
 	{
@@ -201,9 +202,11 @@ void PokTaPokAgentV1::ataque()
 	}
 	else if( amTheClosest(world) )
 	{
-
-		ball_interception->call( command );
-		radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
+		if( ball_vel.normita() < 0.4 )
+			irAlBalon();
+		else
+			ball_interception->call( command );
+		//radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
 	}
 	else
 	{
@@ -220,6 +223,8 @@ void PokTaPokAgentV1::defensa()
 
 	int const BALL_INFO_EXPIRE_TIME = 6;
 
+	Vector2D ball_vel = world->estimateBallCurrentVel();
+
 	if( world->bitacoraBalon.empty() )
 	{
 		searchBall( command, world, game_data->sensor_handler.last_sensor_type );
@@ -236,8 +241,11 @@ void PokTaPokAgentV1::defensa()
 	else if( amTheClosest(world) )
 	{
 
-		ball_interception->call( command );
-		radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
+		if( ball_vel.normita() < 0.5 )
+			irAlBalon();
+		else
+			ball_interception->call( command );
+		//radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type );
 
 	}
 	else
@@ -252,6 +260,11 @@ void PokTaPokAgentV1::ballStaticBehaviorSideL()
 	int amigo;
 	Vector2D kick;
 
+	if( world->bitacoraBalon.empty() )
+	{
+		searchBall( command, world, game_data->sensor_handler.last_sensor_type);
+	}
+	else
 	if(world->me.side == 'l')   // Si es a mi favor
 	{
 		if( world->time - world->bitacoraBalon.begin()->ciclo < 3)
@@ -261,7 +274,7 @@ void PokTaPokAgentV1::ballStaticBehaviorSideL()
 				if( world->bitacoraBalon.begin()->dis < 1.0 )  // si el balón esta en mi posesión
 				{
 					amigo = aQuienPasar(world);
-					if(amigo != -1)   // si regresa -1 no ve ningun agente
+					if( amigo > 0 && amigo < 11 )   // si regresa -1 no ve ningun agente
 					{
 						kick = PasePunto( world->bitacoraAmigos[amigo].begin()->pos.x,
 								world->bitacoraAmigos[amigo].begin()->pos.y,
@@ -321,7 +334,11 @@ void PokTaPokAgentV1::ballStaticBehaviorSideR()
 {
 	int amigo;
 	Vector2D kick;
-
+	if( world->bitacoraBalon.empty() )
+	{
+		searchBall( command, world, game_data->sensor_handler.last_sensor_type);
+	}
+	else
 	if(world->me.side == 'r')   // Si es a mi favor
 	{
 		if( world->time - world->bitacoraBalon.begin()->ciclo < 3)
@@ -331,7 +348,7 @@ void PokTaPokAgentV1::ballStaticBehaviorSideR()
 				if( world->bitacoraBalon.begin()->dis < 1.0 )  // si el balón esta en mi posesión
 				{
 					amigo = aQuienPasar(world);
-					if(amigo != -1)   // si regresa -1 no ve ningun agente
+					if( amigo > 0 && amigo < 11 )   // si regresa -1 no ve ningun agente
 					{
 						kick = PasePunto( world->bitacoraAmigos[amigo].begin()->pos.x,
 								world->bitacoraAmigos[amigo].begin()->pos.y,
@@ -744,16 +761,19 @@ void PokTaPokAgentV1::balonEquipo()
 }
 void PokTaPokAgentV1::balonRival()
 {
-	return;
 
 	bool aux;
+
+	Vector2D ball_vel = world->estimateBallCurrentVel();
 
 	aux =  amTheClosest(world);
 
 	if( aux  )
 	{
-
-		ball_interception->call( command );
+		if( ball_vel.normita() < 0.5 )
+			irAlBalon();
+		else
+			ball_interception->call( command );
 	}
 	else
 	{
@@ -768,11 +788,15 @@ void PokTaPokAgentV1::balonSuelto()
 {
 
 	//cout<<"MAS CERCANO: "<<aux<<endl;
+
+	Vector2D ball_vel = world->estimateBallCurrentVel();
+
 	if( amTheClosest(world) )
 	{
-		//irAlBalon();
-		ball_interception->call( command );
-		////radar game_data->sensor_handler.last_sense.head_angle,
+		if( ball_vel.normita() < 0.5 )
+			irAlBalon();
+		else
+			ball_interception->call( command );		////radar game_data->sensor_handler.last_sense.head_angle,
 			//	command );
 	}
 	else

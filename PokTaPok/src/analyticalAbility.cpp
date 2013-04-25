@@ -28,6 +28,8 @@ DePrimera( Vector2D const & vt1, // Velocidad deseada en el siguiente ciclo
 	double pow_needed;
 	double angle_needed;
 
+	if( f == 0.0 ) f = 0.001;
+
 	if( vt1.x == 0.0 && vt1.y == 0.0 && vt0.x == 0.0 && vt0.y == 0.0)
 	{
 		pow_needed = 0.0;
@@ -72,7 +74,7 @@ velToInterceptBall( Vector2D const & b, // Posición del balón
 double
 ActualKickPowerRate(int dir,double dist)
 {
-	double kick_power_rate = 0.027,kickable_margin = 0.7;
+	double const kick_power_rate = 0.027,kickable_margin = 0.7;
 	double act_kpr = kick_power_rate * (( 1.0 - ((0.25 * dir) / 180.0)) - ((0.25 * dist) / kickable_margin));
 
 	return act_kpr;
@@ -90,7 +92,7 @@ double KickPowerForSpeed(double speed,double actkpr)
 
 double KickSpeedToTravel(double d,double e)
 {
-	if( e == 0 )
+	if( e == 0.0 )
 	{
 		e = 0.01;
 	}
@@ -429,31 +431,31 @@ BallInterception::searchBall()
 
 		//command->append_turn( 60 );
 		double lastDirection = world->bitacoraBalon.begin()->dir;
-		    int    idCono        = world->me.view_mode_w;
+		int    idCono        = world->me.view_mode_w;
 
-		    double cono;
+		double cono;
 
-		    switch(idCono)
-		    {
-		    case NARROW: cono = 60.0;  break;
-		    case NORMAL: cono = 120.0; break;
-		    case WIDE:   cono = 180.0; break;
-		    default:     cono = 0.0;   break; // incorrecto, error
-		    }
+		switch(idCono)
+		{
+		case NARROW: cono = 60.0;  break;
+		case NORMAL: cono = 120.0; break;
+		case WIDE:   cono = 180.0; break;
+		default:     cono = 0.0;   break; // incorrecto, error
+		}
 
-		    if( game_data->sensor_handler.last_sensor_type== SENSOR_SEE)
-		    {
-		        if( lastDirection < 0.0  )
-		        {
-		            command->append_turn(-cono);
-		            //command->append_turn(-15);
-		        }
-		        else
-		        {
-		            //command->append_turn(cono);
-		            command->append_turn( 60 );
-		        }
-		    }
+		if( game_data->sensor_handler.last_sensor_type== SENSOR_SEE)
+		{
+			if( lastDirection < 0.0  )
+			{
+				command->append_turn(-cono);
+				//command->append_turn(-15);
+			}
+			else
+			{
+				//command->append_turn(cono);
+				command->append_turn( 60 );
+			}
+		}
 	}
 }
 
@@ -621,20 +623,14 @@ FreezeBall::call( AgentCommand * command )
 	ServerParam & param  = game_data->game_parameter.server_param;
 	double pow_needed;
 	double angle_needed;
-	//if( !visual.ballIsVisible() )
-	//{	// No podemos congelar el balón sin datos visuales de él
-	//	return;
-	//	}
-	//Vector2D v = world->bitacoraBalon.begin()->vel; // vel...
 
-	int		 t = world->time;	//
+
 	Vector2D p = world->me.pos; // Posición del agente
 	double theta = world->me.angleDeg();
-	Vector2D b = world->bitacoraBalon.begin()->pos; // posición del balón en el ciclo tb
 
 	Vector2D vn = world->estimateBallCurrentVel();
 
-	int		tb = world->bitacoraBalon.begin()->ciclo; // tiempo en que se vio el balón
+
 	Vector2D pv = Vector2D::fromPolar( body.speed_amount,
 									   Deg2Rad( body.speed_direction  + theta ) );
 
@@ -653,7 +649,7 @@ FreezeBall::call( AgentCommand * command )
 	double dir_diff = std::abs( entre180( theta - Rad2Deg( pn_bn.angle() ) ) );
 	double f = (1 - 0.25*(dir_diff/180.0) -0.25*(dis/param.kickable_margin) );
 
-
+	if( f == 0.0 ) f = 0.001;
 
 	if( vn.x == 0.0 && vn.y == 0.0 )
 	{
@@ -833,10 +829,9 @@ bool amTheClosest( WorldModelV1 *world )
     Vector2D balon;
     Vector2D poseAgente;
 
-    double x =  world->me.pos.x;
-    double y =  world->me.pos.y;
-    double angle =  world->me.angle;
-    double neck_dir =  world->me.head_angle;
+
+    if( world->bitacoraBalon.empty() )
+    	return false;
 
     balon.x = world->bitacoraBalon.begin()->pos.x;
     balon.y = world->bitacoraBalon.begin()->pos.y;
@@ -979,7 +974,6 @@ void GoToXY2 (   double   xTarget ,
 {
 
     double  disToPoint;
-    double  dirToPoint;
     double  dashParameter;
     double const dash_power_rate = 0.006, effort = 0.8;
     //double const inertia_moment = 5.0;
@@ -993,7 +987,6 @@ void GoToXY2 (   double   xTarget ,
     //consideramos el angle como el angulo del cuerpo
 
     disToPoint = sqrt( (xTarget - x)*(xTarget - x)  + (yTarget - y)*(yTarget - y) );
-    dirToPoint = Rad2Deg(atan2( yTarget - y , xTarget - x));
 
 
     if( disToPoint > radio )  // el agente no ha llegado al punto
@@ -1125,6 +1118,9 @@ void centerBall( WorldModelV1 *world,
                  AgentCommand * command)
 {
     double precision = 10.0;
+
+    if( world->bitacoraBalon.empty() )
+    	return;
 
     if( world->bitacoraBalon.begin()->dir <=  precision &&
             world->bitacoraBalon.begin()->dir >= -precision  )

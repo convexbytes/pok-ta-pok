@@ -477,7 +477,7 @@ WorldModelV1::predictBallCurrentVel( Vector2D * v )
 	Vector2D vtmp, vtmp_2;
 	*v = 0.0;
 
-	if( this->bitacoraBalon.size() < 1 )
+	if( this->bitacoraBalon.empty() )
 		return false;
 
 	if( bitacoraBalon.size() == 1 )
