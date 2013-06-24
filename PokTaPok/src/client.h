@@ -5,7 +5,7 @@
 #include "udpSocket.h"
 #include "gameData.h"
 #include "parser.h"
-#include "localizationEngine.h"
+#include "localizationAdapter.h"
 #include "microParser.h"
 #include "udpSocket.h"
 #include "serializer.h"
@@ -61,9 +61,6 @@ private:
     MP_MessageType      last_msg_type;
 
     void initialize     ( );
-    void pre_filter     ( char *server_msg );
-    void set_sending_wait_time(char *message);
-
 };
 
 #endif

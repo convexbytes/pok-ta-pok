@@ -5,9 +5,9 @@
 #include <cmath>
 #include <algorithm>
 
-PokTaPokAgentV1::PokTaPokAgentV1( GameData * game_data )
+PokTaPokAgent::PokTaPokAgent( GameData * game_data )
 {
-    world 			  = new WorldModelV1	 ( game_data );
+    world 			  = new WorldModel	 ( game_data );
     freeze_ball	      = new FreezeBall		 ( game_data, world );
     ball_interception = new BallInterception ( game_data, world, freeze_ball );
 	this->game_data	  = game_data;
@@ -18,14 +18,14 @@ PokTaPokAgentV1::PokTaPokAgentV1( GameData * game_data )
 	on_reception = false;
 
 }
-PokTaPokAgentV1::~PokTaPokAgentV1()
+PokTaPokAgent::~PokTaPokAgent()
 {
 	delete world;
 	delete ball_interception;
 	delete freeze_ball;
 }
 
-void PokTaPokAgentV1::do_process( GameData *game_data,
+void PokTaPokAgent::do_process( GameData *game_data,
 		AgentCommand *agent_command )
 {
 
@@ -55,13 +55,13 @@ void PokTaPokAgentV1::do_process( GameData *game_data,
 	}
 }
 
-void PokTaPokAgentV1::update()
+void PokTaPokAgent::update()
 {
 	world->update( this->game_data );
 	state_m.update( *this->game_data );
 }
 
-void PokTaPokAgentV1::onInitial()
+void PokTaPokAgent::onInitial()
 {
 
 	Vector2D pos;
@@ -89,11 +89,11 @@ void PokTaPokAgentV1::onInitial()
 	if( world->me.view_mode_w != NARROW )
 		command->append_change_view( HIGH, NARROW );
 
-	radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type);
+	//radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type);
 
 }
 
-void PokTaPokAgentV1::onPrep()
+void PokTaPokAgent::onPrep()
 {
 	if(world->me.unum == 1)
 	{
@@ -127,10 +127,10 @@ void PokTaPokAgentV1::onPrep()
         case OFFSIDE_R: break;
         }
 	}
-	radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type);
+	//radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type);
 }
 
-void PokTaPokAgentV1::onPlay()
+void PokTaPokAgent::onPlay()
 {
 
 
@@ -172,7 +172,7 @@ void PokTaPokAgentV1::onPlay()
      else
     	 defensa();
 
-     radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type);
+     //radar( world->me.headAngleDeg(), command, game_data->sensor_handler.last_sensor_type);
     }
     else
     {
@@ -181,7 +181,7 @@ void PokTaPokAgentV1::onPlay()
     }
 }
 
-void PokTaPokAgentV1::ataque()
+void PokTaPokAgent::ataque()
 {
 	int const BALL_INFO_EXPIRE_TIME = 6;
 
@@ -218,7 +218,7 @@ void PokTaPokAgentV1::ataque()
 	}
 }
 
-void PokTaPokAgentV1::defensa()
+void PokTaPokAgent::defensa()
 {
 
 	int const BALL_INFO_EXPIRE_TIME = 6;
@@ -255,7 +255,7 @@ void PokTaPokAgentV1::defensa()
 	}
 }
 
-void PokTaPokAgentV1::ballStaticBehaviorSideL()
+void PokTaPokAgent::ballStaticBehaviorSideL()
 {
 	int amigo;
 	Vector2D kick;
@@ -330,7 +330,7 @@ void PokTaPokAgentV1::ballStaticBehaviorSideL()
 	}
 
 }
-void PokTaPokAgentV1::ballStaticBehaviorSideR()
+void PokTaPokAgent::ballStaticBehaviorSideR()
 {
 	int amigo;
 	Vector2D kick;
@@ -404,7 +404,7 @@ void PokTaPokAgentV1::ballStaticBehaviorSideR()
 	}
 }
 
-void PokTaPokAgentV1::balonPropio()
+void PokTaPokAgent::balonPropio()
 {
 	ball_interception->reset();
 
@@ -750,7 +750,7 @@ void PokTaPokAgentV1::balonPropio()
 
 }
 
-void PokTaPokAgentV1::balonEquipo()
+void PokTaPokAgent::balonEquipo()
 {
 
 #ifdef ATTACK_POSITIONING
@@ -759,7 +759,7 @@ void PokTaPokAgentV1::balonEquipo()
 				voronoiPositioning();
 #endif
 }
-void PokTaPokAgentV1::balonRival()
+void PokTaPokAgent::balonRival()
 {
 
 	bool aux;
@@ -784,7 +784,7 @@ void PokTaPokAgentV1::balonRival()
 }
 
 
-void PokTaPokAgentV1::balonSuelto()
+void PokTaPokAgent::balonSuelto()
 {
 
 	//cout<<"MAS CERCANO: "<<aux<<endl;
@@ -805,7 +805,7 @@ void PokTaPokAgentV1::balonSuelto()
 	}
 }
 
-void PokTaPokAgentV1::balonPerdido()
+void PokTaPokAgent::balonPerdido()
 {
 	//searchBall(world->bitacoraBalon.begin()->dir,world->me.view_mode_w,command);
 
@@ -822,7 +822,7 @@ void PokTaPokAgentV1::balonPerdido()
 
 }
 
-void PokTaPokAgentV1::irAlBalon()
+void PokTaPokAgent::irAlBalon()
 {
 	Vector2D velocidad;
 	Vector2D balon;
@@ -867,7 +867,7 @@ void PokTaPokAgentV1::irAlBalon()
 }
 
 
-void PokTaPokAgentV1::voronoiPositioning()
+void PokTaPokAgent::voronoiPositioning()
 {
 
 	BodySensor & body = sensor_h->last_sense;
@@ -889,7 +889,7 @@ void PokTaPokAgentV1::voronoiPositioning()
 }
 
 void
-PokTaPokAgentV1::defencePositioning()
+PokTaPokAgent::defencePositioning()
 {
 	BodySensor & body = game_data->sensor_handler.last_sense;
 
@@ -1311,7 +1311,7 @@ PokTaPokAgentV1::defencePositioning()
 			command);
 
 }	// termina defensa
-void PokTaPokAgentV1::goalieBehavior()
+void PokTaPokAgent::goalieBehavior()
 {
 
     int num,timeCatch;
@@ -1438,7 +1438,7 @@ void PokTaPokAgentV1::goalieBehavior()
             }
             else
             {  // Regreso al punto clave
-                radar(world->me.head_angle,command,game_data->sensor_handler.last_sensor_type);
+                //radar(world->me.head_angle,command,game_data->sensor_handler.last_sensor_type);
                 GoToXY( xTarget,
                         0.0,     //yTarget = 0.0
                         1.0,
@@ -1455,7 +1455,7 @@ void PokTaPokAgentV1::goalieBehavior()
 } // Termina el comportamiento del portero
 
 void
-PokTaPokAgentV1::attackPositioning()
+PokTaPokAgent::attackPositioning()
 {
 	BodySensor & body = game_data->sensor_handler.last_sense;
 
@@ -1563,7 +1563,7 @@ PokTaPokAgentV1::attackPositioning()
 }
 
 void
-PokTaPokAgentV1::constructVoronoi()
+PokTaPokAgent::constructVoronoi()
 {
 	// Para la celda inicial
 	std::vector<Point2D> initial_cell;
@@ -1686,7 +1686,7 @@ PokTaPokAgentV1::constructVoronoi()
 
 
 double
-PokTaPokAgentV1::passProb( Vector2D const & target_pos)
+PokTaPokAgent::passProb( Vector2D const & target_pos)
 {
 	double prob = 0;
 
@@ -1694,7 +1694,7 @@ PokTaPokAgentV1::passProb( Vector2D const & target_pos)
 }
 
 void
-PokTaPokAgentV1::passAction( int unum, Vector2D const & pos )
+PokTaPokAgent::passAction( int unum, Vector2D const & pos )
 {
 	Vector2D kick_vec;
 	char msg[10];
@@ -1720,7 +1720,7 @@ PokTaPokAgentV1::passAction( int unum, Vector2D const & pos )
 }
 
 void
-PokTaPokAgentV1::shootAction()
+PokTaPokAgent::shootAction()
 {
 	double const GOALIE_INFO_EXPIRE_TIME = 6;
 
@@ -1800,7 +1800,7 @@ PokTaPokAgentV1::shootAction()
 }
 
 void
-PokTaPokAgentV1::hearOur()
+PokTaPokAgent::hearOur()
 {
 	std::string msg  = sensor_h->last_hear_opp.message;
 	const char * cad = msg.c_str();
@@ -1822,7 +1822,7 @@ PokTaPokAgentV1::hearOur()
 }
 
 void
-PokTaPokAgentV1::reception()
+PokTaPokAgent::reception()
 {
 	SeeSensor & visual = sensor_h->last_see;
 	BodySensor & body  = sensor_h->last_sense;
@@ -1854,7 +1854,7 @@ PokTaPokAgentV1::reception()
 }
 
 void
-PokTaPokAgentV1::chooseAttention()
+PokTaPokAgent::chooseAttention()
 {
 	static int attention_unum = 10; // es el delantero central
 
@@ -1905,6 +1905,7 @@ PokTaPokAgentV1::chooseAttention()
 
 	if( unum != world->me.attention_unum )
 	{
-		command->append_attentionto( ATTENTION_OUR, unum );
+		attention_unum = unum;
+		command->append_attentionto( ATTENTION_OUR, attention_unum );
 	}
 }

@@ -10,4 +10,4 @@ Vector2D ubicacionLineaBandera(double direccionLinea, char lineaId,double distan
 double  orientacion_global(Vector2D coordGlobalFlag,Vector2D coordGlobalAgente, double angulo_relativo );
 double  body_angle_loc(int head_angle, Vector2D global_agent,  Vector2D coordGlobalFlag, int sensed_flag_direction );
 double orientation(char a);
-#endif
+#endif // METODOSUBICACION_H

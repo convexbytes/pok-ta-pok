@@ -54,48 +54,4 @@ MP_MessageType MicroParser::get_message_type(char * message)
     return MP_NONE;
 }
 
-bool MicroParser::parenthesis_are_matched(char* message){
-	//Regresa verdadero en caso de que no haya paréntesis de sobra ni hagan falta
-    //CharStack parenthesis_pile;
-    vector<char> parenthesis_pile;
-    bool error = false;
-	int i;
-	char c = '(';
-    for(i=0; message[i] != '\0' && !error; i++)
-	{
-        if(message[i] == '(')
-		{
-            parenthesis_pile.push_back(c);
-		}
-		else
-        if(message[i] == ')')
-		{
-
-            if ( parenthesis_pile.empty() )
-			{
-                error = true;
-			}
-            else
-            {
-                parenthesis_pile.pop_back();
-            }
-		}
-	}
-    if(error)
-    {
-        return false;
-    }
-    else
-        if( parenthesis_pile.empty() )
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }	
-}
-
-
-
 

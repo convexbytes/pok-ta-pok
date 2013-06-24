@@ -38,51 +38,51 @@ double  rad2grad ( double radianes )
 inline
 int entre180(int angulo)
 {
-int equivalente;
+	int equivalente;
 
-equivalente = angulo;
+	equivalente = angulo;
 
-if( angulo<-180 || angulo>180 )
-{
-if(angulo<-360 || angulo>360)
-{
-equivalente = angulo % 360;
-}
+	if( angulo<-180 || angulo>180 )
+	{
+		if(angulo<-360 || angulo>360)
+		{
+			equivalente = angulo % 360;
+		}
 
-if(equivalente<-180 || equivalente>180)
-{
-equivalente = equivalente%180;
-if(equivalente<0)
-equivalente = 180 + equivalente;
-else
-equivalente = equivalente - 180;
-}
-}
-return equivalente;
+		if(equivalente<-180 || equivalente>180)
+		{
+			equivalente = equivalente%180;
+			if(equivalente<0)
+				equivalente = 180 + equivalente;
+			else
+				equivalente = equivalente - 180;
+		}
+	}
+	return equivalente;
 }
 
 inline
 double entre180( double angulo )
 {
-    double equivalente;
-    equivalente = angulo;
-    if( angulo<-180 || angulo>180 )
-    {
-    if(angulo<-360 || angulo>360)
-    {
-    equivalente = std::fmod(angulo, 360.0);
-    }
+	double equivalente;
+	equivalente = angulo;
+	if( angulo<-180 || angulo>180 )
+	{
+		if(angulo<-360 || angulo>360)
+		{
+			equivalente = std::fmod(angulo, 360.0);
+		}
 
-    if(equivalente<-180 || equivalente>180)
-    {
-    equivalente = std::fmod(angulo, 180.0);
-    if(equivalente<0)
-    equivalente = 180 + equivalente;
-    else
-    equivalente = equivalente - 180;
-    }
-    }
-    return equivalente;
+		if(equivalente<-180 || equivalente>180)
+		{
+			equivalente = std::fmod(angulo, 180.0);
+			if(equivalente<0)
+				equivalente = 180 + equivalente;
+			else
+				equivalente = equivalente - 180;
+		}
+	}
+	return equivalente;
 }
 
 template < typename T >

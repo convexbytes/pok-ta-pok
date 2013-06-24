@@ -1,4 +1,4 @@
-#include "localizationEngine.h"
+#include "localizationAdapter.h"
 #include "localizationMethods.h"
 #include "gameData.h"
 #include "geometry.h"
@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-LocalizationEngine::LocalizationEngine( GameData * game_data )
+LocalizationAdapter::LocalizationAdapter( GameData * game_data )
 {
   //  int angulo_inicial;
     int i;
@@ -32,7 +32,7 @@ LocalizationEngine::LocalizationEngine( GameData * game_data )
     this->p_nuevas  = particulas_nuevas;
 }
 
-void LocalizationEngine::updatePos(  )
+void LocalizationAdapter::updatePos(  )
 {
     SensorType         sensor_type;
     vector<Flag>     * banderas;

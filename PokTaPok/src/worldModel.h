@@ -4,7 +4,7 @@
 #include "sensorHandler.h"
 #include "sensor.h"
 #include "gameCommand.h"
-#include "localizationEngine.h"
+#include "localizationAdapter.h"
 #include "utilities.h"
 
 #include <deque>
@@ -14,6 +14,11 @@
 #ifndef TEAM_NAME
 #define TEAM_NAME "PokTaPok"
 #endif
+
+class AgentState;
+class WorldModel;
+class ObjetoBitacora;
+
 
 enum MasterStatus
 {
@@ -31,10 +36,10 @@ enum PossessionBall
     PERDIDA         // balón sin ver
 };
 
-class AgentStateV1
+class AgentState
 {
 public:
-	AgentStateV1();
+	AgentState();
 	// principales
     Vector2D pos;
     double   angle;
@@ -82,20 +87,18 @@ public:
 	bool     goalie;
 };
 
-class WorldModelV1
+class WorldModel
 {
 public:
-    WorldModelV1( GameData * game_data );
+    WorldModel( GameData * game_data );
     void update( GameData * game_data );
 
 
-    // Para guardar las referencias de que se reciben en update
+    // Para guardar la referencia a GameData
     GameData  	  * game_data;
-    AgentCommand  * command_commited;
 
-
-    AgentStateV1         me;
-    LocalizationEngine * loc_engine;
+    AgentState	         me;
+    LocalizationAdapter * loc_adapter;
 
     PlayModeHearable     play_mode;
     int                  time;

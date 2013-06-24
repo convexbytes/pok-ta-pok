@@ -1,14 +1,14 @@
-#ifndef LOCALIZATIONENGINE_H
-#define LOCALIZATIONENGINE_H
+#ifndef LOCALIZATIONADAPTER_H
+#define LOCALIZATIONADAPTER_H
 #include "gameData.h"
 #include "gameCommand.h"
-#include "LocalizationAlgorithm.h"
+//#include "LocalizationAlgorithm.h"
 #include "montecarloLocalization.h"
 
-class LocalizationEngine
+class LocalizationAdapter
 {
 public:
-    LocalizationEngine( GameData * game_data );
+    LocalizationAdapter( GameData * game_data );
     void updatePos(); //Método que usa el algoritmo de localización para actualizar los datos de game_data
 
     double x;
@@ -29,4 +29,4 @@ private:
     void inicializar_particulas();
 };
 
-#endif // LOCALIZATIONENGINE_H
+#endif // LOCALIZATIONADAPTER_H
