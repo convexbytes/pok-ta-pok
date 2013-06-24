@@ -2,7 +2,7 @@
 #include "udpSocket.h"
 #include "gameData.h"
 #include "parser.h"
-#include "localizationEngine.h"
+#include "localizationAdapter.h"
 #include "microParser.h"
 #include "udpSocket.h"
 #include "serializer.h"
@@ -45,7 +45,7 @@ void Client::initialize() {
 	//Iniciamos todos los objetos.
 	game_data           = new GameData  ( );
 	parser              = new Parser    (game_data);
-	agent               = new PokTaPokAgentV1  ( game_data );
+	agent               = new PokTaPokAgent	   ( game_data );
 	agent_command       = new AgentCommand     ( );
 
 	//Comprobamos que se crearon todos los objetos
@@ -173,6 +173,8 @@ void Client::main_loop( bool goalie )
 
 void * Client::Client::process_thread_function(void *parameter)
 {
+	AgentCommand aux_command; // Para reducir el tiempo de bloqueo
+
 	int  seconds_since_last_message;
 	char server_message_aux[4096];
 	bool stack_empty;
@@ -211,9 +213,11 @@ void * Client::Client::process_thread_function(void *parameter)
 			Client::instance().parser->parse( server_message_aux );
 
 			// Recibimos la respuesta del agente.
-			pthread_mutex_lock( &Client::instance().command_mutex );
 			Client::instance().agent->do_process(Client::instance().game_data,
-					Client::instance().agent_command );
+					&aux_command );
+
+			pthread_mutex_lock( &Client::instance().command_mutex );
+				*Client::instance().agent_command = aux_command;
 			pthread_mutex_unlock( &Client::instance().command_mutex );
 
 		}
@@ -239,7 +243,7 @@ void* Client::Client::sending_thread_function(void *parameter)
 	timespec wait_time;
 	timespec rem_time;
 
-	wait_time.tv_nsec = 80000000; // 60 milisegundos
+	wait_time.tv_nsec = 80000000; // 80 milisegundos
 	wait_time.tv_sec = 0;
 
 	while ( true )

@@ -11,7 +11,7 @@
 #define POT_FIELD_EXPIRE_TIME 5
 #define PASS_OPTION_EXPIRE_TIME 3
 
-class PokTaPokAgentV1;
+class PokTaPokAgent;
 class BallInterception;
 class FreezeBall;
 
@@ -26,17 +26,17 @@ enum ActionType
 
 
 
-class PokTaPokAgentV1 : public Agent
+class PokTaPokAgent	 : public Agent
 {
 public:
-    PokTaPokAgentV1( GameData * game_data );
-    ~PokTaPokAgentV1();
+    PokTaPokAgent( GameData * game_data );
+    ~PokTaPokAgent();
     virtual void do_process( GameData * game_data,
                              AgentCommand *agent_command );
 
 
 private:
-    WorldModelV1        * world;
+    WorldModel	        * world;
     GameData			* game_data;
     AgentCommand        * command;
     AgentCommand        * command_c;

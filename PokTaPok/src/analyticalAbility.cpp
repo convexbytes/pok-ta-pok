@@ -220,7 +220,7 @@ void runWithBall (double   xTarget ,
                   double   disBall,
                   Vector2D velocidad,
                   double   radio,
-                  WorldModelV1 * world,
+                  WorldModel * world,
                   AgentCommand * command
                   )
 {
@@ -349,7 +349,7 @@ double shootAtGoal(double x, double y, double angle, vector<Flag> *banderas )
 }
 
 BallInterception::BallInterception( GameData 	   * game_data,
-							  WorldModelV1 * world,
+							  WorldModel * world,
 							  FreezeBall   * freeze_ball)
 {
 	this->game_data = game_data;
@@ -607,7 +607,7 @@ void BallInterception::pasiveInterception()
 	state = PASIVE_INTERCEPTION;
 }
 
-FreezeBall::FreezeBall( GameData * game_data, WorldModelV1 * world )
+FreezeBall::FreezeBall( GameData * game_data, WorldModel * world )
 {
 	this->game_data = game_data;
 	this->world 	= world;
@@ -666,7 +666,7 @@ FreezeBall::call( AgentCommand * command )
 
 }
 
-PossessionBall whoHasTheBall(WorldModelV1 *world)
+PossessionBall whoHasTheBall(WorldModel *world)
 {
     int            i;
     bool           posesion=false;
@@ -758,7 +758,7 @@ PossessionBall whoHasTheBall(WorldModelV1 *world)
 
 
 void searchBall( AgentCommand * command,
-                 WorldModelV1 * world,
+                 WorldModel * world,
                  SensorType sensor_type)
 {
     double lastDirection = world->bitacoraBalon.begin()->dir;
@@ -820,7 +820,7 @@ void centerBall(bool   ballVisible,
 
 }
 
-bool amTheClosest( WorldModelV1 *world )
+bool amTheClosest( WorldModel *world )
 
 {
     int      i,k,friends;
@@ -894,7 +894,7 @@ void radar(double neck_dir,
 }
 
 
-int aQuienPasar(WorldModelV1 *world)
+int aQuienPasar(WorldModel *world)
 {
     int i;
     int indice;
@@ -921,7 +921,7 @@ int aQuienPasar(WorldModelV1 *world)
 }
 
 
-void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModelV1 *world,AgentCommand *command)
+void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModel *world,AgentCommand *command)
 {
     Vector2D puntoReferencia;  //Coordenadas de la bandera del centro de la porteria
     double yTarget;
@@ -969,7 +969,7 @@ void GoToXY2 (   double   xTarget ,
                  double   radio,
                  Vector2D velocidad,
                  AgentCommand * command,
-                 WorldModelV1 * world
+                 WorldModel * world
                  )
 {
 
@@ -1114,7 +1114,7 @@ void GoToXY2 (   double   xTarget ,
 
 }
 
-void centerBall( WorldModelV1 *world,
+void centerBall( WorldModel *world,
                  AgentCommand * command)
 {
     double precision = 10.0;
@@ -1152,7 +1152,7 @@ void GoToXY (   double   xTarget ,
 		double   radio,
 		Vector2D velocidad,
                 AgentCommand * command,
-                WorldModelV1 * world
+                WorldModel * world
                 )
 {
 
@@ -1665,7 +1665,7 @@ string convertToString(Vector2D pointTarget , float prob)
 
 // Devuelve el unum del agente amigo al cual debe de oir
 // Elige al agente más cercano al objetivo que tiene destinado
-int chooseFriendToHear(Vector2D pointTarget,WorldModelV1 * world)
+int chooseFriendToHear(Vector2D pointTarget,WorldModel * world)
 {
     double dist_min;
     double distToObjetive;
@@ -1698,7 +1698,7 @@ int chooseFriendToHear(Vector2D pointTarget,WorldModelV1 * world)
 // realizarlo, convierte a cadena esos datos y comunica el mansaje con el comando SAY
 void comunicarObjetivo(Vector2D pointTarget,
                        float   prob,
-                       WorldModelV1 *world,
+                       WorldModel *world,
                        AgentCommand *command )
 {
     string mensaje;
@@ -1710,7 +1710,7 @@ void comunicarObjetivo(Vector2D pointTarget,
 // Elige que agente escuchar, y aplica el comando attentionto para oir el mensaje
 bool escucharObjetivo ( GameData 	   * game_data,
                        Vector2D pointTarget,
-                       WorldModelV1 *world,
+                       WorldModel *world,
                        AgentCommand *command)
 {
     int amigo;
@@ -1734,7 +1734,7 @@ bool escucharObjetivo ( GameData 	   * game_data,
 }
 
 // Regresa un false, si el objetivo es similar al del agente amigo y si su probabilidad es menor
-bool compararObjetivo( GameData * game_data,Vector2D miPunto, float miProb, WorldModelV1 *world)
+bool compararObjetivo( GameData * game_data,Vector2D miPunto, float miProb, WorldModel *world)
 {
     float * p;
     float x,y,prob;
@@ -1772,7 +1772,7 @@ bool compararObjetivo( GameData * game_data,Vector2D miPunto, float miProb, Worl
 }
 
 
-bool amStayInLine( WorldModelV1 * world )
+bool amStayInLine( WorldModel * world )
 {
     bool regreso;
     double xTarget;
@@ -1790,7 +1790,7 @@ bool amStayInLine( WorldModelV1 * world )
     return regreso;
 }
 
-void alignBodyWithNeck(WorldModelV1 *world,
+void alignBodyWithNeck(WorldModel *world,
                        AgentCommand *command)
 {
     if( world->me.head_angle != 0.0 )
@@ -1800,7 +1800,7 @@ void alignBodyWithNeck(WorldModelV1 *world,
        }
 }
 
-bool balonEnAreaGrande( WorldModelV1 *world )
+bool balonEnAreaGrande( WorldModel *world )
 {
     bool regreso;
 

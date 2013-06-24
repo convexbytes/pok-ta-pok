@@ -10,11 +10,13 @@
 #include <iostream>
 #include <cstring>
 
+
 class BallInterception;
 class FreezeBall;
+
 class ServerParam;
 class GameData;
-class WorldModelV1;
+class WorldModel;
 
 
 Vector2D
@@ -47,7 +49,7 @@ class BallInterception
 {
 public:
 	BallInterception( GameData 		* game_data,
-				   WorldModelV1 	* world,
+				   WorldModel 	* world,
 				   FreezeBall		* freeze_ball );
 	void reset(); //
 	void call( AgentCommand * command);
@@ -65,7 +67,7 @@ private:
 	//Datos del juego
 	GameData 	 * game_data;
 	AgentCommand * command;
-	WorldModelV1 * world;
+	WorldModel * world;
 	ServerParam  * param ;
 	SeeSensor    * visual;
 	BodySensor 	 * body  ;
@@ -111,12 +113,12 @@ private:
 class FreezeBall
 {
 public:
-	FreezeBall( GameData * game_data, WorldModelV1 * world );
+	FreezeBall( GameData * game_data, WorldModel * world );
 	void call( AgentCommand * command );
 
 private:
 	GameData 	 * game_data;
-	WorldModelV1 * world;
+	WorldModel * world;
 	AgentCommand * command;
 };
 
@@ -159,7 +161,7 @@ void runWithBall (double   xTarget ,
                   double   disBall,
                   Vector2D velocidad,
                   double   radio,
-                  WorldModelV1 * world,
+                  WorldModel * world,
                   AgentCommand * command
                   );
 
@@ -173,10 +175,10 @@ bool posteVisible ( vector<Flag> *banderas );
 double shootAtGoal(double x, double y, double angle, vector<Flag> *banderas );
 
 
-PossessionBall whoHasTheBall(WorldModelV1 *world);
+PossessionBall whoHasTheBall(WorldModel *world);
 
 void searchBall( AgentCommand * command,
-                 WorldModelV1 * world,
+                 WorldModel * world,
                  SensorType sensor_type);
 
 void align(double neckDir,
@@ -189,7 +191,7 @@ void centerBall(bool   ballVisible,
                 ViewModeWidth cono,
                 AgentCommand * command);
 
-bool amTheClosest( WorldModelV1 *world);
+bool amTheClosest( WorldModel *world);
 
 void radar( double neck_dir,
 		    AgentCommand *command,
@@ -200,14 +202,14 @@ void GoToXY2 (   double   xTarget ,
                  double   radio,
                  Vector2D velocidad,
                  AgentCommand * command,
-                 WorldModelV1 * world
+                 WorldModel * world
                  );
 
-void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModelV1 *world,AgentCommand *command);
+void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModel *world,AgentCommand *command);
 
-int aQuienPasar(WorldModelV1 *world);
+int aQuienPasar(WorldModel *world);
 
-void centerBall( WorldModelV1 *world,
+void centerBall( WorldModel *world,
                  AgentCommand * command);
 
 void GoToXY (   double   xTarget ,
@@ -215,35 +217,35 @@ void GoToXY (   double   xTarget ,
 		double   radio,
 		Vector2D velocidad,
                 AgentCommand * command,
-                WorldModelV1 * world
+                WorldModel * world
                 );
 
 bool compararObjetivo( GameData * game_data,
 		               Vector2D miPunto,
 		               float miProb,
-		               WorldModelV1 *world);
+		               WorldModel *world);
 
 bool escucharObjetivo ( GameData 	   * game_data,
                        Vector2D pointTarget,
-                       WorldModelV1 *world,
+                       WorldModel *world,
                        AgentCommand *command);
 
 void comunicarObjetivo(Vector2D pointTarget,
                        float   prob,
-                       WorldModelV1 *world,
+                       WorldModel *world,
                        AgentCommand *command );
 
-int chooseFriendToHear(Vector2D pointTarget,WorldModelV1 * world);
+int chooseFriendToHear(Vector2D pointTarget,WorldModel * world);
 
 string convertToString(Vector2D pointTarget , float prob);
 
 float * convertToDouble( string mensaje );
 
-bool balonEnAreaGrande( WorldModelV1 *world );
+bool balonEnAreaGrande( WorldModel *world );
 
-bool amStayInLine( WorldModelV1 * world );
+bool amStayInLine( WorldModel * world );
 
-void alignBodyWithNeck(WorldModelV1 *world,
+void alignBodyWithNeck(WorldModel *world,
                        AgentCommand *command);
 
 #endif //ANALYTICAL_ABILITY_H

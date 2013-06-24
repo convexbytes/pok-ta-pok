@@ -7,13 +7,12 @@ Vector2D ubicacionBanderaBandera(double distanciaFlag1, double direccionFlag1, V
     // Devuelve un vector con la coordenada global en x
     // y la coordenada global y
     //
-    double distancia, p1[2], a,b, dx, dy, h;
+    double distancia, p1[2], a, dx, dy, h;
     Vector2D posicion;
     dx = coordGlobalFlag2.x - coordGlobalFlag1.x;
     dy = coordGlobalFlag2.y - coordGlobalFlag1.y;
 
     distancia = sqrt( dx*dx + dy*dy );
-
 
     a = ( distanciaFlag1*distanciaFlag1 - distanciaFlag2*distanciaFlag2 + distancia*distancia )/ ( 2.0*distancia );
 

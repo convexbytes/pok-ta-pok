@@ -5,10 +5,9 @@
 #define tamGrid        100   
 #define distanciaEntreParticulas .1
 
-//#define MONT_PI 3.141592653589793
 #include "gameObject.h"
 #include "vector"
-#include "gameData.h" //arreglar esto, el scope no debería ir tan lejos
+#include "gameData.h"
 
 class Particula
 {

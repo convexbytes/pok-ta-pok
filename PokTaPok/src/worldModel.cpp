@@ -1,7 +1,7 @@
 #include "worldModel.h"
 #include "utilities.h"
 
-AgentStateV1::AgentStateV1()
+AgentState::AgentState()
 {
 	this->angle = 0.0;
 	this->pos = 0.0;
@@ -15,30 +15,30 @@ AgentStateV1::AgentStateV1()
 	this->head_angle = 0.0;
 }
 
-WorldModelV1::WorldModelV1( GameData * game_data )
+WorldModel::WorldModel( GameData * game_data )
 {
 	time = 0;
 	play_mode = PLAYMODE_NULL;
-    loc_engine = new LocalizationEngine( game_data );
+    loc_adapter = new LocalizationAdapter( game_data );
 
 }
 
-void WorldModelV1::update( GameData * game_data )
+void WorldModel::update( GameData * game_data )
 
 {
 	// Guardamos las referencias
-	this->command_commited = &game_data->command_commited;
 	this->game_data		 = game_data;
+
 	SensorHandler & sensor_h = game_data->sensor_handler;
 	SensorType sensor_type   = sensor_h.last_sensor_type;
 
 	// Ejecuta el filtro de partículas
-	loc_engine->updatePos( );
+	loc_adapter->updatePos( );
 
 	// Actualizamos la localización
-	me.pos.x = loc_engine->x;
-	me.pos.y = loc_engine->y;
-	me.angle = loc_engine->angle;
+	me.pos.x = loc_adapter->x;
+	me.pos.y = loc_adapter->y;
+	me.angle = loc_adapter->angle;
 
 	// Actualizamos los demás datos del modelo del mundo en base
 	// a la información del último sensor que recibimos
@@ -74,7 +74,7 @@ void WorldModelV1::update( GameData * game_data )
 	}
 }
 
-void WorldModelV1::updateOnBody()
+void WorldModel::updateOnBody()
 {
 	BodySensor const & body = game_data->sensor_handler.last_sense;
 
@@ -91,14 +91,14 @@ void WorldModelV1::updateOnBody()
 	this->updateOnCommandSent();
 }
 
-void WorldModelV1::updateOnSee()
+void WorldModel::updateOnSee()
 {
 	SeeSensor & see = game_data->sensor_handler.last_see;
 	time = see.time;
 	actualizarBitacora();
 }
 
-void WorldModelV1::updateOnInit()
+void WorldModel::updateOnInit()
 {
 	InitSensor const & init = game_data->sensor_handler.last_init;
 	this->play_mode = init.play_mode;
@@ -108,7 +108,7 @@ void WorldModelV1::updateOnInit()
 
 }
 
-void WorldModelV1::updateOnHear()
+void WorldModel::updateOnHear()
 {
 	SensorHandler & sensor_h = game_data->sensor_handler;
 
@@ -120,7 +120,7 @@ void WorldModelV1::updateOnHear()
 	}
 }
 
-void WorldModelV1::updateOnOk()
+void WorldModel::updateOnOk()
 {
 	SensorHandler & sensor_h = game_data->sensor_handler;
 
@@ -149,7 +149,7 @@ void WorldModelV1::updateOnOk()
 }
 
 
-void WorldModelV1::updateOnCommandSent()
+void WorldModel::updateOnCommandSent()
 {
 	AgentCommand const & com = game_data->command_commited;
 	if( com.attention_to_is_set() )
@@ -202,7 +202,7 @@ void WorldModelV1::updateOnCommandSent()
 }
 
 
-void WorldModelV1::actualizarBitacora()
+void WorldModel::actualizarBitacora()
 {
 	SeeSensor        * vision;
 
@@ -378,7 +378,7 @@ void WorldModelV1::actualizarBitacora()
 
 // predice la velocidad del balón
 Vector2D
-WorldModelV1::predictVel( deque <ObjetoBitacora> const & fila )
+WorldModel::predictVel( deque <ObjetoBitacora> const & fila )
 {
 	double decay_b = game_data->game_parameter.server_param.ball_decay;
 	double decay_p = game_data->game_parameter.server_param.player_decay;
@@ -405,7 +405,7 @@ WorldModelV1::predictVel( deque <ObjetoBitacora> const & fila )
 /// predice la la posición de la pelota
 /// después del último ciclo de sensado
 Vector2D
-WorldModelV1::predictPose( deque <ObjetoBitacora> const & fila )
+WorldModel::predictPose( deque <ObjetoBitacora> const & fila )
 {
 	double         coorx,coory;
 	Vector2D       velocidad,futurePose;
@@ -427,7 +427,7 @@ WorldModelV1::predictPose( deque <ObjetoBitacora> const & fila )
 /// predice el número de ciclos que
 /// tarda el balón en recorrer cierta distancia
 int
-WorldModelV1::predictCycles( deque <ObjetoBitacora> const & fila , double distanciaObjetivo )
+WorldModel::predictCycles( deque <ObjetoBitacora> const & fila , double distanciaObjetivo )
 {
 	double decay_b = game_data->game_parameter.server_param.ball_decay;
 	double decay_p = game_data->game_parameter.server_param.player_decay;
@@ -446,7 +446,7 @@ WorldModelV1::predictCycles( deque <ObjetoBitacora> const & fila , double distan
 /// predice la distancia que recorrera con cierta velocidad
 /// en determinado numero de ciclos
 double
-WorldModelV1::predictDistance( deque <ObjetoBitacora> const & fila , int n )
+WorldModel::predictDistance( deque <ObjetoBitacora> const & fila , int n )
 {
 	double decay_b =  game_data->game_parameter.server_param.ball_decay;
 	double decay_p =  game_data->game_parameter.server_param.player_decay;
@@ -465,7 +465,7 @@ WorldModelV1::predictDistance( deque <ObjetoBitacora> const & fila , int n )
 }
 
 bool
-WorldModelV1::predictBallCurrentVel( Vector2D * v )
+WorldModel::predictBallCurrentVel( Vector2D * v )
 {
 	// Usamos información disponible en los ciclos anteriores y en el actual
 	// para obtener un aproximado de la velocidad del balón
@@ -560,7 +560,7 @@ WorldModelV1::predictBallCurrentVel( Vector2D * v )
 }
 
 Vector2D
-WorldModelV1::estimateBallCurrentVel()
+WorldModel::estimateBallCurrentVel()
 {
 	Vector2D ball_vel;
 	Vector2D p1, p2;
