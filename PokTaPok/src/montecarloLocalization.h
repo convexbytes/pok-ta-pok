@@ -2,7 +2,7 @@
 #define MONTECARLOLOCALIZATION_H
 
 #define NUM_PARTICULAS 4     
-#define tamGrid        100   
+#define tamGrid        150
 #define distanciaEntreParticulas .1
 
 #include "gameObject.h"
