@@ -11,9 +11,10 @@ public:
     LocalizationAdapter( GameData * game_data );
     void updatePos(); //Método que usa el algoritmo de localización para actualizar los datos de game_data
 
-    double x;
-    double y;
-    double angle;
+    double getX() const;
+    double getY() const;
+    double getAngle() const;
+
 private:
     GameData                * game_data;
     AgentCommand            * command_commited; // Command_commited
@@ -24,7 +25,9 @@ private:
     Particula               * p;
     Particula               * p_nuevas;
 
-
+    double x;
+    double y;
+    double angle;
 
     void inicializar_particulas();
 };

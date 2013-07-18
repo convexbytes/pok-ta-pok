@@ -147,7 +147,7 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
                                                   effort,
                                                   Deg2Rad( particula.theta ) );
                 //aceleracion = modelo_aceleracion_gomez( U.dash_power, stamina, effort, particula.theta );
-                rmax = player_rand * aceleracion.normita();
+                rmax = player_rand * aceleracion.mag();
                 
                 r1 = -rmax*2.0;  
                 r2 =  rmax*2.0; 
@@ -173,11 +173,11 @@ Particula MontecarloLocalization::Sample_Motion_Model( Control const    &  U,
                                                   
                 velocidad = Vector2D::fromPolar(body_dis_vel, Deg2Rad( body_dir_vel + particula.theta + neck_dir ) );
                   
-                rmax = player_rand * ( aceleracion + velocidad ).normita() ;
+                rmax = player_rand * ( aceleracion + velocidad ).mag() ;
                 
                 velocidad += aceleracion;
                 
-                magnitud_velocidad = velocidad.normita();
+                magnitud_velocidad = velocidad.mag();
 
                 // Normalizamos la velocidad, la max velocidad es speed_max
                 if( magnitud_velocidad > speed_max )
@@ -635,7 +635,7 @@ Vector2D MontecarloLocalization::modelo_aceleracion( double power,
 
     // Normalizamos, la aceleración max es un parámetro del servidor, igual a 1.05
 
-    magnitud = aceleracion.normita();
+    magnitud = aceleracion.mag();
     if( magnitud > speed_max )
         {
 			aceleracion.x = aceleracion.x * speed_max / magnitud;

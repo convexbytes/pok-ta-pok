@@ -33,11 +33,10 @@ public:
     Vector2D 	operator *( double r) const;
     void 		operator*=( double r );
 
-    double 		normita	   () const;
+    double 		mag	   () const; // Magnituud
 
     double 		prodPunto   ( Vector2D const & v ) const;
-    //double 		distance    ( Vector2D const & v ) const; // Verificar fórmula!
-    double 		angleBetween( Vector2D const & v ) const; // verificar fórmula!
+
     double 		angle	   () const;
 
     void 		normalize();

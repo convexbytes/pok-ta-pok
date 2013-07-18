@@ -18,17 +18,6 @@ class ServerParam;
 class GameData;
 class WorldModel;
 
-
-Vector2D
-DePrimera( Vector2D const & vt1, // Velocidad deseada en el siguiente ciclo
-		   Vector2D const & vt0, // velocidad del balón en el ciclo actual
-		   double ball_dis, // Distancia al balón
-		   double ball_dir_deg, //  Dirección del balón con respecto al cuerpo
-		   double kickable_margin,
-		   double kick_power_rate,
-		   double ball_decay
-		   );
-
 Vector2D
 velToInterceptBall( Vector2D const & b, // Posición del balón
 		Vector2D const & p, // Posición del jugador
@@ -48,10 +37,10 @@ double KickSpeedToTravel(double d,double e);
 class BallInterception
 {
 public:
-	BallInterception( GameData 		* game_data,
-				   WorldModel 	* world,
-				   FreezeBall		* freeze_ball );
-	void reset(); //
+	BallInterception( GameData 	* game_data,
+				   	    WorldModel 	* world,
+				   	    FreezeBall	* freeze_ball );
+	void reset();
 	void call( AgentCommand * command);
 
 	enum State
@@ -60,8 +49,7 @@ public:
 		SEARCH_BALL,
 		COMPUTE_POINT_TURN,
 		GO,
-		FREEZE,
-		PASIVE_INTERCEPTION
+		FREEZE
 	};
 private:
 	//Datos del juego
@@ -86,7 +74,6 @@ private:
 	void computePointTurn();
 	void go();
 	void freeze();
-	void pasiveInterception();
 
 	// Datos calculados para la intercepción, se calculan en el tiempo start_time_s
 	Vector2D player_pos_s; // Posición del agente
@@ -165,37 +152,12 @@ void runWithBall (double   xTarget ,
                   AgentCommand * command
                   );
 
-//*Define una zona de tiro como un circulo*//
-bool  isZoneShoot( double x, double y , double radio);
-
-//* Verdadero si ve un poste al menos *//
-bool posteVisible ( vector<Flag> *banderas );
-
-//*Nos regresa un angulo para tirar junto al poste más cercano*//
-double shootAtGoal(double x, double y, double angle, vector<Flag> *banderas );
-
-
-PossessionBall whoHasTheBall(WorldModel *world);
-
 void searchBall( AgentCommand * command,
                  WorldModel * world,
                  SensorType sensor_type);
 
 void align(double neckDir,
             AgentCommand *command);
-
-void centerBall(bool   ballVisible,
-                double ballDir,
-                double lastAngleBall,
-                double neckDir,
-                ViewModeWidth cono,
-                AgentCommand * command);
-
-bool amTheClosest( WorldModel *world);
-
-void radar( double neck_dir,
-		    AgentCommand *command,
-		    SensorType sensor_type);
 
 void GoToXY2 (   double   xTarget ,
                  double   yTarget ,
@@ -207,7 +169,6 @@ void GoToXY2 (   double   xTarget ,
 
 void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModel *world,AgentCommand *command);
 
-int aQuienPasar(WorldModel *world);
 
 void centerBall( WorldModel *world,
                  AgentCommand * command);
@@ -219,31 +180,6 @@ void GoToXY (   double   xTarget ,
                 AgentCommand * command,
                 WorldModel * world
                 );
-
-bool compararObjetivo( GameData * game_data,
-		               Vector2D miPunto,
-		               float miProb,
-		               WorldModel *world);
-
-bool escucharObjetivo ( GameData 	   * game_data,
-                       Vector2D pointTarget,
-                       WorldModel *world,
-                       AgentCommand *command);
-
-void comunicarObjetivo(Vector2D pointTarget,
-                       float   prob,
-                       WorldModel *world,
-                       AgentCommand *command );
-
-int chooseFriendToHear(Vector2D pointTarget,WorldModel * world);
-
-string convertToString(Vector2D pointTarget , float prob);
-
-float * convertToDouble( string mensaje );
-
-bool balonEnAreaGrande( WorldModel *world );
-
-bool amStayInLine( WorldModel * world );
 
 void alignBodyWithNeck(WorldModel *world,
                        AgentCommand *command);

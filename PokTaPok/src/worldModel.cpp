@@ -17,28 +17,45 @@ AgentState::AgentState()
 
 WorldModel::WorldModel( GameData * game_data )
 {
-	time = 0;
-	play_mode = PLAYMODE_NULL;
-    loc_adapter = new LocalizationAdapter( game_data );
-
+	m_time 		  = 0;
+	m_game_data   = game_data;
+	m_play_mode   = PLAYMODE_NULL;
+    m_loc_adapter = new LocalizationAdapter( game_data );
 }
 
-void WorldModel::update( GameData * game_data )
+const AgentState &
+WorldModel::me() const
+{
+	return m_me;
+}
+PlayModeHearable
+WorldModel::playMode() const
+{
+	return m_play_mode;
+}
+int
+WorldModel::time() const
+{
+	return m_time;
+}
+
+
+void WorldModel::update( GameData * m_game_data )
 
 {
 	// Guardamos las referencias
-	this->game_data		 = game_data;
+	this->m_game_data		 = m_game_data;
 
-	SensorHandler & sensor_h = game_data->sensor_handler;
+	SensorHandler & sensor_h = m_game_data->sensor_handler;
 	SensorType sensor_type   = sensor_h.last_sensor_type;
 
 	// Ejecuta el filtro de partículas
-	loc_adapter->updatePos( );
+	m_loc_adapter->updatePos( );
 
 	// Actualizamos la localización
-	me.pos.x = loc_adapter->x;
-	me.pos.y = loc_adapter->y;
-	me.angle = loc_adapter->angle;
+	m_me.pos.x = m_loc_adapter->getX();
+	m_me.pos.y = m_loc_adapter->getY();
+	m_me.angle = m_loc_adapter->getAngle();
 
 	// Actualizamos los demás datos del modelo del mundo en base
 	// a la información del último sensor que recibimos
@@ -76,16 +93,17 @@ void WorldModel::update( GameData * game_data )
 
 void WorldModel::updateOnBody()
 {
-	BodySensor const & body = game_data->sensor_handler.last_sense;
+	BodySensor const & body = m_game_data->sensor_handler.last_sense;
 
-	time = body.time;
+	m_time = body.time;
 
-	me.effort 		= body.effort;
-	me.stamina 		= body.stamina;
-	me.view_mode_q 	= body.view_mode_quality;
-	me.view_mode_w 	= body.view_mode_width;
-	me.head_angle 	= body.head_angle;
-
+	m_me.effort 		= body.effort;
+	m_me.stamina 		= body.stamina;
+	m_me.view_mode_q 	= body.view_mode_quality;
+	m_me.view_mode_w 	= body.view_mode_width;
+	m_me.head_angle 	= body.head_angle;
+	m_me.speed_amount	= body.speed_amount;
+	m_me.speed_amount	= body.speed_direction;
 
 	// Actualizamos en base a los comandos enviados
 	this->updateOnCommandSent();
@@ -93,36 +111,34 @@ void WorldModel::updateOnBody()
 
 void WorldModel::updateOnSee()
 {
-	SeeSensor & see = game_data->sensor_handler.last_see;
-	time = see.time;
+	SeeSensor & see = m_game_data->sensor_handler.last_see;
+	m_time = see.time;
 	actualizarBitacora();
 }
 
 void WorldModel::updateOnInit()
 {
-	InitSensor const & init = game_data->sensor_handler.last_init;
-	this->play_mode = init.play_mode;
-	me.side = init.side;
-	me.unum = init.unum;
-
-
+	InitSensor const & init = m_game_data->sensor_handler.last_init;
+	m_play_mode = init.play_mode;
+	m_me.side = init.side;
+	m_me.unum = init.unum;
 }
 
 void WorldModel::updateOnHear()
 {
-	SensorHandler & sensor_h = game_data->sensor_handler;
+	SensorHandler & sensor_h = m_game_data->sensor_handler;
 
-	time = sensor_h.last_hear.time;
+	m_time = sensor_h.last_hear.time;
 
 	if( sensor_h.last_hear.sender == REFEREE )
 	{
-		play_mode = sensor_h.last_hear_referee.play_mode;
+		m_play_mode = sensor_h.last_hear_referee.play_mode;
 	}
 }
 
 void WorldModel::updateOnOk()
 {
-	SensorHandler & sensor_h = game_data->sensor_handler;
+	SensorHandler & sensor_h = m_game_data->sensor_handler;
 
 	switch( sensor_h.last_ok )
 	{
@@ -139,7 +155,7 @@ void WorldModel::updateOnOk()
 	case CHECK_BALL: // Propio del coach, no lo usamos
 		break;
 	case SYNCH_SEE:
-		me.synch_see_on = true;
+		m_me.synch_see_on = true;
 		break;
 	case LOOK: // Propio del coach, no lo usamos
 		break;
@@ -151,11 +167,11 @@ void WorldModel::updateOnOk()
 
 void WorldModel::updateOnCommandSent()
 {
-	AgentCommand const & com = game_data->command_commited;
+	AgentCommand const & com = m_game_data->command_commited;
 	if( com.attention_to_is_set() )
 	{
-		me.attention_unum = com.attention_uniform_number;
-		me.attention_team = com.attention_team;
+		m_me.attention_unum = com.attention_uniform_number;
+		m_me.attention_team = com.attention_team;
 	}
 	if( com.catch_is_set() )
 	{
@@ -163,8 +179,8 @@ void WorldModel::updateOnCommandSent()
 	}
 	if( com.change_view_is_set() )
 	{
-		me.view_mode_q = com.change_view_quality;
-		me.view_mode_w = com.change_view_width;
+		m_me.view_mode_q = com.change_view_quality;
+		m_me.view_mode_w = com.change_view_width;
 	}
 	if( com.dash_is_set() )
 	{
@@ -206,12 +222,12 @@ void WorldModel::actualizarBitacora()
 {
 	SeeSensor        * vision;
 
-	SensorType sensor_type    = game_data->sensor_handler.last_sensor_type;
-	vector <Player> & player  = game_data->sensor_handler.last_see.players;
-	Ball 			& ball    = game_data->sensor_handler.last_see.ball;
-	BodySensor 		& body	  = game_data->sensor_handler.last_sense;
+	SensorType sensor_type    = m_game_data->sensor_handler.last_sensor_type;
+	vector <Player> & player  = m_game_data->sensor_handler.last_see.players;
+	Ball 			& ball    = m_game_data->sensor_handler.last_see.ball;
+	BodySensor 		& body	  = m_game_data->sensor_handler.last_sense;
 
-    vision = & game_data->sensor_handler.last_see;
+    vision = & m_game_data->sensor_handler.last_see;
 
 	ObjetoBitacora  balonAux;
 	ObjetoBitacora  playerAux;
@@ -227,21 +243,21 @@ void WorldModel::actualizarBitacora()
 			 balonAux.num    = 0;
 			 balonAux.pos    =
 			     Vector2D::fromPolar( ball.dis ,
-						 	 	 	  Deg2Rad( ball.dir + me.angle + me.headAngleDeg() ) );
-		     balonAux.pos.x += me.pos.x;                 // coordenada global x del balón
-		     balonAux.pos.y += me.pos.y;                // coordenada global y del balón
+						 	 	 	  Deg2Rad( ball.dir + m_me.angle + m_me.headAngleDeg() ) );
+		     balonAux.pos.x += m_me.pos.x;                 // coordenada global x del balón
+		     balonAux.pos.y += m_me.pos.y;                // coordenada global y del balón
 		     balonAux.dis    = ball.dis;            // distancia al balón
 		     balonAux.dir    = ball.dir;           // dirección hacia el balón
-		     balonAux.dir_from_body = ball.dir + me.headAngleDeg();
-		     balonAux.ciclo  = game_data->sensor_handler.last_see.time;		 // ciclo del sensado
+		     balonAux.dir_from_body = ball.dir + m_me.headAngleDeg();
+		     balonAux.ciclo  = m_game_data->sensor_handler.last_see.time;		 // ciclo del sensado
 		     if( ball.dis_chg != NDEF_NUM && ball.dir_chg != NDEF_NUM )
 		     {   // Actualizamos la velocidad global en base a dir_chg y dis_chg
 
 		    	 vel = Vector2D::fromPolar(
 		    			 body.speed_amount,
-		    			 Deg2Rad(body.speed_direction + me.angle + me.head_angle ) );
+		    			 Deg2Rad(body.speed_direction + m_me.angle + m_me.head_angle ) );
 
-		    	 obj_vel = fromChgToVel( me.pos,
+		    	 obj_vel = fromChgToVel( m_me.pos,
 		    			 vel,
 		    			 balonAux.pos,
 		    			 ball.dis,
@@ -274,13 +290,13 @@ void WorldModel::actualizarBitacora()
 							coordenadas     =
 							Vector2D::fromPolar(
 									player[i].dis,
-									Deg2Rad( player[i].dir + me.angle + me.head_angle) );
-							playerAux.pos.x = coordenadas.x + me.pos.x;
-							playerAux.pos.y = coordenadas.y + me.pos.y;
+									Deg2Rad( player[i].dir + m_me.angle + m_me.head_angle) );
+							playerAux.pos.x = coordenadas.x + m_me.pos.x;
+							playerAux.pos.y = coordenadas.y + m_me.pos.y;
 							playerAux.dis   = player[i].dis;
 							playerAux.dir   = player[i].dir;
-							playerAux.dir_from_body = player[i].dir + me.headAngleDeg();
-							playerAux.ciclo = game_data->sensor_handler.last_see.time;
+							playerAux.dir_from_body = player[i].dir + m_me.headAngleDeg();
+							playerAux.ciclo = m_game_data->sensor_handler.last_see.time;
 							playerAux.goalie= player[i].is_goalie;
 
 							if( player[i].dis_chg != NDEF_NUM )
@@ -289,9 +305,9 @@ void WorldModel::actualizarBitacora()
 
 								vel = Vector2D::fromPolar(
 									  body.speed_amount,
-									  Deg2Rad(body.speed_direction + me.angle + me.head_angle ) );
+									  Deg2Rad(body.speed_direction + m_me.angle + m_me.head_angle ) );
 
-								obj_vel = fromChgToVel( me.pos,
+								obj_vel = fromChgToVel( m_me.pos,
 													  vel,
 													  playerAux.pos,
 													  player[i].dis,
@@ -327,13 +343,13 @@ void WorldModel::actualizarBitacora()
 							coordenadas     =
 							Vector2D::fromPolar(
 									  player[i].dis,
-									  Deg2Rad( player[i].dir + me.angle + me.head_angle ) );
-							playerAux.pos.x = coordenadas.x + me.pos.x;
-							playerAux.pos.y = coordenadas.y + me.pos.y;
+									  Deg2Rad( player[i].dir + m_me.angle + m_me.head_angle ) );
+							playerAux.pos.x = coordenadas.x + m_me.pos.x;
+							playerAux.pos.y = coordenadas.y + m_me.pos.y;
 							playerAux.dis   = player[i].dis;
 							playerAux.dir   = player[i].dir;
-							playerAux.dir_from_body = player[i].dir + me.headAngleDeg();
-							playerAux.ciclo = game_data->sensor_handler.last_see.time;
+							playerAux.dir_from_body = player[i].dir + m_me.headAngleDeg();
+							playerAux.ciclo = m_game_data->sensor_handler.last_see.time;
 							playerAux.goalie= player[i].is_goalie;
 
 
@@ -343,9 +359,9 @@ void WorldModel::actualizarBitacora()
 
 								vel = Vector2D::fromPolar(
 									  body.speed_amount,
-									  Deg2Rad(body.speed_direction + me.angle + me.head_angle ) );
+									  Deg2Rad(body.speed_direction + m_me.angle + m_me.head_angle ) );
 
-								obj_vel = fromChgToVel( me.pos,
+								obj_vel = fromChgToVel( m_me.pos,
 													  vel,
 													  playerAux.pos,
 													  player[i].dis,
@@ -370,197 +386,13 @@ void WorldModel::actualizarBitacora()
 							// No puede almancenar la bitácora, no sabe de que jugador rival se trata
 						   }
 					  }
-			     }	// termina el recorrido del vector player
+			     }	// Termina el recorrido del vector player
             }
 	}
 }  //end actualizarBitacora()
 
-
-// predice la velocidad del balón
 Vector2D
-WorldModel::predictVel( deque <ObjetoBitacora> const & fila )
-{
-	double decay_b = game_data->game_parameter.server_param.ball_decay;
-	double decay_p = game_data->game_parameter.server_param.player_decay;
-	ObjetoBitacora ultimoElemento, pUltimoElemento;
-	Vector2D velocidad;
-
-    ultimoElemento  = fila[ 0 ]; // #gil_mark
-    pUltimoElemento = fila[ 1 ];
-
-    if( ultimoElemento.name == "ball" )
-	   {
-		velocidad.x = ( ultimoElemento.pos.x - pUltimoElemento.pos.x ) * decay_b;   // aproximamos la velocidad en x
-  	    velocidad.y = ( ultimoElemento.pos.y - pUltimoElemento.pos.y ) * decay_b;   // aproximamos la velocidad en y
-  	   }
-  	else
-  	   {
-     	velocidad.x = ( ultimoElemento.pos.x - pUltimoElemento.pos.x  ) * decay_p;   // aproximamos la velocidad en x
-	    velocidad.y = ( ultimoElemento.pos.y - pUltimoElemento.pos.y ) * decay_p;   // aproximamos la velocidad en y
-	   }
-
-	return velocidad;
-}
-
-/// predice la la posición de la pelota
-/// después del último ciclo de sensado
-Vector2D
-WorldModel::predictPose( deque <ObjetoBitacora> const & fila )
-{
-	double         coorx,coory;
-	Vector2D       velocidad,futurePose;
-	ObjetoBitacora ultimoElemento;
-
-	velocidad = predictVel(fila);
-
-	ultimoElemento = fila[ 0 ]; // obtenemos el ultimo elemento (el más reciente) // #gil_mark
-
-	coorx = ultimoElemento.pos.x;           // obtenemos coordenada x del balón
-	coory = ultimoElemento.pos.y;           // obtenemos coordenada y del balón
-
-	futurePose.x = velocidad.x + coorx;
-	futurePose.y = velocidad.y + coory;
-
-	return futurePose;
-}
-
-/// predice el número de ciclos que
-/// tarda el balón en recorrer cierta distancia
-int
-WorldModel::predictCycles( deque <ObjetoBitacora> const & fila , double distanciaObjetivo )
-{
-	double decay_b = game_data->game_parameter.server_param.ball_decay;
-	double decay_p = game_data->game_parameter.server_param.player_decay;
-	Vector2D velocidad;
-	int n;
-
-	velocidad = predictVel(fila);
-    if( fila.front().name == "ball" ) // cambiado #gil_mark
-	   n = log( 1.0 - ( distanciaObjetivo * ( 1.0 - (decay_b) ) / velocidad.normita() ) ) / log(decay_b);
-	else
-	   n = log( 1.0 - ( distanciaObjetivo * ( 1.0 - (decay_p) ) / velocidad.normita() ) ) / log(decay_p);
-
-	return n;
-}
-
-/// predice la distancia que recorrera con cierta velocidad
-/// en determinado numero de ciclos
-double
-WorldModel::predictDistance( deque <ObjetoBitacora> const & fila , int n )
-{
-	double decay_b =  game_data->game_parameter.server_param.ball_decay;
-	double decay_p =  game_data->game_parameter.server_param.player_decay;
-
-	double distancia;
-	Vector2D velocidad;
-
-	velocidad = predictVel(fila);
-
-    if(fila.back().name == "ball")
-	  distancia = velocidad.normita() * ( ( 1.0 - pow(decay_b,n) ) / (1.0 - decay_b) );
-	else
-	  distancia = velocidad.normita() * ( ( 1.0 - pow(decay_p,n) ) / (1.0 - decay_p) );
-
-	return distancia;
-}
-
-bool
-WorldModel::predictBallCurrentVel( Vector2D * v )
-{
-	// Usamos información disponible en los ciclos anteriores y en el actual
-	// para obtener un aproximado de la velocidad del balón
-	int   diferencia_tiempo;
-//	bool  impulso_detectado = false;
-//	double rmax;
-
-	double ball_decay = game_data->game_parameter.server_param.ball_decay;
-	Vector2D vtmp, vtmp_2;
-	*v = 0.0;
-
-	if( this->bitacoraBalon.empty() )
-		return false;
-
-	if( bitacoraBalon.size() == 1 )
-	{
-		if(    bitacoraBalon.begin()->vel.x == NDEF_NUM
-			|| bitacoraBalon.begin()->vel.y == NDEF_NUM )
-			// No tenemos información para predecir la velocidad
-			return false;
-		else
-		{
-			// Usamos la última velocidad y le aplicamos el decay
-			*v = bitacoraBalon.begin()->vel;
-			diferencia_tiempo =  time - bitacoraBalon.begin()->ciclo;
-			*v *= std::pow( ball_decay, diferencia_tiempo );
-			return true;
-		}
-	}
-	else // ( bitacoraBalon.size() > 1)
-	{	// Aproximamos la velocidad con las dos anteriores
-		deque<ObjetoBitacora>::const_iterator it = bitacoraBalon.begin();
-		deque<ObjetoBitacora>::const_iterator it_2 = it+1;
-		vtmp = 0.0;
-
-		if(    it->vel.x != NDEF_NUM && it->vel.y != NDEF_NUM )
-		{
-			if ( it_2->vel.x != NDEF_NUM && it_2->vel.y != NDEF_NUM )
-			{
-				diferencia_tiempo =  time - it->ciclo;
-				vtmp = it->vel * std::pow( ball_decay, diferencia_tiempo );
-				diferencia_tiempo =  time - it_2->ciclo;
-				vtmp += it_2->vel * std::pow( ball_decay, diferencia_tiempo );
-				*v = vtmp/2.0;
-				return true;
-			}
-			else // Sólo tenemos disponible la primera velocidad,
-			{
-				vtmp_2 	= it->pos - it_2->pos;
-				vtmp_2 /= (double)(it->ciclo - it_2->ciclo);
-				diferencia_tiempo =  time - it->ciclo;
-				vtmp_2 *= std::pow( ball_decay, diferencia_tiempo);
-
-				vtmp = it->vel * std::pow( ball_decay, diferencia_tiempo );
-				*v = vtmp + vtmp_2;
-				*v /= 2.0;
-				return true;
-			}
-		}
-		else // No tenemos la primera velocidad
-		{
-			if ( it_2->vel.x != NDEF_NUM && it_2->vel.y != NDEF_NUM )
-			{
-				vtmp_2 	= it->pos - it_2->pos;
-				vtmp_2 /= (double)(it->ciclo - it_2->ciclo);
-				diferencia_tiempo =  time - it->ciclo;
-				vtmp_2 *= std::pow( ball_decay, diferencia_tiempo);
-
-				vtmp = it_2->vel;
-				vtmp *= std::pow( ball_decay, time - it_2->ciclo );
-
-				*v = vtmp_2 + vtmp;
-				*v /= 2.0;
-				return true;
-			}
-			else // No tenemos ninguna velocidad
-			{ // Aproximamos la velocidad con la diferencia de posiciones
-				vtmp_2 	= it->pos - it_2->pos;
-				vtmp_2 /= (double)(it->ciclo - it_2->ciclo);
-				diferencia_tiempo =  time - it->ciclo;
-				vtmp_2 *= std::pow( ball_decay, diferencia_tiempo);
-				*v = vtmp_2;
-				return true;
-			}
-		}
-		//do
-		//{		}
-		//while( it_2 != bitacoraBalon.end() && impulso_detectado == false );
-
-		return true;
-	}
-}
-
-Vector2D
-WorldModel::estimateBallCurrentVel()
+WorldModel::estBallVelocity() const
 {
 	Vector2D ball_vel;
 	Vector2D p1, p2;
@@ -575,7 +407,7 @@ WorldModel::estimateBallCurrentVel()
 		return ball_vel;
 	}
 
-	time_diff = this->time - bitacoraBalon.begin()->ciclo;
+	time_diff = this->m_time - bitacoraBalon.begin()->ciclo;
 
 	if( time_diff == 0 )
 	{
@@ -586,7 +418,7 @@ WorldModel::estimateBallCurrentVel()
 		}
 		else
 		{
-			if( bitacoraBalon.size() >= 2 ) // uso dos posiciones para estimar la velocidad
+			if( bitacoraBalon.size() >= 2 ) // Se usan dos posiciones para estimar la velocidad
 			{
 				p1 = ball_it->pos;
 				t1 = ball_it->ciclo;
@@ -605,7 +437,7 @@ WorldModel::estimateBallCurrentVel()
 			}
 		}
 	}
-	else	// no tengo info actual de la velocidad
+	else	// No tenemos datos actuales de la velocidad
 	{
 		ball_it = bitacoraBalon.begin();
 		if( ball_it->vel.x != NDEF_NUM && ball_it->vel.y != NDEF_NUM )
@@ -614,7 +446,7 @@ WorldModel::estimateBallCurrentVel()
 		}
 		else
 		{
-			if( bitacoraBalon.size() >= 2 ) // uso dos posiciones para estimar la velocidad
+			if( bitacoraBalon.size() >= 2 ) // Se usan dos posiciones para estimar la velocidad
 			{
 				p1 = ball_it->pos;
 				t1 = ball_it->ciclo;
@@ -641,6 +473,17 @@ WorldModel::estimateBallCurrentVel()
 }
 
 Vector2D
+WorldModel::estBallPosition() const
+{
+	Vector2D b;
+	if( bitacoraBalon.empty() )
+		b = bitacoraBalon.begin()->pos;
+	else
+		b.set(0,0);
+	return b;
+}
+
+Vector2D
 fromChgToVel(  Vector2D const & player_pos, // Posición del jugador, absoluta.
 						Vector2D const & player_vel, // Velocidad del jugador, absoluta.
 						Vector2D const & obj_pos, // Posición del objeto que ve, absoluta.
@@ -654,7 +497,6 @@ fromChgToVel(  Vector2D const & player_pos, // Posición del jugador, absoluta.
 
 	if( obj_dist == 0.0 )
 	{
-		//std::cerr << "Warning. fromChgToVel(): zero division." << std::endl;
 		return vtmp;
 	}
 	etmp /= obj_dist;

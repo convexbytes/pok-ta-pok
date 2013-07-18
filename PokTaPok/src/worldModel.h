@@ -20,32 +20,17 @@ class WorldModel;
 class ObjetoBitacora;
 
 
-enum MasterStatus
-{
-  DEFENSA = 0,
-  ATAQUE
-};
-
-enum PossessionBall
-{
-
-    PROPIA = 0,     // balón en poder del agente
-    EQUIPO,         // balón en poder del equipo propio
-    RIVAL,          // balón en poder del rival
-    SUELTA,         // balón suelto
-    PERDIDA         // balón sin ver
-};
-
 class AgentState
 {
 public:
 	AgentState();
-	// principales
-    Vector2D pos;
+	// Principales
+    Vector2D  pos;
     double   angle;
-    char 	 side;
-    int 	 unum;
-    double 	 head_angle;
+    char 	  side;
+    int 	  unum;
+    double 	  head_angle;
+
     double   angleRad() const { return DEG2RAD*angle; }
     double   angleDeg() const { return angle; }
     double   headAngleRad() const { return DEG2RAD*head_angle; }
@@ -60,14 +45,13 @@ public:
     ViewModeQuality	last_recv_visual_q;
     ViewModeWidth	last_recv_visual_w;
 
-    PossessionBall  possession_ball;
-    MasterStatus    master_status;
-
     // Acerca del cuerpo
     double stamina;
     double effort;
+    double speed_amount;
+    double speed_dir;
 
-    // aural
+    // Aural
     int 		  attention_unum;
     AttentionTeam attention_team;
 
@@ -93,32 +77,26 @@ public:
     WorldModel( GameData * game_data );
     void update( GameData * game_data );
 
-
-    // Para guardar la referencia a GameData
-    GameData  	  * game_data;
-
-    AgentState	         me;
-    LocalizationAdapter * loc_adapter;
-
-    PlayModeHearable     play_mode;
-    int                  time;
-
     // Guardamos info de los objetos
     deque <ObjetoBitacora>  bitacoraRivales[11]; // 11 rivales
     deque <ObjetoBitacora>  bitacoraAmigos[11];  // 10 amgios, el lugar nuestro se queda vacío
     deque <ObjetoBitacora>  bitacoraBalon;       // balon
+
     void 	 actualizarBitacora();
-    Vector2D predictVel      ( deque <ObjetoBitacora> const & fila );
-    Vector2D predictPose     ( deque <ObjetoBitacora> const & fila );
-    double   predictDistance ( deque <ObjetoBitacora> const & fila , int n );
-    int      predictCycles   ( deque <ObjetoBitacora> const & fila , double distanciaObjetivo );
 
-    bool 	predictBallCurrentVel( Vector2D * v );
+    Vector2D estBallPosition() const; // Estimate current ball position
+    Vector2D estBallVelocity() const; // Estimate current ball velocity
 
-    Vector2D estimateBallCurrentVel();
+    const AgentState & me() const;
+    PlayModeHearable 	playMode() const;
+    int					time() const;
 
 private:
-
+    GameData  			* m_game_data;
+    PlayModeHearable      m_play_mode;
+    int                   m_time;
+    AgentState	          m_me;
+    LocalizationAdapter * m_loc_adapter;
 
     void updateOnBody   ();
     void updateOnInit   ();
@@ -126,10 +104,6 @@ private:
     void updateOnHear   ();
     void updateOnOk		();
     void updateOnCommandSent();
-
-
-
-
 
 };
 

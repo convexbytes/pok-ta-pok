@@ -89,7 +89,7 @@ void Vector2D::operator*=( double r )
 	this->y *= r;
 }
 
-double Vector2D::normita() const
+double Vector2D::mag() const
 {
 	return sqrt( x*x + y*y );
 }
@@ -97,17 +97,6 @@ double Vector2D::normita() const
 double Vector2D::prodPunto( Vector2D const & v ) const
 {
 	return x * v.x + y * v.y;
-}
-
-//double Vector2D::distance( Vector2D const & v ) const
-//{
-//	return sqrt( prodPunto( v ) );
-//}
-
-double Vector2D::angleBetween( Vector2D const & v ) const
-{
-
-	return (*this-v).angle();
 }
 
 double Vector2D::angle() const
@@ -121,7 +110,7 @@ double Vector2D::angle() const
 void
 Vector2D::normalize()
 {
-	double d = this->normita();
+	double d = this->mag();
 	if( d != 0 )
 	{
 		this->x /= d;
@@ -763,9 +752,9 @@ closestPointInSegment( Vector2D const & q,
 	else
 	{
 		proj = P1_Q.projectionOver( P1_P2 );
-		proj_mag = proj.normita();
+		proj_mag = proj.mag();
 
-		if( proj_mag < P1_P2.normita() )
+		if( proj_mag < P1_P2.mag() )
 		{
 			closest_point = p1 + proj;
 		}

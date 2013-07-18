@@ -26,13 +26,31 @@ LocalizationAdapter::LocalizationAdapter( GameData * game_data )
         particulas[i].x =  particulas_nuevas[i].x =  -14.0; 
         particulas[i].y =  particulas_nuevas[i].y =  -25.0; 
         particulas[i].theta = particulas_nuevas[i].theta = 0.0;
-
     }
     this->p         = particulas;
     this->p_nuevas  = particulas_nuevas;
 }
 
-void LocalizationAdapter::updatePos(  )
+double
+LocalizationAdapter::getX() const
+{
+	return x;
+}
+
+double
+LocalizationAdapter::getY() const
+{
+	return y;
+}
+
+double
+LocalizationAdapter::getAngle() const
+{
+	return angle;
+}
+
+void
+LocalizationAdapter::updatePos(  )
 {
     SensorType         sensor_type;
     vector<Flag>     * banderas;

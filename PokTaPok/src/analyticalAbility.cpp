@@ -9,46 +9,6 @@
 #endif
 
 Vector2D
-DePrimera( Vector2D const & vt1, // Velocidad deseada en el siguiente ciclo
-		   Vector2D const & vt0, // velocidad del balón en el ciclo actual
-		   double ball_dis, // Distancia al balón
-		   double ball_dir_deg, //  Dirección del balón con respecto al cuerpo
-		   double kickable_margin = 0.7,
-		   double kick_power_rate = 0.027,
-		   double ball_decay = 0.94)
-
-{
-	// kick_vector.x = power, kick_vector.y = direction
-	Vector2D kick_vector;
-
-	double dir_diff = std::fabs( ball_dir_deg );
-
-	double f = (1 - 0.25*(dir_diff/180.0) -0.25*(ball_dis/kickable_margin) );
-
-	double pow_needed;
-	double angle_needed;
-
-	if( f == 0.0 ) f = 0.001;
-
-	if( vt1.x == 0.0 && vt1.y == 0.0 && vt0.x == 0.0 && vt0.y == 0.0)
-	{
-		pow_needed = 0.0;
-		angle_needed = 0.0;
-	}
-	else
-	{
-		pow_needed = (vt1/ball_decay - vt0).normita() / ( kick_power_rate * f ) ;
-		angle_needed = std::atan2( vt1.y/ball_decay - vt0.y, vt1.x/ball_decay - vt0.x );
-	}
-
-	kick_vector.x = pow_needed;
-	kick_vector.y = Rad2Deg( angle_needed );
-
-	return kick_vector;
-
-}
-
-Vector2D
 velToInterceptBall( Vector2D const & b, // Posición del balón
 		Vector2D const & p, // Posición del jugador
 		Vector2D const & v, // Velocidad del balón
@@ -168,9 +128,6 @@ void GoToXY (   double   xTarget ,
     double const dash_power_rate = 0.006, effort = 0.8;
     double const inertia_moment = 5.0;
 
-    //anguloCuerpo =  angle + angleCuelloCuerpo; // angleCuelloCuerpo se obtiene del sense_body
-    //consideramos el angle como el angulo del cuerpo
-
     disToPoint = sqrt( (xTarget - x)*(xTarget - x)  + (yTarget - y)*(yTarget - y) );
     dirToPoint = Rad2Deg(atan2( yTarget - y , xTarget - x));
 
@@ -178,7 +135,7 @@ void GoToXY (   double   xTarget ,
     {
 
         angPermisible = Rad2Deg( atan2( radio , disToPoint ) );
-        /*neck_dir?*/   turnParameter = dirToPoint - angle;// - neck_dir;
+        turnParameter = dirToPoint - angle;
         turnParameter = entre180( turnParameter );
 
         if( angPermisible < turnParameter * 0.1  ||  disToPoint > 25.0 )
@@ -188,9 +145,8 @@ void GoToXY (   double   xTarget ,
         {
 
             velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y) );
-            turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.normita()));
+            turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.mag()));
             turnParameter = entre180(turnParameter);
-            //cout<<"Giro TURN"<<endl;
             command->append_turn(turnParameter);
 
         }
@@ -229,23 +185,23 @@ void runWithBall (double   xTarget ,
     double x,y,angle,neck_dir;
     Vector2D Kick;
 
-    x=world->me.pos.x;
-    y=world->me.pos.y;
-    angle=world->me.angle;
-    neck_dir = world->me.head_angle;
+    x=world->me().pos.x;
+    y=world->me().pos.y;
+    angle=world->me().angle;
+    neck_dir = world->me().head_angle;
 
 
     if (disBall <= radio)
     {
         angToPoint = Rad2Deg( atan2(  yTarget   - y,   xTarget   - x) );
 
-        /*Este 2.0 es similar a lo que queremos que adelante la pelota
-        para valores grandes la adelanta mucho*/
+        // Este 2.0 es similar a lo que queremos que adelante la pelota,
+        // para valores grandes la adelanta mucho.
 
         auxX = 2.0 * cos( Deg2Rad( angToPoint ) );
         auxY = 2.0 * sin( Deg2Rad( angToPoint ) );
 
-        Kick = PasePunto(x+auxX,y+auxY,x,y,angle,0.0, xBall , yBall);
+        Kick = PasePunto(x+auxX,y+auxY,x,y,angle,0.5, xBall , yBall);
 
         //// cout<<"Adelanto KICK"<<endl;
         command->append_kick(Kick.x,Kick.y);
@@ -254,98 +210,6 @@ void runWithBall (double   xTarget ,
     {
         GoToXY(xBall,yBall,x,y,angle,neck_dir,radio,velocidad,command );  // vamos por la pelota
     }
-}
-
-
-bool  isZoneShoot( double x, double y , double radio)
-{
-	double aux;
-	bool   regreso;
-
-	aux = sqrt(((x - 52.0)*(x - 52.0)) + (y*y));
-
-	if( aux <= radio )
-	{
-		regreso = true;
-	}
-	else
-		regreso = false;
-
-	return regreso;
-}
-
-bool posteVisible ( vector<Flag> *banderas )
-{
-	bool regreso;
-	int  i;
-
-	for( i=0; i<banderas->size(); i++ )
-	{
-		if( banderas->at(i).id == 40 || banderas->at(i).id == 42  ) //id's de los postes
-		{
-			regreso = true;
-			i=banderas->size();
-		}
-		else
-		{
-			if( i == banderas->size()-1 )
-				regreso = false;
-		}
-	}
-	return regreso;
-}
-
-double shootAtGoal(double x, double y, double angle, vector<Flag> *banderas )
-{
-	double regreso  ;
-	int    i;
-	bool   post1,post2;
-	Vector2D disToPosts;  //disToPosts.x = distancia a grt
-	//disToPosts.y = distancia a grb
-	Vector2D dirToPosts;  //dirToPosts.x = dirección a grt
-	//dirToPosts.y = dirección a grb
-
-	post1 = post2 = false;
-	for( i=0; i< banderas->size(); i++ )
-	{
-		if( banderas->at(i).id == 40 )   // es bandera GRT
-		{
-			disToPosts.x = banderas->at(i).dis;
-			dirToPosts.x = banderas->at(i).dir;
-			post1       = true;
-		}
-
-		if( banderas->at(i).id == 42 )   // es bandera GRB
-		{
-			disToPosts.y = banderas->at(i).dis;
-			dirToPosts.y = banderas->at(i).dir;
-			post2        = true;
-		}
-	}
-
-	if( post1 == true && post2== true ) // ve los dos postes
-	{
-		if( disToPosts.x > disToPosts.y ) // compara que poste esta más cerca
-		{
-			regreso = dirToPosts.y - 2.0;          // poste 1 más lejos
-		}
-		else
-		{
-			regreso = dirToPosts.x + 2.0;          // poste 2 más lejos
-		}
-	}
-	else                              // ve solo un poste
-	{
-		if( post1 == true)             // ve el poste 1
-		{
-			regreso = dirToPosts.x + 2.0;
-		}
-		else                           // ve el poste 2
-		{
-			regreso = dirToPosts.y -2.0;
-		}
-	}
-	return regreso;
 }
 
 BallInterception::BallInterception( GameData 	   * game_data,
@@ -361,7 +225,7 @@ BallInterception::BallInterception( GameData 	   * game_data,
 	this->start_time_s  = NDEF_NUM;
 	this->last_call_time= NDEF_NUM;
 	time_to_reach_s = NDEF_NUM;
-	reset();
+	turn_requested  = false;
 }
 
 void
@@ -379,14 +243,11 @@ BallInterception::call( AgentCommand * command )
 
 	this->command = command;
 	// Eventos generales
-	if( world->time - last_call_time > 1 )
+	if( world->time() - last_call_time > 1 )
 		state = START;
 
-	last_call_time = world->time;
-	//
-	// Espacio para considerar el evento
-	// on pasive interception position
-	//
+	last_call_time = world->time();
+
 	State tmp_state = state;
 	switch( tmp_state )
 	{
@@ -404,9 +265,6 @@ BallInterception::call( AgentCommand * command )
 		break;
 	case FREEZE:
 		freeze();
-		break;
-	case PASIVE_INTERCEPTION:
-		pasiveInterception();
 		break;
 	}
 }
@@ -431,7 +289,7 @@ BallInterception::searchBall()
 
 		//command->append_turn( 60 );
 		double lastDirection = world->bitacoraBalon.begin()->dir;
-		int    idCono        = world->me.view_mode_w;
+		int    idCono        = world->me().view_mode_w;
 
 		double cono;
 
@@ -478,15 +336,15 @@ BallInterception::computePointTurn()
 	{
 		//world->predictBallCurrentVel( &ball_vel_s );
 
-		ball_pos_s 	   = world->me.pos
+		ball_pos_s 	   = world->me().pos
 				+ Vector2D::fromPolar( visual->ball.dis,
-						Deg2Rad( visual->ball.dir + world->me.angleDeg() + world->me.headAngleDeg() ) );
-		player_pos_s   = world->me.pos;
+						Deg2Rad( visual->ball.dir + world->me().angleDeg() + world->me().headAngleDeg() ) );
+		player_pos_s   = world->me().pos;
 
-		start_time_s   = world->time;
+		start_time_s   = world->time();
 
 		player_vel_s   = Vector2D::fromPolar(  body->speed_amount,
-				Deg2Rad(body->speed_direction + world->me.angle + world->me.head_angle ) );
+				Deg2Rad(body->speed_direction + world->me().angle + world->me().head_angle ) );
 
 		if( visual->ball.dir_chg != NDEF_NUM && visual->ball.dis_chg != NDEF_NUM )
 		{
@@ -495,7 +353,7 @@ BallInterception::computePointTurn()
 					ball_pos_s, // Posición del objeto que ve, absoluta.
 					visual->ball.dis,
 					visual->ball.dis_chg,
-					visual->ball.dir_chg// + world->me.headAngleDeg()
+					visual->ball.dir_chg// + world->me().headAngleDeg()
 			);
 		}
 		else
@@ -513,7 +371,7 @@ BallInterception::computePointTurn()
 					ball_vel_s,
 					time_to_reach_s);
 		}
-		while( vel_needed_s.normita() >= AVERAGE_VEL );
+		while( vel_needed_s.mag() >= AVERAGE_VEL );
 
 		//Calculamos el punto de intercepción teórico
 		intercept_point_s = player_pos_s + vel_needed_s* time_to_reach_s;
@@ -549,7 +407,7 @@ BallInterception::computePointTurn()
 
 		// Calculamos el turn necesario para alinearnos con el punto
 		turn_param =
-				entre180( angle_deg - world->me.angleDeg() /* - world->me.headAngleDeg() */)
+				entre180( angle_deg - world->me().angleDeg() /* - world->me().headAngleDeg() */)
 				* (1.0 + param->inertia_moment * body->speed_amount ) ;
 
 		if( std::fabs(turn_param ) > 4.0 )
@@ -570,13 +428,13 @@ BallInterception::go()
 {
 	state = GO;
 	bool point_reached =
-			(world->me.pos - p_mid_s).normita() <= 1.0;
+			(world->me().pos - p_mid_s).mag() <= 1.0;
 
 	if( visual->ball_is_visible && visual->ball.dis < 1)
 	{
 		freeze();
 	}
-	else if(    (world->time - start_time_s) > time_to_reach_s
+	else if(    (world->time() - start_time_s) > time_to_reach_s
 			 || point_reached )
 	{
 
@@ -602,11 +460,6 @@ void BallInterception::freeze()
 	}
 }
 
-void BallInterception::pasiveInterception()
-{
-	state = PASIVE_INTERCEPTION;
-}
-
 FreezeBall::FreezeBall( GameData * game_data, WorldModel * world )
 {
 	this->game_data = game_data;
@@ -618,36 +471,31 @@ void
 FreezeBall::call( AgentCommand * command )
 {
 	this->command = command;
-	SeeSensor   & visual = game_data->sensor_handler.last_see;
 	BodySensor  & body   = game_data->sensor_handler.last_sense;
 	ServerParam & param  = game_data->game_parameter.server_param;
 	double pow_needed;
 	double angle_needed;
 
+	Vector2D p 	  = world->me().pos; // Posición del agente
+	double theta = world->me().angleDeg(); // Orientación del agente
 
-	Vector2D p = world->me.pos; // Posición del agente
-	double theta = world->me.angleDeg();
+	Vector2D vn   = world->estBallVelocity();
 
-	Vector2D vn = world->estimateBallCurrentVel();
-
-
-	Vector2D pv = Vector2D::fromPolar( body.speed_amount,
+	Vector2D pv	  = Vector2D::fromPolar( body.speed_amount,
 									   Deg2Rad( body.speed_direction  + theta ) );
 
 	Vector2D pn_bn; // vector de bn a pn
-	// Predicciones
+
 	Vector2D pn = p + pv; //Posición del agente en el siguiente ciclo
-
-	Vector2D bn = world->bitacoraBalon.begin()->pos;
-
+	Vector2D bn = world->estBallPosition();
 
 	Vector2D zero_vel(0.0, 0.0);
 
 	pn_bn = pn-bn;
 
-	double dis 		= pn_bn.normita();
+	double dis 		= pn_bn.mag();
 	double dir_diff = std::abs( entre180( theta - Rad2Deg( pn_bn.angle() ) ) );
-	double f = (1 - 0.25*(dir_diff/180.0) -0.25*(dis/param.kickable_margin) );
+	double f = 1 - 0.25*(dir_diff/180.0) -0.25*(dis/param.kickable_margin);
 
 	if( f == 0.0 ) f = 0.001;
 
@@ -658,7 +506,7 @@ FreezeBall::call( AgentCommand * command )
 	}
 	else
 	{
-		pow_needed = vn.normita() / ( param.kick_power_rate * f ) ;
+		pow_needed = vn.mag() / ( param.kick_power_rate * f ) ;
 		angle_needed = entre180( Rad2Deg( std::atan2( vn.y, vn.x )  ) + 180 - theta);
 	}
 
@@ -666,95 +514,7 @@ FreezeBall::call( AgentCommand * command )
 
 }
 
-PossessionBall whoHasTheBall(WorldModel *world)
-{
-    int            i;
-    bool           posesion=false;
-    double         x,y,angle,neck_dir;
-    double         disToBall;
-    double         disPermisible;
 
-    Vector2D       poseAgente,balon;
-
-    PossessionBall regreso;
-
-    x = world->me.pos.x;
-    y = world->me.pos.y;
-    angle = world->me.angle;
-    neck_dir = world->me.head_angle;
-
-    disPermisible = 2.0;
-
-    if( world->bitacoraBalon.size() != 0         &&
-            (world->time - world->bitacoraBalon.begin()->ciclo) <= 5 )
-    {
-        balon.x = world->bitacoraBalon.begin()->pos.x;
-        balon.y = world->bitacoraBalon.begin()->pos.y;
-
-        if(  world->bitacoraBalon.begin()->dis <= disPermisible )
-        {
-            regreso = PROPIA;
-            posesion = true;
-            //cout<<world->time<<" PROPIA"<<endl;
-        }
-
-        //pruebo para los amigos
-        for( i=0 ; i<11 && posesion == false ; i++ )
-        {
-            if( world->bitacoraAmigos[i].size()!= 0 )
-            {
-                poseAgente.x = world->bitacoraAmigos[i].begin()->pos.x;
-                poseAgente.y = world->bitacoraAmigos[i].begin()->pos.y;
-
-                disToBall = sqrt((balon.x-poseAgente.x)*(balon.x-poseAgente.x) +
-                                 (balon.y-poseAgente.y)*(balon.y-poseAgente.y)
-                                 );
-
-                if( disToBall <= disPermisible )
-                {
-                    regreso = EQUIPO;
-                    posesion = true;
-                    //cout<<world->time<<" EQUIPO "<<endl;
-                    i=11;
-                }
-            }
-        }
-
-        //pruebo para los rivales
-        for( i=0 ; i<11 && posesion == false; i++ )
-        {
-            if( world->bitacoraRivales[i].size()!= 0)
-            {
-                poseAgente.x = world->bitacoraRivales[i].begin()->pos.x;
-                poseAgente.y = world->bitacoraRivales[i].begin()->pos.y;
-
-                disToBall = sqrt((balon.x-poseAgente.x)*(balon.x-poseAgente.x) +
-                                 (balon.y-poseAgente.y)*(balon.y-poseAgente.y)
-                                 );
-
-                if( disToBall <= disPermisible )
-                {
-                    regreso = RIVAL;
-                    posesion = true;
-                    //cout<<world->time<<" RIVAL "<<endl;
-                    i=11;
-                }
-            }
-        }
-
-        if( posesion == false )
-        {
-            regreso = SUELTA;
-            //cout<<world->time<<" SUELTA "<<endl;
-        }
-    }
-    else
-    {
-        regreso = PERDIDA;
-        //cout<<world->time<<" PERDIDA "<<endl;
-    }
-    return regreso;
-}
 
 
 void searchBall( AgentCommand * command,
@@ -762,7 +522,7 @@ void searchBall( AgentCommand * command,
                  SensorType sensor_type)
 {
     double lastDirection = world->bitacoraBalon.begin()->dir;
-    int    idCono        = world->me.view_mode_w;
+    int    idCono        = world->me().view_mode_w;
 
     double cono;
 
@@ -801,124 +561,6 @@ void align(double neckDir,
          }
 }
 
-void centerBall(bool   ballVisible,
-                double ballDir,
-                double lastAngleBall,
-                double neckDir,
-                ViewModeWidth cono,
-                AgentCommand * command)
-{
-           if( ballDir >= -10.0 && ballDir <= 10.0 )
-              {
-                  // Balon esta centrado en el cono de vision
-              }
-           else
-              {
-                  align(neckDir,command);
-                  command->append_turn(ballDir);
-              }
-
-}
-
-bool amTheClosest( WorldModel *world )
-
-{
-    int      i,k,friends;
-    bool     regreso;
-    double   disToBall;
-    Vector2D balon;
-    Vector2D poseAgente;
-
-
-    if( world->bitacoraBalon.empty() )
-    	return false;
-
-    balon.x = world->bitacoraBalon.begin()->pos.x;
-    balon.y = world->bitacoraBalon.begin()->pos.y;
-
-    k=0;
-    friends = 0;
-
-    for( i = 0; i<11; i++ )
-    {
-        if( world->bitacoraAmigos[i].size() != 0 )
-        {
-            friends++;
-
-            poseAgente.x = world->bitacoraAmigos[i].begin()->pos.x;
-            poseAgente.y = world->bitacoraAmigos[i].begin()->pos.y;
-
-            disToBall = sqrt((poseAgente.x-balon.x)*(poseAgente.x-balon.x) +
-                             (poseAgente.y-balon.y)*(poseAgente.y-balon.y)
-                             );
-
-            if( (world->time - world->bitacoraAmigos[i].begin()->ciclo) >= 10 ||
-                    world->bitacoraBalon.begin()->dis < disToBall)
-                k++;
-        }
-    }
-
-    if( friends == 0 || ( friends!=0 && friends==k  )  )
-    {
-        regreso = true;
-    }
-    else
-        regreso = false;
-
-    return regreso;
-}
-
-void radar(double neck_dir,
-           AgentCommand * command,
-           SensorType sensor_type)
-{
-    static bool aux;
-    double aumento = 40.0;
-
-    if( neck_dir == 90  || (neck_dir + aumento) >= 90.0 )
-        aux=true;
-
-    if( neck_dir == -90 || (neck_dir - aumento) <= -90.0 )
-        aux=false;
-
-
-    if( neck_dir < 90.0 && aux == false && sensor_type== SENSOR_SEE )
-    {
-        command->append_turn_neck( aumento );
-    }
-
-    if( neck_dir >-90.0 && aux == true && sensor_type== SENSOR_SEE )
-    {
-        command->append_turn_neck( -aumento );
-    }
-}
-
-
-int aQuienPasar(WorldModel *world)
-{
-    int i;
-    int indice;
-    double min = 9999.9999;
-
-    indice = -1;
-
-    for(i=0;i<11;i++)
-    {
-        if( world->bitacoraAmigos[i].size()!=0 &&
-           (world->time - world->bitacoraAmigos[i].begin()->ciclo) < 5 &&
-           (world->me.unum - 1) != i
-          )
-        {
-            if( world->bitacoraAmigos[i].begin()->dis < min )
-            {
-                //cout<<"distancia amigo "<<i<<": "<<world->bitacoraAmigos[i].begin()->dis<<endl;
-                indice = i;
-            }
-        }
-    }
-
-    return indice;
-}
 
 
 void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,WorldModel *world,AgentCommand *command)
@@ -929,7 +571,7 @@ void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,W
     puntoReferencia.x =-52.5;   // coordenadas de la bandera del centro de la porteria
     puntoReferencia.y = 0.0;
 
-    if(  (world->time - world->bitacoraBalon.begin()->ciclo) < 3 ) // si esta reciente los datos del balon
+    if(  (world->time() - world->bitacoraBalon.begin()->ciclo) < 3 ) // si esta reciente los datos del balon
     {
 
         //xTarget = -48.0; // Linea donde quieres que se desplace el portero
@@ -951,7 +593,7 @@ void porteroLine( double xTarget, Vector2D velocidad , SensorType sensor_type ,W
         if(yTarget <= -7.0)
             yTarget = -7.0;
 
-        if( (world->me.pos.y > (yTarget - 0.5)) && (world->me.pos.y < (yTarget + 0.5)) )
+        if( (world->me().pos.y > (yTarget - 0.5)) && (world->me().pos.y < (yTarget + 0.5)) )
             centerBall(world,command);
         else
             GoToXY2(xTarget, yTarget,0.5,velocidad,command,world); // utiliza dash() negativo
@@ -978,10 +620,10 @@ void GoToXY2 (   double   xTarget ,
     double const dash_power_rate = 0.006, effort = 0.8;
     //double const inertia_moment = 5.0;
 
-    double   x = world->me.pos.x;
-    double   y = world->me.pos.y;
-    double   angle = world->me.angle;
-    //double   neck_dir = world->me.head_angle;
+    double   x = world->me().pos.x;
+    double   y = world->me().pos.y;
+    double   angle = world->me().angle;
+    //double   neck_dir = world->me().head_angle;
 
     //anguloCuerpo =  angle + angleCuelloCuerpo; // angleCuelloCuerpo se obtiene del sense_body
     //consideramos el angle como el angulo del cuerpo
@@ -1130,17 +772,17 @@ void centerBall( WorldModel *world,
     else
     {   // Si neck_dir es menor al maximo-ball.dir, puede girar el cuello o
         // si neck_dir es mayor al minimo-ball.dir, puede girar el cuello
-        if( world->me.head_angle <  90.0 - world->bitacoraBalon.begin()->dir &&
-                world->me.head_angle > -90.0 - world->bitacoraBalon.begin()->dir
+        if( world->me().head_angle <  90.0 - world->bitacoraBalon.begin()->dir &&
+                world->me().head_angle > -90.0 - world->bitacoraBalon.begin()->dir
                 )
             command->append_turn_neck(world->bitacoraBalon.begin()->dir);
         else
         {
             // Si no, alineamos el cuello con el cuerpo y
             // luego giramos el cuerpo en ball.dir+neck_dir
-            align(world->me.head_angle,command);
+            align(world->me().head_angle,command);
             command->append_turn(world->bitacoraBalon.begin()->dir +
-                                 world->me.head_angle);
+                                 world->me().head_angle);
         }
 
     }
@@ -1164,52 +806,44 @@ void GoToXY (   double   xTarget ,
     double const dash_power_rate = 0.006, effort = 0.8;
     double const inertia_moment = 5.0;
 
-    double   x = world->me.pos.x;
-    double   y = world->me.pos.y;
-    double   angle = world->me.angle;
-    double   neck_dir = world->me.head_angle;
-
-    //anguloCuerpo =  angle + angleCuelloCuerpo; // angleCuelloCuerpo se obtiene del sense_body
-    //consideramos el angle como el angulo del cuerpo
+    double   x = world->me().pos.x;
+    double   y = world->me().pos.y;
+    double   angle = world->me().angle;
 
     disToPoint = sqrt( (xTarget - x)*(xTarget - x)  + (yTarget - y)*(yTarget - y) );
     dirToPoint = Rad2Deg(atan2( yTarget - y , xTarget - x));
 
-    if( disToPoint > radio )  // el agente no ha llegado al punto
+    if( disToPoint > radio )  // El agente no ha llegado al punto
     {
 
         angPermisible = Rad2Deg( atan2( radio , disToPoint ) );
-        /*neck_dir?*/   turnParameter = dirToPoint - angle;// - neck_dir;
+        turnParameter = dirToPoint - angle;
         turnParameter = entre180( turnParameter );
 
         if( angPermisible < turnParameter * 0.1  ||  disToPoint > 25.0 )
             angPermisible = 25.0;
 
-        if( fabs(turnParameter) > angPermisible )  // el agente no esta bien alineado al punto
+        if( fabs(turnParameter) > angPermisible )  // El agente no esta bien alineado al punto
         {
-
             velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y) );
-            turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.normita()));
+            turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.mag()));
             turnParameter = entre180(turnParameter);
-            //// cout<<"Giro TURN"<<endl;
             command->append_turn(turnParameter);
-
         }
         else
         {
-
             velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y - angle) );
             dashParameter = (disToPoint - velocidad.x)  / ( dash_power_rate * effort );
 
             if( dashParameter > 100.0)
                 dashParameter = 100.0;
-            //// cout<<"Avanza DASH"<<endl;
+
             command->append_dash( dashParameter );
         }
     }
     else
     {
-        // el agente llego al punto
+        // El agente llego al punto
     }
 
 }
@@ -1256,7 +890,7 @@ void GoToXYSlow (   double   xTarget ,
         {
 
             velocidad     = Vector2D::fromPolar( velocidad.x, Deg2Rad(velocidad.y) );
-            turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.normita()));
+            turnParameter =  turnParameter *(1.0 + (inertia_moment*velocidad.mag()));
             turnParameter = entre180(turnParameter);
             //cout<<"Giro TURN"<<endl;
             command->append_turn(turnParameter);
@@ -1278,554 +912,14 @@ void GoToXYSlow (   double   xTarget ,
     {
         // el agente llego al punto
     }
-
-}
-
-
-
-// Convierte a numeros dobles el mensaje recibido, es decir mensaje = x,y,prob
-float * convertToDouble( string mensaje )
-{
-    const char   *subcadena;
-    int x,y;
-    float prob;
-    bool error;
-
-    static float arreglo[3];
-
-    subcadena = mensaje.c_str();
-
-    if( *subcadena == '+' )
-    {
-        subcadena++;
-        sscanf(subcadena,"%d",&x);   //obtenemos el 1er dato (+,x)
-
-        if( isdigit(*(subcadena+1) ) )
-            subcadena+=2;
-        else
-            subcadena++;
-
-        if( *subcadena == '+' )
-        {
-            subcadena++;
-            sscanf(subcadena,"%d",&y);   //obtenemos el 2do dato (+,y)
-
-            if( isdigit(*(subcadena+1) ) )
-                subcadena+=2;
-            else
-                subcadena++;
-
-            if(*subcadena == '.')
-               sscanf(subcadena,"%f",&prob);  //obtenemos el 3er dato (prob)
-            else
-                error = true;
-        }
-        else
-        {
-            if( *subcadena == '-')
-            {
-                sscanf(subcadena,"%d",&y); //obtenemos el 2do dato (-,y)
-                subcadena++;  // brinco el signo
-
-                if( isdigit(*(subcadena+1) ) )
-                    subcadena+=2;
-                else
-                    subcadena++;
-
-                if(*subcadena == '.')
-                    sscanf(subcadena,"%f",&prob);  //obtenemos el 3er dato (prob)
-                else
-                    error = true;
-            }
-            else
-            {
-                // ERROR, mensaje fuera de formato
-                error = true;
-            }
-        }
-    }
-    else  // el primer dato no fue positivo
-    {
-        if( *subcadena == '-')
-        {
-            sscanf(subcadena,"%d",&x);         //obtenemos el 1er dato (-,x)
-
-            subcadena++;  // me brinco el signo
-
-            if( isdigit(*(subcadena+1) ) )
-                subcadena+=2;
-            else
-                subcadena++;
-
-            if( *subcadena == '+' )
-            {
-                subcadena++;
-                sscanf(subcadena,"%d",&y);   //obtenemos el 2do dato (+,y)
-
-                if( isdigit(*(subcadena+1) ) )
-                    subcadena+=2;
-                else
-                    subcadena++;
-
-                if(*subcadena == '.')
-                    sscanf(subcadena,"%f",&prob);  //obtenemos el 3er dato (prob)
-                else
-                    error = true;
-            }
-            else
-            {
-                if( *subcadena == '-')
-                {
-                    sscanf(subcadena,"%d",&y); //obtenemos el 2do dato (-,y)
-
-                    subcadena++;  // me brinco el signo
-
-                    if( isdigit(*(subcadena+1) ) )
-                        subcadena+=2;
-                    else
-                        subcadena++;
-
-                    if(*subcadena == '.')
-                        sscanf(subcadena,"%f",&prob);  //obtenemos el 3er dato (prob)
-                    else
-                        error = true;
-                }
-                else
-                {
-                    // ERROR, mensaje fuera de formato
-                    error = true;
-                }
-            }
-        }
-        else
-        {
-            // ERROR, mensaje fuera de formato
-            error = true;
-        }
-    }
-
-    if(error != true )
-    {
-        arreglo[0] = x;
-        arreglo[1] = y;
-        arreglo[2] = prob;
-        cout<<"Convertimos a valores: "<<x<<" "<<y<<" "<<prob<<endl;
-        cout<<"Enviados en el arreglo: "<<arreglo[0]<<" "<<arreglo[1]<<" "<<arreglo[2]<<endl;
-    }
-
-    return arreglo;
-}
-
-// Convierte las coordenadas del punto objetivo y la probabilidad en cadena
-string convertToString(Vector2D pointTarget , float prob)
-{
-    int x,y;
-    char cad1[5],cad2[5],cad3[5],cad4[5],cad5[5];
-    char mensaje[10];
-
-    for(int i=0 ; i<10 ; i++)
-    {
-        mensaje[i]='\0';
-    }
-
-    x= (int)pointTarget.x;
-    y= (int)pointTarget.y;
-
-    if( x<0 )
-    {
-        sprintf(cad1,"%d",x);  // obtengo el primer dato negativo
-
-        if( isdigit(cad1[2]) )  // veo si es de uno o dos digitos
-            cad1[3]='\0';
-        else
-            cad1[2]='\0';
-
-        if( y<0 )  // Y negativo
-        {
-            sprintf(cad2,"%d",y);  // obtengo el segundo dato
-
-            if( isdigit(cad2[2]) )  // veo si es de uno o dos digitos
-                cad2[3]='\0';
-            else
-                cad2[2]='\0';
-
-            sprintf(cad3,"%f",prob);   // obtengo la probabilidad
-
-            cad3[0]=cad3[1];
-            cad3[1]=cad3[2];
-            cad3[2]=cad3[3];
-            cad3[3]=cad3[4];
-            cad3[4]='\0';                // quito el caracter 0.
-
-            strcat(mensaje,cad1);
-            strcat(mensaje,cad2);
-            strncat(mensaje,cad3,10);
-        }  // termina el if del segundo dato negativo
-        else
-        {
-            if( y < 0 )
-            {
-                cad2[0]='+';
-                cad2[1]='\0';
-                sprintf(cad3,"%d",y);
-
-                if( isdigit(cad3[2]) )
-                    cad3[3]='\0';
-                else
-                    cad3[2]='\0';
-
-                sprintf(cad4,"%f",prob);
-
-                cad4[0]=cad4[1];
-                cad4[1]=cad4[2];
-                cad4[2]=cad4[3];
-                cad4[3]=cad4[4];
-                cad4[4]='\0';
-
-                strcat(mensaje,cad1);
-                strcat(mensaje,cad2);
-                strcat(mensaje,cad3);
-                strncat(mensaje,cad4,10);
-            }  // termina else del segundo dato positivo
-            else  // Y = 0
-            {
-                strcpy(cad2,"+00");
-                sprintf(cad3,"%f",prob);
-
-                cad3[0]=cad3[1];
-                cad3[1]=cad3[2];
-                cad3[2]=cad3[3];
-                cad3[3]=cad3[4];
-                cad3[4]='\0';
-
-                strcat(mensaje,cad1);
-                strcat(mensaje,cad2);
-                strcat(mensaje,cad3);
-            }  // termina else del segundo dato = 0
-        }
-    }// termina el if del primer dato positivo
-    else  // X > 0   o   X = 0
-    {
-        if( x>0 )
-        {
-            cad1[0] ='+';
-            cad1[1] ='\0';
-
-            sprintf(cad2,"%d",x);
-
-            if( isdigit(cad2[1]) )
-                cad2[2]='\0';
-            else
-                cad2[1]='\0';
-
-            if( y < 0 )
-            {
-                sprintf(cad3,"%d",y);
-
-                if( isdigit(cad3[2]) )
-                    cad3[3]='\0';
-                else
-                    cad3[2]='\0';
-
-                sprintf(cad4,"%f",prob);
-
-                cad4[0]=cad4[1];
-                cad4[1]=cad4[2];
-                cad4[2]=cad4[3];
-                cad4[3]=cad4[4];
-                cad4[4]='\0';
-
-                strcat(mensaje,cad1);
-                strcat(mensaje,cad2);
-                strcat(mensaje,cad3);
-                strncat(mensaje,cad4,10);
-            }
-            else  // Y > 0
-            {
-                if( y > 0)
-                {
-                    cad3[0]='+';
-                    cad3[1]='\0';
-
-                    sprintf(cad4,"%d",y);
-
-                    if( isdigit(cad4[1]) )
-                        cad4[2]='\0';
-                    else
-                        cad4[1]='\0';
-
-                    sprintf(cad5,"%f",prob);
-
-                    cad5[0]=cad5[1];
-                    cad5[1]=cad5[2];
-                    cad5[2]=cad5[3];
-                    cad5[3]=cad5[4];
-                    cad5[4]='\0';
-
-                    strcat(mensaje,cad1);
-                    strcat(mensaje,cad2);
-                    strcat(mensaje,cad3);
-                    strcat(mensaje,cad4);
-                    strncat(mensaje,cad5,10);
-                }
-                else // Y = 0
-                {
-                    strcpy(cad3,"+00");
-                    sprintf(cad4,"%f",prob);
-
-                    cad4[0]=cad4[1];
-                    cad4[1]=cad4[2];
-                    cad4[2]=cad4[3];
-                    cad4[3]=cad4[4];
-                    cad4[4]='\0';
-
-                    strcat(mensaje,cad1);
-                    strcat(mensaje,cad2);
-                    strcat(mensaje,cad3);
-                    strncat(mensaje,cad4,10);
-
-                }
-            }
-        }
-        else  // X = 0
-        {
-            strcpy(cad1,"+00");
-            if( y<0 )
-            {
-                sprintf(cad2,"%d",y);
-
-                if( isdigit(cad2[2]) )
-                    cad2[3]='\0';
-                else
-                    cad2[2]='\0';
-
-                sprintf(cad3,"%f",prob);
-
-                cad3[0]=cad3[1];
-                cad3[1]=cad3[2];
-                cad3[2]=cad3[3];
-                cad3[3]=cad3[4];
-                cad3[4]='\0';
-
-                strcat(mensaje,cad1);
-                strcat(mensaje,cad2);
-                strncat(mensaje,cad3,10);
-
-            }
-            else
-            {
-                if( y>0 )
-                {
-                    cad2[0]='+';
-                    cad2[1]='\0';
-
-                    sprintf(cad3,"%d",y);
-
-                    if( isdigit(cad3[1]) )
-                        cad3[2]='\0';
-                    else
-                        cad3[1]='\0';
-
-                    sprintf(cad4,"%f",prob);
-
-                    cad4[0]=cad4[1];
-                    cad4[1]=cad4[2];
-                    cad4[2]=cad4[3];
-                    cad4[3]=cad4[4];
-                    cad4[4]='\0';
-
-                    strcat(mensaje,cad1);
-                    strcat(mensaje,cad2);
-                    strcat(mensaje,cad3);
-                    strncat(mensaje,cad4,10);
-
-                }
-                else // Y = 0
-                {
-                    strcpy(cad2,"+00");
-                    sprintf(cad3,"%f",prob);
-
-                    cad3[0]=cad3[1];
-                    cad3[1]=cad3[2];
-                    cad3[2]=cad3[3];
-                    cad3[3]=cad3[4];
-                    cad3[4]='\0';
-
-                    strcat(mensaje,cad1);
-                    strcat(mensaje,cad2);
-                    strncat(mensaje,cad3,10);
-                }
-            }
-        }
-    }
-
-    cout<<"Mensaje Final: "<<mensaje<<endl;
-    return mensaje;
-}
-
-// Devuelve el unum del agente amigo al cual debe de oir
-// Elige al agente más cercano al objetivo que tiene destinado
-int chooseFriendToHear(Vector2D pointTarget,WorldModel * world)
-{
-    double dist_min;
-    double distToObjetive;
-    int    closestAgent,i;
-
-    closestAgent = -1;
-    dist_min = 9999.9999;
-
-    for( i=0 ; i<11 ; i++ )
-    {
-        if(  world->bitacoraAmigos[i].size()!= 0 &&
-            (world->time - world->bitacoraAmigos[i].begin()->ciclo) < 2 )
-        {
-            distToObjetive = sqrt( (pointTarget.x - world->bitacoraAmigos[i].begin()->pos.x)*(pointTarget.x - world->bitacoraAmigos[i].begin()->pos.x) +
-                                   (pointTarget.y - world->bitacoraAmigos[i].begin()->pos.y)*(pointTarget.y - world->bitacoraAmigos[i].begin()->pos.y)
-                                   );
-
-            if( distToObjetive < dist_min )
-            {
-                closestAgent = i+1;
-                dist_min = distToObjetive;
-            }
-        }
-    }
-
-    return closestAgent;
-}
-
-// Recibe como parametros las coordenadas de su objetivo y la probabilidad de
-// realizarlo, convierte a cadena esos datos y comunica el mansaje con el comando SAY
-void comunicarObjetivo(Vector2D pointTarget,
-                       float   prob,
-                       WorldModel *world,
-                       AgentCommand *command )
-{
-    string mensaje;
-    mensaje = convertToString(pointTarget,prob);
-    command->append_say(mensaje);
-    cout<<"Grito en cadena: "<<mensaje<<endl;
-}
-
-// Elige que agente escuchar, y aplica el comando attentionto para oir el mensaje
-bool escucharObjetivo ( GameData 	   * game_data,
-                       Vector2D pointTarget,
-                       WorldModel *world,
-                       AgentCommand *command)
-{
-    int amigo;
-    bool regreso;
-
-    amigo = chooseFriendToHear(pointTarget,world);
-
-    if( amigo != -1 )
-    {
-        command->append_attentionto( ATTENTION_OUR , amigo );
-        regreso = true;
-        cout<<"Escucho al agente con el numero: "<<amigo<<endl;
-        cout<<"Que envio: "<< game_data->sensor_handler.last_hear_our.message<<endl;
-    }
-    else
-    {
-        cout<<"No ve ningun agente...."<<endl;
-        regreso = false;
-    }
-    return regreso;
-}
-
-// Regresa un false, si el objetivo es similar al del agente amigo y si su probabilidad es menor
-bool compararObjetivo( GameData * game_data,Vector2D miPunto, float miProb, WorldModel *world)
-{
-    float * p;
-    float x,y,prob;
-    bool   regreso;
-
-
-    p = convertToDouble( game_data->sensor_handler.last_hear_our.message );
-
-    x    = p[0];
-    y    = p[1];
-    prob = p[2];
-
-    cout<<"Comparo el objetivo mio con: "<<x<<" "<<y<<" "<<prob<<endl;
-
-    if( (((x + 1.0) <= (miPunto.x + 1.0) && (x + 1.0) >= (miPunto.x - 1.0)) ||
-         ((x - 1.0) <= (miPunto.x + 1.0) && (x - 1.0) >= (miPunto.x - 1.0)) )
-            &&
-            (((y + 1.0) <= (miPunto.y + 1.0) && (y + 1.0) >= (miPunto.y - 1.0)) ||
-             ((y - 1.0) <= (miPunto.y + 1.0) && (y - 1.0) >= (miPunto.y - 1.0)) )
-            &&
-            miProb < prob )
-
-    {
-        // Las zonas son similares y es mas probable que cumpla el objetivo el
-        // agente amigo
-        regreso = false;
-    }
-    else
-    {
-        // miPunto es bueno, eligo realizar objetivo
-        regreso = true;
-    }
-
-    return regreso;
-}
-
-
-bool amStayInLine( WorldModel * world )
-{
-    bool regreso;
-    double xTarget;
-
-    regreso = false;
-
-    if( world->me.side == 'l' )
-        xTarget = -48.0;
-    else
-        xTarget = 48.0;
-
-    if(world->me.pos.x < xTarget + 1.0 && world->me.pos.x > xTarget - 1.0)
-        regreso = true;
-
-    return regreso;
 }
 
 void alignBodyWithNeck(WorldModel *world,
                        AgentCommand *command)
 {
-    if( world->me.head_angle != 0.0 )
+    if( world->me().head_angle != 0.0 )
        {
-           command->append_turn(world->me.head_angle);
-           command->append_turn_neck(-world->me.head_angle);
+           command->append_turn(world->me().head_angle);
+           command->append_turn_neck(-world->me().head_angle);
        }
-}
-
-bool balonEnAreaGrande( WorldModel *world )
-{
-    bool regreso;
-
-    regreso = false;
-
-    if( world->me.side == 'l')
-    {
-        if(   world->bitacoraBalon.begin()->pos.x < -36 &&    // area grande del portero
-              world->bitacoraBalon.begin()->pos.y > -20 &&
-              world->bitacoraBalon.begin()->pos.y <  20 &&
-              world->bitacoraBalon.begin()->pos.x > -52.5)
-        {
-            regreso = true;
-        }
-    }
-    else
-    {
-        if(   world->bitacoraBalon.begin()->pos.x > 36  &&    // area grande del portero
-              world->bitacoraBalon.begin()->pos.y > -20 &&
-              world->bitacoraBalon.begin()->pos.y <  20 &&
-              world->bitacoraBalon.begin()->pos.x < 52.5)
-        {
-            regreso = true;
-        }
-    }
-
-    return regreso;
 }

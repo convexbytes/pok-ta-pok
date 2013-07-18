@@ -24,6 +24,21 @@ enum ActionType
 	SHOOT
 };
 
+enum MasterStatus
+{
+  DEFENSA = 0,
+  ATAQUE
+};
+
+enum PossessionBall
+{
+
+    PROPIA = 0,     // balón en poder del agente
+    EQUIPO,         // balón en poder del equipo propio
+    RIVAL,          // balón en poder del rival
+    SUELTA,         // balón suelto
+    PERDIDA         // balón sin ver
+};
 
 
 class PokTaPokAgent	 : public Agent
@@ -44,16 +59,15 @@ private:
     SensorHandler       * sensor_h;
     StateMachine		  state_m;
 
+    PossessionBall		m_ball_possession;
+    MasterStatus    	m_master_status;
 
-    // Habilidades de las que depende
+    // Habilidades
     BallInterception	* ball_interception;
-
-    //PasiveInterception  * pasive_interception;
     FreezeBall			* freeze_ball;
 
 
     // Para tomar decisiones
-    //PotentialField		pot_field;
     Vector2D  	 	 	goal_l;
     Vector2D  			goal_r;
     Vector2D			goal_pos;
@@ -63,9 +77,6 @@ private:
     Vector2D			 last_voronoi_centroid;
     std::vector<Point2D> voronoi_cell;
 
-
-    bool 	 on_reception;
-    int  	 reception_time;
     Vector2D pass_point;
 
     void update();
@@ -103,9 +114,14 @@ private:
 
     void shootAction();
 
-    void hearOur();
-    void reception();
-    void chooseAttention();
+    int   aQuienPasar();
+    bool  isZoneShoot( double x, double y , double radio);
+    bool  IamTheClosest();
+    bool  balonEnAreaGrande();
+
+    PossessionBall whoHasTheBall();
+
+    bool inGoalieLine();
 
     double 		 passProb( Vector2D const & target_pos );
 
