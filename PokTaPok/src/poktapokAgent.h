@@ -88,7 +88,7 @@ private:
     void onPrep();
     void onPlay();
 
-    void irAlBalon();
+    //void irAlBalon();
 
     void balonPropio();
     void balonEquipo();

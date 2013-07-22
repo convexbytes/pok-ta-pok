@@ -214,7 +214,12 @@ void PokTaPokAgent::ataque()
 	else if( IamTheClosest() )
 	{
 		if( ball_vel.mag() < 0.5 )
-			irAlBalon();
+		{
+			m_go_to_point->setDashOverride( false );
+			m_go_to_point->setRadius( 1.0 );
+			m_go_to_point->setTarget( m_world->estBallPosition() );
+			m_go_to_point->call();
+		}
 		else
 			m_ball_interception->call( );
 	}
@@ -249,7 +254,12 @@ void PokTaPokAgent::defensa()
 	{
 
 		if( ball_vel.mag() < 0.5 )
-			irAlBalon();
+		{
+			m_go_to_point->setDashOverride( false );
+			m_go_to_point->setRadius( 1.0 );
+			m_go_to_point->setTarget( m_world->estBallPosition() );
+			m_go_to_point->call();
+		}
 		else
 			m_ball_interception->call( );
 	}
@@ -294,7 +304,10 @@ void PokTaPokAgent::ballStaticBehaviorSideL()
 				}
 				else
 				{
-					irAlBalon();
+					m_go_to_point->setDashOverride( false );
+					m_go_to_point->setRadius( 1.0 );
+					m_go_to_point->setTarget( m_world->estBallPosition() );
+					m_go_to_point->call();
 				}
 			}
 			else
@@ -356,9 +369,11 @@ void PokTaPokAgent::ballStaticBehaviorSideR()
 				}
 				else
 				{
-					irAlBalon();
+					m_go_to_point->setDashOverride( false );
+					m_go_to_point->setRadius( 1.0 );
+					m_go_to_point->setTarget( m_world->estBallPosition() );
+					m_go_to_point->call();				}
 				}
-			}
 			else
 			{
 				// Posicion ATAQUE no soy el más cercano al balón
@@ -721,7 +736,12 @@ void PokTaPokAgent::balonRival()
 	if( IamTheClosest()  )
 	{
 		if( ball_vel.mag() < 0.5 )
-			irAlBalon();
+		{
+			m_go_to_point->setDashOverride( false );
+			m_go_to_point->setRadius( 1.0 );
+			m_go_to_point->setTarget( m_world->estBallPosition() );
+			m_go_to_point->call();
+		}
 		else
 			m_ball_interception->call();
 	}
@@ -739,7 +759,12 @@ void PokTaPokAgent::balonSuelto()
 	if( IamTheClosest() )
 	{
 		if( ball_vel.mag() < 0.5 )
-			irAlBalon();
+		{
+			m_go_to_point->setDashOverride( false );
+			m_go_to_point->setRadius( 1.0 );
+			m_go_to_point->setTarget( m_world->estBallPosition() );
+			m_go_to_point->call();
+		}
 		else
 			m_ball_interception->call();
 	}
@@ -761,46 +786,6 @@ void PokTaPokAgent::balonPerdido()
 	{	}
 
 }
-
-void PokTaPokAgent::irAlBalon()
-{
-	Vector2D velocidad;
-	Vector2D balon;
-
-	double x     = m_world->me().pos.x;
-	double y     = m_world->me().pos.y;
-	double angle = m_world->me().angle;
-
-	double  neck_dir = m_game_data->sensor_handler.last_sense.head_angle;
-
-
-	if( m_game_data->sensor_handler.last_see.ballIsVisible())
-	{
-		Ball & ball         = m_sensor_h->last_see.ball;
-		balon = Vector2D::fromPolar(ball.dis,Deg2Rad(ball.dir + angle + neck_dir));
-		balon.x = balon.x + x;
-		balon.y = balon.y + y;
-		m_go_to_point->setDashOverride( false );
-		m_go_to_point->setRadius( 1.0 );
-		m_go_to_point->setTarget( balon );
-		m_go_to_point->call();
-	}
-	else
-	{
-      if( (m_world->time() - m_world->bitacoraBalon.begin()->ciclo) < POT_FIELD_EXPIRE_TIME )
-      {
-  		m_go_to_point->setDashOverride( false );
-  		m_go_to_point->setRadius( 1.0 );
-  		m_go_to_point->setTarget( m_world->bitacoraBalon.begin()->pos );
-  		m_go_to_point->call();
-      }
-      else
-      {
-    	  m_search_ball->call();
-      }
-	}
-}
-
 
 void PokTaPokAgent::voronoiPositioning()
 {
