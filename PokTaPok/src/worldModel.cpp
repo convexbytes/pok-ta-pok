@@ -23,6 +23,12 @@ WorldModel::WorldModel( GameData * game_data )
     m_loc_adapter = new LocalizationAdapter( game_data );
 }
 
+const GameData &
+WorldModel::gameData()
+{
+	return *m_game_data;
+}
+
 const AgentState &
 WorldModel::me() const
 {
@@ -103,7 +109,7 @@ void WorldModel::updateOnBody()
 	m_me.view_mode_w 	= body.view_mode_width;
 	m_me.head_angle 	= body.head_angle;
 	m_me.speed_amount	= body.speed_amount;
-	m_me.speed_amount	= body.speed_direction;
+	m_me.speed_dir	    = body.speed_direction;
 
 	// Actualizamos en base a los comandos enviados
 	this->updateOnCommandSent();
@@ -477,9 +483,9 @@ WorldModel::estBallPosition() const
 {
 	Vector2D b;
 	if( bitacoraBalon.empty() )
-		b = bitacoraBalon.begin()->pos;
-	else
 		b.set(0,0);
+	else
+		b = bitacoraBalon.begin()->pos;
 	return b;
 }
 

@@ -1,6 +1,7 @@
 #ifndef POKTAPOK_AGENT_H
 #define POKTAPOK_AGENT_H
 #include "agent.h"
+#include "ability.h"
 #include "sensorHandler.h"
 #include "worldModel.h"
 #include "state.h"
@@ -32,7 +33,6 @@ enum MasterStatus
 
 enum PossessionBall
 {
-
     PROPIA = 0,     // balón en poder del agente
     EQUIPO,         // balón en poder del equipo propio
     RIVAL,          // balón en poder del rival
@@ -44,40 +44,43 @@ enum PossessionBall
 class PokTaPokAgent	 : public Agent
 {
 public:
-    PokTaPokAgent( GameData * game_data );
+    PokTaPokAgent( GameData * game_data, AgentCommand * command );
     ~PokTaPokAgent();
-    virtual void do_process( GameData * game_data,
-                             AgentCommand *agent_command );
+    virtual void do_process();
 
 
 private:
-    WorldModel	        * world;
-    GameData			* game_data;
-    AgentCommand        * command;
-    AgentCommand        * command_c;
-    GameParameter       * param;
-    SensorHandler       * sensor_h;
-    StateMachine		  state_m;
+    WorldModel	        * m_world;
+    AgentCommand        * m_command_commited;
+    GameParameter       * m_param;
+    SensorHandler       * m_sensor_h;
+    StateMachine		  m_state_machine;
 
     PossessionBall		m_ball_possession;
     MasterStatus    	m_master_status;
 
     // Habilidades
-    BallInterception	* ball_interception;
-    FreezeBall			* freeze_ball;
+    PassToPoint			* m_pass_to_point;
+    GoToPoint			* m_go_to_point;
+    FreezeBall			* m_freeze_ball;
+    SearchBall			* m_search_ball;
+    BallInterception	* m_ball_interception;
+    CenterBall			* m_center_ball;
+    RunWithBall			* m_run_with_ball;
+    Shoot				* m_shoot;
+    // Goalie...
+    GoToPoint2			* m_go_to_point2;
+    GoalieLine			* m_goalie_line;
 
-
-    // Para tomar decisiones
-    Vector2D  	 	 	goal_l;
-    Vector2D  			goal_r;
-    Vector2D			goal_pos;
-
+    Vector2D  	 	 	m_goal_l;
+    Vector2D  			m_goal_r;
+    Vector2D			m_goal_pos;
 
     // Para posicionar
-    Vector2D			 last_voronoi_centroid;
-    std::vector<Point2D> voronoi_cell;
+    Vector2D			 m_last_voronoi_centroid;
+    std::vector<Point2D> m_voronoi_cell;
 
-    Vector2D pass_point;
+    Vector2D m_pass_point;
 
     void update();
 
@@ -93,11 +96,8 @@ private:
     void balonSuelto();
     void balonPerdido();
 
-
     void ballStaticBehaviorSideL();
     void ballStaticBehaviorSideR();
-
-
 
     void constructVoronoi();
     void voronoiPositioning();
@@ -110,20 +110,15 @@ private:
 
     void ataque();
 
-    void passAction( int unum, Vector2D const & pos );
-
-    void shootAction();
 
     int   aQuienPasar();
-    bool  isZoneShoot( double x, double y , double radio);
+    bool  isShootZone( double x, double y , double radio);
     bool  IamTheClosest();
     bool  balonEnAreaGrande();
 
     PossessionBall whoHasTheBall();
 
     bool inGoalieLine();
-
-    double 		 passProb( Vector2D const & target_pos );
 
     ActionOption chooseAction( std::vector<ActionOption> const & actions );
 };
@@ -138,7 +133,7 @@ public:
 	double 	 	dist_to_goal;
 	double 	 	prob;
 	ActionType 	action_type;
-	int			unum; // ball := 0, playres := 1,...,11
+	int			unum; // ball = 0, playres = 1,...,11
 
 	static bool distanceLowerThan( ActionOption i, ActionOption j )
 	{

@@ -53,7 +53,8 @@ private:
     char buffer_in[4096]; //4096 es el tamaño usado por send y receive en udpsocket
 
     GameData        *   game_data;
-    AgentCommand    *   agent_command;
+    AgentCommand        agent_command;
+    AgentCommand        command_to_send;
     Parser          *   parser;
     Agent           *   agent;
     deque<string>       messages;

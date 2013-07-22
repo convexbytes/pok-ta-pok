@@ -77,6 +77,8 @@ public:
     WorldModel( GameData * game_data );
     void update( GameData * game_data );
 
+    const GameData & gameData();
+
     // Guardamos info de los objetos
     deque <ObjetoBitacora>  bitacoraRivales[11]; // 11 rivales
     deque <ObjetoBitacora>  bitacoraAmigos[11];  // 10 amgios, el lugar nuestro se queda vacío

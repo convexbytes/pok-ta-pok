@@ -40,16 +40,14 @@ void Client::initialize() {
 	game_data   = 0;
 	parser      = 0;
 	agent       = 0;
-	agent_command      = 0;
 
 	//Iniciamos todos los objetos.
 	game_data           = new GameData  ( );
 	parser              = new Parser    (game_data);
-	agent               = new PokTaPokAgent	   ( game_data );
-	agent_command       = new AgentCommand     ( );
+	agent               = new PokTaPokAgent	   ( game_data , &agent_command );
 
 	//Comprobamos que se crearon todos los objetos
-	if( !( game_data && parser && agent && agent_command ) )
+	if( !( game_data && parser && agent ) )
 	{
 		std::cerr << "Objects could not be created, exiting..."
 				  << std::endl;
@@ -60,8 +58,6 @@ void Client::initialize() {
 			delete parser ;
 		if( agent )
 			delete agent ;
-		if( agent_command )
-			delete agent_command ;
 
 		exit (1);
 	}
@@ -118,16 +114,12 @@ Client::~Client()
 	if( instance.game_data )
 		delete instance.game_data;
 
-	if( instance.agent_command )
-		delete instance.agent_command;
-
 	if( instance.agent )
 		delete instance.agent;
 
 	instance.game_data   = 0;
 	instance.parser      = 0;
 	instance.agent       = 0;
-	instance.agent_command      = 0;
 
 }
 
@@ -173,8 +165,6 @@ void Client::main_loop( bool goalie )
 
 void * Client::Client::process_thread_function(void *parameter)
 {
-	AgentCommand aux_command; // Para reducir el tiempo de bloqueo
-
 	int  seconds_since_last_message;
 	char server_message_aux[4096];
 	bool stack_empty;
@@ -213,11 +203,10 @@ void * Client::Client::process_thread_function(void *parameter)
 			Client::instance().parser->parse( server_message_aux );
 
 			// Recibimos la respuesta del agente.
-			Client::instance().agent->do_process(Client::instance().game_data,
-					&aux_command );
+			Client::instance().agent->do_process();
 
 			pthread_mutex_lock( &Client::instance().command_mutex );
-				*Client::instance().agent_command = aux_command;
+				Client::instance().command_to_send = Client::instance().agent_command;
 			pthread_mutex_unlock( &Client::instance().command_mutex );
 
 		}
@@ -259,7 +248,7 @@ void* Client::Client::sending_thread_function(void *parameter)
 
 			// Serializamos los comandos y los guardamos en el vector.
 			pthread_mutex_lock( &Client::instance().command_mutex );
-			Serializer::serializeAgentCommands( *Client::instance().agent_command,
+			Serializer::serializeAgentCommands( Client::instance().command_to_send,
 					& commands );
 			pthread_mutex_unlock( &Client::instance().command_mutex );
 
@@ -270,7 +259,7 @@ void* Client::Client::sending_thread_function(void *parameter)
 			//Copiamos lo que se envió a los datos del juego.
 			pthread_mutex_lock( &Client::instance().command_mutex );
 			Client::instance().game_data->command_commited =
-					*Client::instance().agent_command;
+					Client::instance().agent_command;
 			pthread_mutex_unlock( &Client::instance().command_mutex );
 
 
