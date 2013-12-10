@@ -123,20 +123,21 @@ Client::~Client()
 
 }
 
-void Client::main_loop( bool goalie )
+void Client::main_loop( string server, unsigned int port, string team_name, int goalie )
 {
 	Client::instance().initialize();
-	USock::instance().Initial("localhost", 6000);
+
+	USock::instance().Initial(server.c_str(), port);
+	
 	MP_MessageType msg_type;
+	string param;			//Esta variable se usará para establecer en formato del init que será enviado
 
 	if( goalie )
-	{
-		USock::instance().Send("(init PokTaPok (version 15.1) (goalie))");
-	}
+		param = "(init " + team_name + " (version 15.1) (goalie))";
 	else
-	{
-		USock::instance().Send("(init PokTaPok (version 15.1))");
-	}
+		param = "(init " + team_name + " (version 15.1))";
+
+	USock::instance().Send(param.c_str());
 
 
 	while( true )
@@ -173,10 +174,13 @@ void * Client::Client::process_thread_function(void *parameter)
 	timespec start, end; // Para analizar si el servidor ha muerto
 	wait_check_time.tv_nsec = 100000; // .1 milisegundo
 	wait_check_time.tv_sec = 0;
+
 	//AgentCommand * comm_aux;
 	clock_gettime( CLOCK_MONOTONIC, &start );
 	clock_gettime( CLOCK_MONOTONIC, &end );
+
 	while ( true ) {
+
 		pthread_mutex_lock( & Client::instance().message_stack_mutex );
 		stack_empty = Client::instance().messages.empty();
 		pthread_mutex_unlock( & Client::instance().message_stack_mutex );
@@ -210,6 +214,7 @@ void * Client::Client::process_thread_function(void *parameter)
 			pthread_mutex_unlock( &Client::instance().command_mutex );
 
 		}
+		
 		clock_gettime( CLOCK_MONOTONIC, &end );
 		
 		seconds_since_last_message = end.tv_sec - start.tv_sec;
@@ -242,7 +247,7 @@ void* Client::Client::sending_thread_function(void *parameter)
 			pthread_cond_wait( &Client::instance().sending_thread_cond,
 							   &Client::instance().sending_thread_cond_mutex);
 
-			nanosleep( &wait_time, &rem_time );
+			nanosleep( &wait_time, &rem_time ); // Esperamos al momento justo en que finaliza el ciclo
 
 			commands.clear();
 
@@ -268,5 +273,6 @@ void* Client::Client::sending_thread_function(void *parameter)
 	}
 	return NULL;
 }
+
 
 

@@ -1,0 +1,24 @@
+This is a multiagent software arquitechture for RobocupSoccer Simulation2D league, developed at Advanced Studies Faculty of the National Autonomous University of Mexico. 
+
+This software uses some C++ non-standard libraries that should be installed in order to compile it.
+
+Boost libraries needed:
+
+Boost Regex				>= 1	http://www.boost.org/doc/libs/1_54_0/libs/regex/doc/html/index.html		
+Boost Program Options	>= 1 	http://www.boost.org/doc/libs/1_54_0/doc/html/program_options.html
+
+The version of boost used is 1.4.90, to get boost visit http://www.boost.org/ or use your package manager.
+
+Debian example:
+
+>apt-get install libboost-program-options-dev
+>apt-get install libboost-regex-dev
+
+Ubuntu exaple:
+
+>aptitude install libboost-regex1.40-dev
+>aptitude install libboost-program-options1.40-dev
+
+Arch Linux:
+
+>pacman -S boost

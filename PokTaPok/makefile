@@ -1,4 +1,5 @@
 FLAGS = -c
+BOOST_FLAGS = -L /usr/lib -lboost_program_options-mt -lboost_regex
 EXECUTABLE_NAME = poktapok
 SOURCE_DIR = src/
 BIN_DIR_NAME = bin
@@ -24,7 +25,7 @@ OBJS = 	$(BIN_DIR)gameCommand.o \
 
 
 $(BIN_DIR)poktapok : $(OBJS) $(BIN_DIR)poktapokAgent.o $(BIN_DIR)client.o 
-	g++ $(OBJS) $(BIN_DIR)poktapokAgent.o $(BIN_DIR)client.o  -lpthread  -lrt -o $(BIN_DIR)$(EXECUTABLE_NAME)
+	g++ $(OBJS) $(BOOST_FLAGS) $(BIN_DIR)poktapokAgent.o $(BIN_DIR)client.o  -lpthread  -lrt -o $(BIN_DIR)$(EXECUTABLE_NAME)
 
 clean:
 	rm $(BIN_DIR)*

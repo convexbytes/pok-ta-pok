@@ -32,10 +32,12 @@ public:
     //initial();
     static Client & instance();
 	~Client();
-    void main_loop(bool goalie);
 
-    static void * process_thread_function(void *parameter);
-    static void * sending_thread_function(void *parameter);
+    //Se modifica el método para recibir los nuevos parámetros
+    void main_loop( string server, unsigned int port, string team_name, int goalie );
+
+    static void * process_thread_function (void *parameter);
+    static void * sending_thread_function (void *parameter);
 
 
     // mutex para acceder a la pila de mensajes. Lo usan: main_loop y process_thread
@@ -65,3 +67,4 @@ private:
 };
 
 #endif
+
