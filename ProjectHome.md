@@ -1,0 +1,1 @@
+A multiagent software arquitechture for RobocupSoccer Simulation2D league, developed at Advanced Studies Faculty of the National Autonomous University of Mexico.
